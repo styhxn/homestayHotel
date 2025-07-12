@@ -1,0 +1,373 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>AI选房功能测试 - 普洱蘑菇庄园</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            max-width: 1200px;
+            margin: 0 auto;
+            padding: 20px;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            min-height: 100vh;
+        }
+        .container {
+            background: rgba(255, 255, 255, 0.1);
+            backdrop-filter: blur(10px);
+            padding: 20px;
+            border-radius: 15px;
+            margin-bottom: 20px;
+            border: 1px solid rgba(255, 255, 255, 0.2);
+        }
+        .result {
+            background: rgba(0, 0, 0, 0.3);
+            padding: 15px;
+            margin: 10px 0;
+            border-radius: 8px;
+            white-space: pre-wrap;
+            font-family: monospace;
+            font-size: 14px;
+            max-height: 400px;
+            overflow-y: auto;
+        }
+        .success {
+            background: rgba(40, 167, 69, 0.3);
+            border: 1px solid rgba(40, 167, 69, 0.5);
+        }
+        .error {
+            background: rgba(220, 53, 69, 0.3);
+            border: 1px solid rgba(220, 53, 69, 0.5);
+        }
+        button {
+            background: rgba(255, 255, 255, 0.2);
+            color: white;
+            border: 1px solid rgba(255, 255, 255, 0.3);
+            padding: 12px 24px;
+            border-radius: 8px;
+            cursor: pointer;
+            margin: 5px;
+            font-size: 14px;
+            transition: all 0.3s ease;
+        }
+        button:hover {
+            background: rgba(255, 255, 255, 0.3);
+            transform: translateY(-2px);
+        }
+        .step {
+            display: flex;
+            align-items: center;
+            margin: 15px 0;
+        }
+        .step-number {
+            background: rgba(255, 255, 255, 0.2);
+            width: 30px;
+            height: 30px;
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            margin-right: 15px;
+            font-weight: bold;
+        }
+        h1 {
+            text-align: center;
+            margin-bottom: 30px;
+            text-shadow: 2px 2px 4px rgba(0,0,0,0.3);
+        }
+        .room-card {
+            background: rgba(255, 255, 255, 0.1);
+            padding: 15px;
+            border-radius: 8px;
+            margin: 10px 0;
+            display: flex;
+            gap: 15px;
+        }
+        .room-image {
+            width: 120px;
+            height: 80px;
+            border-radius: 8px;
+            object-fit: cover;
+        }
+        .room-info {
+            flex: 1;
+        }
+        .room-name {
+            font-weight: bold;
+            margin-bottom: 5px;
+        }
+        .room-price {
+            color: #ffd700;
+            font-weight: bold;
+        }
+        .room-status {
+            padding: 2px 8px;
+            border-radius: 12px;
+            font-size: 12px;
+            margin-left: 10px;
+        }
+        .status-available {
+            background: #28a745;
+        }
+        .status-booked {
+            background: #ffc107;
+            color: #000;
+        }
+    </style>
+</head>
+<body>
+    <h1>🍄 AI选房功能测试</h1>
+    
+    <div class="container">
+        <h2>测试步骤</h2>
+        
+        <div class="step">
+            <div class="step-number">1</div>
+            <div>
+                <strong>登录用户</strong>
+                <button onclick="loginUser('testuser', '123456')">登录testuser</button>
+                <button onclick="loginUser('2759749679@qq.com', 'lhw200541')">登录有订单用户</button>
+            </div>
+        </div>
+        
+        <div class="step">
+            <div class="step-number">2</div>
+            <div>
+                <strong>获取房间列表</strong>
+                <button onclick="getRoomList()">获取房间列表</button>
+            </div>
+        </div>
+        
+        <div class="step">
+            <div class="step-number">3</div>
+            <div>
+                <strong>测试房间详情</strong>
+                <button onclick="getRoomDetail(1)">查看房间1详情</button>
+                <button onclick="getRoomDetail(2)">查看房间2详情</button>
+                <button onclick="getRoomDetail(3)">查看房间3详情</button>
+                <button onclick="getRoomDetail(4)">查看房间4详情</button>
+                <button onclick="getRoomDetail(5)">查看房间5详情</button>
+                <button onclick="getRoomDetail(6)">查看房间6详情</button>
+            </div>
+        </div>
+        
+        <div class="step">
+            <div class="step-number">4</div>
+            <div>
+                <strong>打开前端页面</strong>
+                <button onclick="openAIRooms()">打开AI选房页面</button>
+                <button onclick="openRoomDetail(1)">打开房间详情页</button>
+            </div>
+        </div>
+        
+        <div id="result" class="result">等待测试...</div>
+    </div>
+
+    <div class="container">
+        <h2>房间列表</h2>
+        <div id="roomList">暂无数据</div>
+        <button onclick="refreshRoomList()">刷新房间列表</button>
+    </div>
+
+    <script>
+        let currentToken = '';
+
+        async function loginUser(username, password) {
+            const resultDiv = document.getElementById('result');
+            resultDiv.className = 'result';
+            resultDiv.textContent = `开始登录用户: ${username}\n`;
+            
+            try {
+                const response = await fetch('http://localhost:8091/h/user/login', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                    },
+                    body: JSON.stringify({
+                        username: username,
+                        password: password
+                    })
+                });
+                
+                const data = await response.json();
+                
+                if (data.code === 200 || data.code === "200") {
+                    currentToken = data.data.tokenInfo.tokenValue;
+                    localStorage.setItem('token', currentToken);
+                    
+                    resultDiv.className = 'result success';
+                    resultDiv.textContent += `✅ 登录成功！\n`;
+                    resultDiv.textContent += `用户: ${data.data.user.username}\n`;
+                    resultDiv.textContent += `Token: ${currentToken.substring(0, 20)}...\n`;
+                    
+                    // 自动获取房间列表
+                    await getRoomList();
+                } else {
+                    throw new Error(data.msg || '登录失败');
+                }
+            } catch (error) {
+                resultDiv.className = 'result error';
+                resultDiv.textContent += `❌ 登录失败: ${error.message}\n`;
+            }
+        }
+
+        async function getRoomList() {
+            const resultDiv = document.getElementById('result');
+            const token = localStorage.getItem('token');
+
+            if (!token) {
+                resultDiv.className = 'result error';
+                resultDiv.textContent = '❌ 请先登录\n';
+                return;
+            }
+
+            try {
+                resultDiv.textContent += '\n获取房间列表...\n';
+
+                const response = await fetch('http://localhost:8091/h/room/getFreeRoom?pageNum=1&pageSize=50', {
+                    method: 'GET',
+                    headers: {
+                        'Content-Type': 'application/json',
+                        'satoken': token
+                    }
+                });
+                
+                const data = await response.json();
+                
+                if (response.status === 200) {
+                    resultDiv.className = 'result success';
+                    resultDiv.textContent += `✅ 房间列表获取成功！\n`;
+                    resultDiv.textContent += `状态码: ${data.code}\n`;
+                    resultDiv.textContent += `消息: ${data.msg}\n`;
+                    
+                    if (data.data && data.data.records) {
+                        resultDiv.textContent += `房间数量: ${data.data.records.length}\n`;
+                        resultDiv.textContent += `总记录数: ${data.data.total}\n\n`;
+                        
+                        // 显示房间列表
+                        displayRoomList(data.data.records);
+                        
+                        // 显示房间详情
+                        data.data.records.forEach((room, index) => {
+                            resultDiv.textContent += `房间${index + 1}:\n`;
+                            resultDiv.textContent += `  ID: ${room.id}\n`;
+                            resultDiv.textContent += `  名称: ${room.name}\n`;
+                            resultDiv.textContent += `  代码: ${room.code}\n`;
+                            resultDiv.textContent += `  价格: ¥${room.price}/晚\n`;
+                            resultDiv.textContent += `  状态: ${room.state}\n`;
+                            resultDiv.textContent += `  类别: ${room.category}\n`;
+                            resultDiv.textContent += `  可住人数: ${room.seat}人\n`;
+                            resultDiv.textContent += `  设施: ${room.device || '基础设施'}\n`;
+                            resultDiv.textContent += `  地址: ${room.address || '庄园内'}\n\n`;
+                        });
+                    } else {
+                        resultDiv.textContent += `⚠️ 没有房间数据\n`;
+                        displayRoomList([]);
+                    }
+                } else {
+                    throw new Error(`HTTP ${response.status}: ${JSON.stringify(data)}`);
+                }
+            } catch (error) {
+                resultDiv.className = 'result error';
+                resultDiv.textContent += `❌ 获取房间列表失败: ${error.message}\n`;
+            }
+        }
+
+        async function getRoomDetail(roomId) {
+            const resultDiv = document.getElementById('result');
+            const token = localStorage.getItem('token');
+            
+            if (!token) {
+                resultDiv.className = 'result error';
+                resultDiv.textContent = '❌ 请先登录\n';
+                return;
+            }
+            
+            try {
+                resultDiv.textContent += `\n获取房间${roomId}详情...\n`;
+                
+                const response = await fetch(`http://localhost:8091/h/room/${roomId}`, {
+                    method: 'GET',
+                    headers: {
+                        'Content-Type': 'application/json',
+                        'satoken': token
+                    }
+                });
+                
+                const data = await response.json();
+                
+                if (response.status === 200) {
+                    resultDiv.className = 'result success';
+                    resultDiv.textContent += `✅ 房间${roomId}详情获取成功！\n`;
+                    resultDiv.textContent += `房间信息:\n`;
+                    resultDiv.textContent += `  名称: ${data.data.name}\n`;
+                    resultDiv.textContent += `  价格: ¥${data.data.price}/晚\n`;
+                    resultDiv.textContent += `  状态: ${data.data.state}\n`;
+                    resultDiv.textContent += `  描述: ${data.data.describe || '暂无描述'}\n`;
+                } else {
+                    throw new Error(`HTTP ${response.status}: ${JSON.stringify(data)}`);
+                }
+            } catch (error) {
+                resultDiv.className = 'result error';
+                resultDiv.textContent += `❌ 获取房间详情失败: ${error.message}\n`;
+            }
+        }
+
+        function displayRoomList(rooms) {
+            const roomListDiv = document.getElementById('roomList');
+            
+            if (!rooms || rooms.length === 0) {
+                roomListDiv.innerHTML = '<p>暂无房间数据</p>';
+                return;
+            }
+            
+            let html = '';
+            rooms.forEach(room => {
+                const statusClass = room.state === '空闲' ? 'status-available' : 'status-booked';
+                const statusText = room.state === '空闲' ? '可预订' : room.state;
+                
+                html += `
+                    <div class="room-card">
+                        <img src="https://images.unsplash.com/photo-1566665797739-1674de7a421a?w=120&h=80&fit=crop" 
+                             alt="${room.name}" class="room-image">
+                        <div class="room-info">
+                            <div class="room-name">
+                                ${room.name}
+                                <span class="room-status ${statusClass}">${statusText}</span>
+                            </div>
+                            <div>房间编号: ${room.code}</div>
+                            <div>可住人数: ${room.seat}人</div>
+                            <div class="room-price">¥${room.price}/晚</div>
+                        </div>
+                    </div>
+                `;
+            });
+            
+            roomListDiv.innerHTML = html;
+        }
+
+        async function refreshRoomList() {
+            await getRoomList();
+        }
+
+        function openAIRooms() {
+            window.open('http://localhost:5174/ai-rooms', '_blank');
+        }
+
+        function openRoomDetail(roomId) {
+            window.open(`http://localhost:5174/room/${roomId}`, '_blank');
+        }
+
+        // 页面加载时检查登录状态
+        window.onload = function() {
+            const token = localStorage.getItem('token');
+            if (token) {
+                currentToken = token;
+                getRoomList();
+            }
+        };
+    </script>
+</body>
+</html>

@@ -1,0 +1,564 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>AI数字人对话系统</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Microsoft YaHei', sans-serif;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            min-height: 100vh;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+
+        .container {
+            background: white;
+            border-radius: 20px;
+            padding: 30px;
+            box-shadow: 0 20px 40px rgba(0, 0, 0, 0.1);
+            max-width: 800px;
+            width: 90%;
+        }
+
+        .header {
+            text-align: center;
+            margin-bottom: 30px;
+        }
+
+        .header h1 {
+            color: #333;
+            margin-bottom: 10px;
+        }
+
+        .digital-human-container {
+            width: 100%;
+            height: 400px;
+            background: #f5f5f5;
+            border-radius: 15px;
+            margin-bottom: 20px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            position: relative;
+            overflow: hidden;
+        }
+
+        .digital-human-video {
+            width: 100%;
+            height: 100%;
+            object-fit: cover;
+            border-radius: 15px;
+        }
+
+        .loading {
+            position: absolute;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+            color: #666;
+        }
+
+        .controls {
+            display: flex;
+            gap: 15px;
+            margin-bottom: 20px;
+            flex-wrap: wrap;
+        }
+
+        .input-group {
+            flex: 1;
+            min-width: 200px;
+        }
+
+        .input-group label {
+            display: block;
+            margin-bottom: 5px;
+            color: #333;
+            font-weight: 500;
+        }
+
+        .input-group input,
+        .input-group textarea {
+            width: 100%;
+            padding: 12px;
+            border: 2px solid #e1e5e9;
+            border-radius: 8px;
+            font-size: 14px;
+            transition: border-color 0.3s;
+        }
+
+        .input-group input:focus,
+        .input-group textarea:focus {
+            outline: none;
+            border-color: #667eea;
+        }
+
+        .button-group {
+            display: flex;
+            gap: 10px;
+            flex-wrap: wrap;
+        }
+
+        .btn {
+            padding: 12px 24px;
+            border: none;
+            border-radius: 8px;
+            cursor: pointer;
+            font-size: 14px;
+            font-weight: 500;
+            transition: all 0.3s;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+
+        .btn-primary {
+            background: #667eea;
+            color: white;
+        }
+
+        .btn-primary:hover {
+            background: #5a6fd8;
+            transform: translateY(-2px);
+        }
+
+        .btn-secondary {
+            background: #6c757d;
+            color: white;
+        }
+
+        .btn-secondary:hover {
+            background: #5a6268;
+        }
+
+        .btn-success {
+            background: #28a745;
+            color: white;
+        }
+
+        .btn-success:hover {
+            background: #218838;
+        }
+
+        .btn:disabled {
+            opacity: 0.6;
+            cursor: not-allowed;
+            transform: none;
+        }
+
+        .status {
+            padding: 15px;
+            border-radius: 8px;
+            margin-bottom: 20px;
+            font-size: 14px;
+        }
+
+        .status.info {
+            background: #d1ecf1;
+            color: #0c5460;
+            border: 1px solid #bee5eb;
+        }
+
+        .status.error {
+            background: #f8d7da;
+            color: #721c24;
+            border: 1px solid #f5c6cb;
+        }
+
+        .status.success {
+            background: #d4edda;
+            color: #155724;
+            border: 1px solid #c3e6cb;
+        }
+
+        .chat-history {
+            max-height: 200px;
+            overflow-y: auto;
+            border: 1px solid #e1e5e9;
+            border-radius: 8px;
+            padding: 15px;
+            background: #f8f9fa;
+        }
+
+        .chat-message {
+            margin-bottom: 10px;
+            padding: 8px 12px;
+            border-radius: 8px;
+        }
+
+        .chat-message.user {
+            background: #667eea;
+            color: white;
+            margin-left: 20%;
+        }
+
+        .chat-message.ai {
+            background: white;
+            color: #333;
+            margin-right: 20%;
+            border: 1px solid #e1e5e9;
+        }
+
+        .voice-controls {
+            display: flex;
+            align-items: center;
+            gap: 15px;
+            margin-top: 15px;
+        }
+
+        .voice-indicator {
+            width: 20px;
+            height: 20px;
+            border-radius: 50%;
+            background: #dc3545;
+            animation: pulse 1s infinite;
+            display: none;
+        }
+
+        .voice-indicator.active {
+            display: block;
+        }
+
+        @keyframes pulse {
+            0% { transform: scale(1); opacity: 1; }
+            50% { transform: scale(1.2); opacity: 0.7; }
+            100% { transform: scale(1); opacity: 1; }
+        }
+
+        @media (max-width: 768px) {
+            .container {
+                padding: 20px;
+                margin: 20px;
+            }
+            
+            .controls {
+                flex-direction: column;
+            }
+            
+            .button-group {
+                justify-content: center;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div class="header">
+            <h1>🤖 AI数字人对话系统</h1>
+            <p>与您的专属AI数字人进行智能对话</p>
+        </div>
+
+        <div id="status" class="status info">
+            正在初始化数字人系统...
+        </div>
+
+        <!-- 数字人显示区域 -->
+        <div class="digital-human-container">
+            <video id="digitalHumanVideo" class="digital-human-video" style="display: none;" autoplay muted></video>
+            <div id="loading" class="loading">
+                <div>🤖 数字人准备中...</div>
+            </div>
+        </div>
+
+        <!-- 控制面板 -->
+        <div class="controls">
+            <div class="input-group">
+                <label for="textInput">输入对话内容：</label>
+                <textarea id="textInput" rows="3" placeholder="请输入您想说的话..."></textarea>
+            </div>
+        </div>
+
+        <div class="button-group">
+            <button id="speakBtn" class="btn btn-primary">
+                <span>💬</span> 发送文字
+            </button>
+            <button id="voiceBtn" class="btn btn-success">
+                <span>🎤</span> 语音对话
+            </button>
+            <button id="stopBtn" class="btn btn-secondary" disabled>
+                <span>⏹️</span> 停止
+            </button>
+        </div>
+
+        <div class="voice-controls">
+            <div id="voiceIndicator" class="voice-indicator"></div>
+            <span id="voiceStatus">点击语音对话开始录音</span>
+        </div>
+
+        <!-- 对话历史 -->
+        <div class="chat-history" id="chatHistory">
+            <div class="chat-message ai">
+                <strong>AI助手：</strong> 您好！我是您的AI数字人助手，有什么可以帮助您的吗？
+            </div>
+        </div>
+    </div>
+
+    <script>
+        class DigitalHumanChat {
+            constructor() {
+                this.isRecording = false;
+                this.mediaRecorder = null;
+                this.audioChunks = [];
+                this.currentVideo = null;
+                
+                this.initializeElements();
+                this.bindEvents();
+                this.initializeSystem();
+            }
+
+            initializeElements() {
+                this.statusEl = document.getElementById('status');
+                this.videoEl = document.getElementById('digitalHumanVideo');
+                this.loadingEl = document.getElementById('loading');
+                this.textInput = document.getElementById('textInput');
+                this.speakBtn = document.getElementById('speakBtn');
+                this.voiceBtn = document.getElementById('voiceBtn');
+                this.stopBtn = document.getElementById('stopBtn');
+                this.voiceIndicator = document.getElementById('voiceIndicator');
+                this.voiceStatus = document.getElementById('voiceStatus');
+                this.chatHistory = document.getElementById('chatHistory');
+            }
+
+            bindEvents() {
+                this.speakBtn.addEventListener('click', () => this.handleTextInput());
+                this.voiceBtn.addEventListener('click', () => this.toggleVoiceRecording());
+                this.stopBtn.addEventListener('click', () => this.stopCurrentAction());
+                
+                this.textInput.addEventListener('keypress', (e) => {
+                    if (e.key === 'Enter' && !e.shiftKey) {
+                        e.preventDefault();
+                        this.handleTextInput();
+                    }
+                });
+            }
+
+            async initializeSystem() {
+                try {
+                    this.updateStatus('正在初始化AI数字人系统...', 'info');
+                    
+                    // 模拟初始化过程
+                    await this.delay(2000);
+                    
+                    this.updateStatus('数字人系统已就绪！', 'success');
+                    this.showDigitalHuman();
+                    
+                } catch (error) {
+                    this.updateStatus('初始化失败：' + error.message, 'error');
+                }
+            }
+
+            showDigitalHuman() {
+                this.loadingEl.style.display = 'none';
+                this.videoEl.style.display = 'block';
+                
+                // 这里应该加载您的数字人视频/模型
+                // 示例：显示茶茶正面IP形象
+                this.videoEl.poster = '/src/assets/images/IP形象/茶茶正面.png';
+            }
+
+            async handleTextInput() {
+                const text = this.textInput.value.trim();
+                if (!text) return;
+
+                this.addChatMessage('user', text);
+                this.textInput.value = '';
+                
+                try {
+                    this.updateStatus('AI正在思考中...', 'info');
+                    this.speakBtn.disabled = true;
+                    
+                    // 1. 获取AI回复
+                    const aiResponse = await this.getAIResponse(text);
+                    this.addChatMessage('ai', aiResponse);
+                    
+                    // 2. 生成数字人视频
+                    await this.generateDigitalHumanVideo(aiResponse);
+                    
+                    this.updateStatus('对话完成', 'success');
+                    
+                } catch (error) {
+                    this.updateStatus('对话失败：' + error.message, 'error');
+                } finally {
+                    this.speakBtn.disabled = false;
+                }
+            }
+
+            async toggleVoiceRecording() {
+                if (!this.isRecording) {
+                    await this.startVoiceRecording();
+                } else {
+                    await this.stopVoiceRecording();
+                }
+            }
+
+            async startVoiceRecording() {
+                try {
+                    const stream = await navigator.mediaDevices.getUserMedia({ audio: true });
+                    this.mediaRecorder = new MediaRecorder(stream);
+                    this.audioChunks = [];
+
+                    this.mediaRecorder.ondataavailable = (event) => {
+                        this.audioChunks.push(event.data);
+                    };
+
+                    this.mediaRecorder.onstop = async () => {
+                        const audioBlob = new Blob(this.audioChunks, { type: 'audio/wav' });
+                        await this.processVoiceInput(audioBlob);
+                    };
+
+                    this.mediaRecorder.start();
+                    this.isRecording = true;
+                    
+                    this.voiceBtn.textContent = '🛑 停止录音';
+                    this.voiceIndicator.classList.add('active');
+                    this.voiceStatus.textContent = '正在录音中...';
+                    this.updateStatus('正在录音，请说话...', 'info');
+                    
+                } catch (error) {
+                    this.updateStatus('无法访问麦克风：' + error.message, 'error');
+                }
+            }
+
+            async stopVoiceRecording() {
+                if (this.mediaRecorder && this.isRecording) {
+                    this.mediaRecorder.stop();
+                    this.mediaRecorder.stream.getTracks().forEach(track => track.stop());
+                    
+                    this.isRecording = false;
+                    this.voiceBtn.textContent = '🎤 语音对话';
+                    this.voiceIndicator.classList.remove('active');
+                    this.voiceStatus.textContent = '正在处理语音...';
+                }
+            }
+
+            async processVoiceInput(audioBlob) {
+                try {
+                    this.updateStatus('正在识别语音...', 'info');
+                    
+                    // 这里应该调用语音识别API
+                    const recognizedText = await this.speechToText(audioBlob);
+                    
+                    if (recognizedText) {
+                        this.addChatMessage('user', recognizedText);
+                        
+                        // 获取AI回复并生成数字人视频
+                        const aiResponse = await this.getAIResponse(recognizedText);
+                        this.addChatMessage('ai', aiResponse);
+                        await this.generateDigitalHumanVideo(aiResponse);
+                        
+                        this.updateStatus('语音对话完成', 'success');
+                    } else {
+                        this.updateStatus('未识别到语音内容', 'error');
+                    }
+                    
+                } catch (error) {
+                    this.updateStatus('语音处理失败：' + error.message, 'error');
+                } finally {
+                    this.voiceStatus.textContent = '点击语音对话开始录音';
+                }
+            }
+
+            async speechToText(audioBlob) {
+                // 这里应该调用真实的语音识别API
+                // 示例：使用Web Speech API或调用云端API
+                
+                // 模拟语音识别结果
+                await this.delay(2000);
+                return "这是模拟的语音识别结果";
+            }
+
+            async getAIResponse(userInput) {
+                // 这里应该调用真实的AI对话API
+                // 示例：OpenAI GPT、Claude、或其他LLM API
+                
+                // 模拟AI回复
+                await this.delay(1500);
+                
+                const responses = [
+                    "我理解您的问题，让我为您详细解答...",
+                    "这是一个很好的问题，根据我的分析...",
+                    "感谢您的提问，我的建议是...",
+                    "基于您提供的信息，我认为..."
+                ];
+                
+                return responses[Math.floor(Math.random() * responses.length)];
+            }
+
+            async generateDigitalHumanVideo(text) {
+                try {
+                    this.updateStatus('正在生成数字人视频...', 'info');
+                    
+                    // 这里应该调用数字人视频生成API
+                    // 示例：D-ID、HeyGen等平台的API
+                    
+                    // 模拟视频生成过程
+                    await this.delay(3000);
+                    
+                    // 播放生成的视频
+                    this.playDigitalHumanVideo();
+                    
+                } catch (error) {
+                    throw new Error('数字人视频生成失败：' + error.message);
+                }
+            }
+
+            playDigitalHumanVideo() {
+                // 这里应该播放真实生成的数字人视频
+                // 示例代码：
+                // this.videoEl.src = generatedVideoUrl;
+                // this.videoEl.play();
+                
+                // 模拟播放效果
+                this.videoEl.style.border = '3px solid #28a745';
+                setTimeout(() => {
+                    this.videoEl.style.border = 'none';
+                }, 3000);
+            }
+
+            stopCurrentAction() {
+                if (this.isRecording) {
+                    this.stopVoiceRecording();
+                }
+                
+                if (this.videoEl && !this.videoEl.paused) {
+                    this.videoEl.pause();
+                }
+                
+                this.updateStatus('操作已停止', 'info');
+            }
+
+            addChatMessage(type, message) {
+                const messageEl = document.createElement('div');
+                messageEl.className = `chat-message ${type}`;
+                messageEl.innerHTML = `<strong>${type === 'user' ? '用户' : 'AI助手'}：</strong> ${message}`;
+                
+                this.chatHistory.appendChild(messageEl);
+                this.chatHistory.scrollTop = this.chatHistory.scrollHeight;
+            }
+
+            updateStatus(message, type = 'info') {
+                this.statusEl.textContent = message;
+                this.statusEl.className = `status ${type}`;
+            }
+
+            delay(ms) {
+                return new Promise(resolve => setTimeout(resolve, ms));
+            }
+        }
+
+        // 初始化系统
+        document.addEventListener('DOMContentLoaded', () => {
+            new DigitalHumanChat();
+        });
+    </script>
+</body>
+</html>

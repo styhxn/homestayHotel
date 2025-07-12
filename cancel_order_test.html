@@ -1,0 +1,662 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>取消订单测试 - 普洱蘑菇庄园</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            max-width: 1200px;
+            margin: 0 auto;
+            padding: 20px;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            min-height: 100vh;
+        }
+        .container {
+            background: rgba(255, 255, 255, 0.1);
+            backdrop-filter: blur(10px);
+            padding: 20px;
+            border-radius: 15px;
+            margin-bottom: 20px;
+            border: 1px solid rgba(255, 255, 255, 0.2);
+        }
+        .result {
+            background: rgba(0, 0, 0, 0.3);
+            padding: 15px;
+            margin: 10px 0;
+            border-radius: 8px;
+            white-space: pre-wrap;
+            font-family: monospace;
+            font-size: 14px;
+            max-height: 400px;
+            overflow-y: auto;
+        }
+        .success {
+            background: rgba(40, 167, 69, 0.3);
+            border: 1px solid rgba(40, 167, 69, 0.5);
+        }
+        .error {
+            background: rgba(220, 53, 69, 0.3);
+            border: 1px solid rgba(220, 53, 69, 0.5);
+        }
+        button {
+            background: rgba(255, 255, 255, 0.2);
+            color: white;
+            border: 1px solid rgba(255, 255, 255, 0.3);
+            padding: 12px 24px;
+            border-radius: 8px;
+            cursor: pointer;
+            margin: 5px;
+            font-size: 14px;
+            transition: all 0.3s ease;
+        }
+        button:hover {
+            background: rgba(255, 255, 255, 0.3);
+            transform: translateY(-2px);
+        }
+        .step {
+            display: flex;
+            align-items: center;
+            margin: 15px 0;
+        }
+        .step-number {
+            background: rgba(255, 255, 255, 0.2);
+            width: 30px;
+            height: 30px;
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            margin-right: 15px;
+            font-weight: bold;
+        }
+        h1 {
+            text-align: center;
+            margin-bottom: 30px;
+            text-shadow: 2px 2px 4px rgba(0,0,0,0.3);
+        }
+        .room-card {
+            background: rgba(255, 255, 255, 0.1);
+            padding: 15px;
+            border-radius: 8px;
+            margin: 10px 0;
+            display: flex;
+            gap: 15px;
+        }
+        .room-info {
+            flex: 1;
+        }
+        .room-name {
+            font-weight: bold;
+            margin-bottom: 5px;
+        }
+        .room-price {
+            color: #ffd700;
+            font-weight: bold;
+        }
+        .room-status {
+            padding: 2px 8px;
+            border-radius: 12px;
+            font-size: 12px;
+            margin-left: 10px;
+        }
+        .status-available {
+            background: #28a745;
+        }
+        .status-booked {
+            background: #ffc107;
+            color: #000;
+        }
+        .status-occupied {
+            background: #dc3545;
+        }
+        .order-card {
+            background: rgba(255, 255, 255, 0.1);
+            padding: 15px;
+            border-radius: 8px;
+            margin: 10px 0;
+        }
+        .order-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 10px;
+        }
+        .order-id {
+            font-weight: bold;
+            color: #ffd700;
+        }
+        .order-status {
+            padding: 4px 12px;
+            border-radius: 12px;
+            font-size: 12px;
+        }
+        .status-预订 {
+            background: #ffc107;
+            color: #000;
+        }
+        .status-入住 {
+            background: #dc3545;
+        }
+        .status-取消 {
+            background: #6c757d;
+        }
+        .status-完成 {
+            background: #28a745;
+        }
+    </style>
+</head>
+<body>
+    <h1>🍄 取消订单测试</h1>
+    
+    <div class="container">
+        <h2>测试步骤</h2>
+        
+        <div class="step">
+            <div class="step-number">1</div>
+            <div>
+                <strong>登录用户</strong>
+                <button onclick="loginUser('2759749679@qq.com', 'lhw200541')">登录有订单用户</button>
+                <button onclick="loginUser('testuser', '123456')">登录testuser</button>
+            </div>
+        </div>
+        
+        <div class="step">
+            <div class="step-number">2</div>
+            <div>
+                <strong>创建测试订单</strong>
+                <button onclick="createTestOrder(2, '普洱茶香木屋')">预订房间2</button>
+                <button onclick="createTestOrder(4, '竹林雅居')">预订房间4</button>
+                <button onclick="createSmartOrder()">智能预订（自动获取房间名）</button>
+            </div>
+        </div>
+        
+        <div class="step">
+            <div class="step-number">3</div>
+            <div>
+                <strong>查看订单和房间状态</strong>
+                <button onclick="getUserOrders()">查看我的订单</button>
+                <button onclick="getRoomStatus()">查看房间状态</button>
+            </div>
+        </div>
+        
+        <div class="step">
+            <div class="step-number">4</div>
+            <div>
+                <strong>取消订单测试</strong>
+                <button onclick="cancelOrderById()">取消最新订单</button>
+                <button onclick="cancelSpecificOrder()">取消指定订单</button>
+            </div>
+        </div>
+        
+        <div class="step">
+            <div class="step-number">5</div>
+            <div>
+                <strong>验证状态更新</strong>
+                <button onclick="verifyRoomStatus()">验证房间状态</button>
+                <button onclick="openAIRooms()">打开AI选房页面</button>
+            </div>
+        </div>
+        
+        <div id="result" class="result">等待测试...</div>
+    </div>
+
+    <div class="container">
+        <h2>房间状态</h2>
+        <div id="roomList">暂无数据</div>
+        <button onclick="refreshRoomStatus()">刷新房间状态</button>
+    </div>
+
+    <div class="container">
+        <h2>用户订单</h2>
+        <div id="orderList">暂无数据</div>
+        <button onclick="refreshOrders()">刷新订单</button>
+    </div>
+
+    <script>
+        let currentToken = '';
+        let currentUser = '';
+        let userOrders = [];
+
+        async function loginUser(username, password) {
+            const resultDiv = document.getElementById('result');
+            resultDiv.className = 'result';
+            resultDiv.textContent = `开始登录用户: ${username}\n`;
+            
+            try {
+                const response = await fetch('http://localhost:8091/h/user/login', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                    },
+                    body: JSON.stringify({
+                        username: username,
+                        password: password
+                    })
+                });
+                
+                const data = await response.json();
+                
+                if (data.code === 200 || data.code === "200") {
+                    currentToken = data.data.tokenInfo.tokenValue;
+                    currentUser = username;
+                    localStorage.setItem('token', currentToken);
+                    
+                    resultDiv.className = 'result success';
+                    resultDiv.textContent += `✅ 登录成功！\n`;
+                    resultDiv.textContent += `用户: ${data.data.user.username}\n`;
+                    resultDiv.textContent += `Token: ${currentToken.substring(0, 20)}...\n`;
+                    
+                    // 自动获取订单和房间状态
+                    await getUserOrders();
+                    await getRoomStatus();
+                } else {
+                    throw new Error(data.msg || '登录失败');
+                }
+            } catch (error) {
+                resultDiv.className = 'result error';
+                resultDiv.textContent += `❌ 登录失败: ${error.message}\n`;
+            }
+        }
+
+        async function createTestOrder(roomId, roomName) {
+            const resultDiv = document.getElementById('result');
+            const token = localStorage.getItem('token');
+            
+            if (!token) {
+                resultDiv.className = 'result error';
+                resultDiv.textContent = '❌ 请先登录\n';
+                return;
+            }
+            
+            try {
+                resultDiv.textContent += `\n创建测试订单 - 房间${roomId}(${roomName})...\n`;
+                
+                const orderData = {
+                    roomId: roomId,
+                    roomCode: roomName,
+                    username: currentUser,
+                    phone: '15262541251',
+                    startDate: '2025-07-20',
+                    endDate: '2025-07-22',
+                    amount: 2,
+                    days: 2,
+                    userRemark: '测试订单-用于取消测试'
+                };
+                
+                const response = await fetch('http://localhost:8091/h/order', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                        'satoken': token
+                    },
+                    body: JSON.stringify(orderData)
+                });
+                
+                const data = await response.json();
+                
+                if (response.status === 200) {
+                    resultDiv.className = 'result success';
+                    resultDiv.textContent += `✅ 测试订单创建成功！\n`;
+                    resultDiv.textContent += `订单ID: ${data.data?.id || '未知'}\n`;
+                    
+                    // 刷新订单和房间状态
+                    await getUserOrders();
+                    await getRoomStatus();
+                } else {
+                    throw new Error(`HTTP ${response.status}: ${JSON.stringify(data)}`);
+                }
+            } catch (error) {
+                resultDiv.className = 'result error';
+                resultDiv.textContent += `❌ 创建测试订单失败: ${error.message}\n`;
+            }
+        }
+
+        async function getUserOrders() {
+            const resultDiv = document.getElementById('result');
+            const token = localStorage.getItem('token');
+            
+            if (!token) {
+                resultDiv.className = 'result error';
+                resultDiv.textContent = '❌ 请先登录\n';
+                return;
+            }
+            
+            try {
+                resultDiv.textContent += '\n获取用户订单...\n';
+                
+                const response = await fetch('http://localhost:8091/h/order/getUserOrders', {
+                    method: 'GET',
+                    headers: {
+                        'Content-Type': 'application/json',
+                        'satoken': token
+                    }
+                });
+                
+                const data = await response.json();
+                
+                if (response.status === 200) {
+                    userOrders = data.data.records || [];
+                    resultDiv.className = 'result success';
+                    resultDiv.textContent += `✅ 订单列表获取成功！\n`;
+                    resultDiv.textContent += `订单数量: ${userOrders.length}\n`;
+                    
+                    // 显示订单列表
+                    displayOrderList(userOrders);
+                    
+                    // 显示订单详情
+                    userOrders.forEach((order, index) => {
+                        resultDiv.textContent += `订单${index + 1}:\n`;
+                        resultDiv.textContent += `  ID: ${order.id}\n`;
+                        resultDiv.textContent += `  房间: ${order.roomCode}\n`;
+                        resultDiv.textContent += `  状态: ${order.state}\n`;
+                        resultDiv.textContent += `  总价: ¥${order.total}\n`;
+                        resultDiv.textContent += `  日期: ${order.startDate} - ${order.endDate}\n\n`;
+                    });
+                } else {
+                    throw new Error(`HTTP ${response.status}: ${JSON.stringify(data)}`);
+                }
+            } catch (error) {
+                resultDiv.className = 'result error';
+                resultDiv.textContent += `❌ 获取订单列表失败: ${error.message}\n`;
+            }
+        }
+
+        async function createSmartOrder() {
+            const resultDiv = document.getElementById('result');
+            const token = localStorage.getItem('token');
+
+            if (!token) {
+                resultDiv.className = 'result error';
+                resultDiv.textContent = '❌ 请先登录\n';
+                return;
+            }
+
+            try {
+                resultDiv.textContent += '\n🤖 智能预订：获取房间信息...\n';
+
+                // 先获取房间列表
+                const roomResponse = await fetch('http://localhost:8091/h/room/getFreeRoom?pageNum=1&pageSize=50', {
+                    method: 'GET',
+                    headers: {
+                        'Content-Type': 'application/json',
+                        'satoken': token
+                    }
+                });
+
+                const roomData = await roomResponse.json();
+
+                if (roomResponse.status === 200 && roomData.data.records.length > 0) {
+                    // 找一个空闲的房间
+                    const availableRoom = roomData.data.records.find(room => room.state === '空闲');
+
+                    if (availableRoom) {
+                        resultDiv.textContent += `✅ 找到空闲房间：${availableRoom.name} (ID: ${availableRoom.id})\n`;
+
+                        // 使用正确的房间信息创建订单
+                        const orderData = {
+                            roomId: availableRoom.id,
+                            roomCode: availableRoom.name, // 使用实际的房间名称
+                            username: currentUser,
+                            phone: '15262541251',
+                            startDate: '2025-07-25',
+                            endDate: '2025-07-27',
+                            amount: 2,
+                            days: 2,
+                            userRemark: '智能预订测试订单'
+                        };
+
+                        resultDiv.textContent += `📝 创建订单数据：\n${JSON.stringify(orderData, null, 2)}\n`;
+
+                        // 记录实际发送的数据
+                        console.log('🔍 实际发送的订单数据:', orderData);
+                        console.log('🔍 roomCode字段值:', orderData.roomCode);
+                        console.log('🔍 roomCode字段类型:', typeof orderData.roomCode);
+
+                        const orderResponse = await fetch('http://localhost:8091/h/order', {
+                            method: 'POST',
+                            headers: {
+                                'Content-Type': 'application/json',
+                                'satoken': token
+                            },
+                            body: JSON.stringify(orderData)
+                        });
+
+                        const orderResult = await orderResponse.json();
+
+                        if (orderResponse.status === 200) {
+                            resultDiv.className = 'result success';
+                            resultDiv.textContent += `🎉 智能预订成功！\n`;
+                            resultDiv.textContent += `订单信息: ${JSON.stringify(orderResult.data, null, 2)}\n`;
+
+                            // 刷新订单和房间状态
+                            await getUserOrders();
+                            await getRoomStatus();
+                        } else {
+                            throw new Error(`订单创建失败: ${orderResult.msg || '未知错误'}`);
+                        }
+                    } else {
+                        resultDiv.className = 'result error';
+                        resultDiv.textContent += '❌ 没有找到空闲房间\n';
+                    }
+                } else {
+                    throw new Error('获取房间列表失败');
+                }
+            } catch (error) {
+                resultDiv.className = 'result error';
+                resultDiv.textContent += `❌ 智能预订失败: ${error.message}\n`;
+            }
+        }
+
+        async function getRoomStatus() {
+            const resultDiv = document.getElementById('result');
+            const token = localStorage.getItem('token');
+
+            if (!token) {
+                resultDiv.className = 'result error';
+                resultDiv.textContent = '❌ 请先登录\n';
+                return;
+            }
+
+            try {
+                resultDiv.textContent += '\n获取房间状态...\n';
+
+                const response = await fetch('http://localhost:8091/h/room/getFreeRoom?pageNum=1&pageSize=50', {
+                    method: 'GET',
+                    headers: {
+                        'Content-Type': 'application/json',
+                        'satoken': token
+                    }
+                });
+
+                const data = await response.json();
+
+                if (response.status === 200) {
+                    resultDiv.className = 'result success';
+                    resultDiv.textContent += `✅ 房间状态获取成功！\n`;
+                    resultDiv.textContent += `房间数量: ${data.data.records.length}\n`;
+
+                    // 显示房间列表
+                    displayRoomList(data.data.records);
+
+                    // 显示房间状态统计
+                    const statusCount = {};
+                    data.data.records.forEach(room => {
+                        statusCount[room.state] = (statusCount[room.state] || 0) + 1;
+                    });
+
+                    resultDiv.textContent += `房间状态统计:\n`;
+                    Object.keys(statusCount).forEach(status => {
+                        resultDiv.textContent += `  ${status}: ${statusCount[status]}个\n`;
+                    });
+                } else {
+                    throw new Error(`HTTP ${response.status}: ${JSON.stringify(data)}`);
+                }
+            } catch (error) {
+                resultDiv.className = 'result error';
+                resultDiv.textContent += `❌ 获取房间状态失败: ${error.message}\n`;
+            }
+        }
+
+        async function cancelOrderById() {
+            if (userOrders.length === 0) {
+                alert('没有可取消的订单，请先创建订单');
+                return;
+            }
+
+            // 找到最新的预订状态订单
+            const bookingOrders = userOrders.filter(order => order.state === '预订');
+            if (bookingOrders.length === 0) {
+                alert('没有可取消的预订订单');
+                return;
+            }
+
+            const latestOrder = bookingOrders[0]; // 订单已按ID降序排列
+            await cancelOrder(latestOrder.id);
+        }
+
+        async function cancelSpecificOrder() {
+            const orderId = prompt('请输入要取消的订单ID:');
+            if (orderId) {
+                await cancelOrder(parseInt(orderId));
+            }
+        }
+
+        async function cancelOrder(orderId) {
+            const resultDiv = document.getElementById('result');
+            const token = localStorage.getItem('token');
+
+            if (!token) {
+                resultDiv.className = 'result error';
+                resultDiv.textContent = '❌ 请先登录\n';
+                return;
+            }
+
+            try {
+                resultDiv.textContent += `\n取消订单 ${orderId}...\n`;
+
+                const response = await fetch(`http://localhost:8091/h/order/${orderId}`, {
+                    method: 'DELETE',
+                    headers: {
+                        'Content-Type': 'application/json',
+                        'satoken': token
+                    }
+                });
+
+                const data = await response.json();
+
+                if (response.status === 200) {
+                    resultDiv.className = 'result success';
+                    resultDiv.textContent += `✅ 订单取消成功！\n`;
+                    resultDiv.textContent += `响应: ${data.msg || '订单已取消'}\n`;
+
+                    // 等待一下让后端处理完成
+                    await new Promise(resolve => setTimeout(resolve, 1000));
+
+                    // 刷新订单和房间状态
+                    await getUserOrders();
+                    await getRoomStatus();
+                } else {
+                    throw new Error(`HTTP ${response.status}: ${data.msg || '取消失败'}`);
+                }
+            } catch (error) {
+                resultDiv.className = 'result error';
+                resultDiv.textContent += `❌ 取消订单失败: ${error.message}\n`;
+            }
+        }
+
+        async function verifyRoomStatus() {
+            const resultDiv = document.getElementById('result');
+            resultDiv.textContent += '\n🔍 验证房间状态更新...\n';
+
+            await getRoomStatus();
+
+            resultDiv.textContent += '\n✅ 验证完成！请检查房间状态是否正确更新。\n';
+            resultDiv.textContent += '预期结果：取消订单后，对应房间应该从"预订"变为"空闲"状态。\n';
+        }
+
+        function displayRoomList(rooms) {
+            const roomListDiv = document.getElementById('roomList');
+
+            if (!rooms || rooms.length === 0) {
+                roomListDiv.innerHTML = '<p>暂无房间数据</p>';
+                return;
+            }
+
+            let html = '';
+            rooms.forEach(room => {
+                const statusClass = room.state === '空闲' ? 'status-available' :
+                                   room.state === '预订' ? 'status-booked' : 'status-occupied';
+
+                html += `
+                    <div class="room-card">
+                        <div class="room-info">
+                            <div class="room-name">
+                                ${room.name}
+                                <span class="room-status ${statusClass}">${room.state}</span>
+                            </div>
+                            <div>房间编号: ${room.code || room.id}</div>
+                            <div>可住人数: ${room.seat}人</div>
+                            <div class="room-price">¥${room.price}/晚</div>
+                        </div>
+                    </div>
+                `;
+            });
+
+            roomListDiv.innerHTML = html;
+        }
+
+        function displayOrderList(orders) {
+            const orderListDiv = document.getElementById('orderList');
+
+            if (!orders || orders.length === 0) {
+                orderListDiv.innerHTML = '<p>暂无订单数据</p>';
+                return;
+            }
+
+            let html = '';
+            orders.forEach(order => {
+                html += `
+                    <div class="order-card">
+                        <div class="order-header">
+                            <span class="order-id">订单 #${order.id}</span>
+                            <span class="order-status status-${order.state}">${order.state}</span>
+                        </div>
+                        <div>房间: ${order.roomCode}</div>
+                        <div>日期: ${order.startDate} - ${order.endDate}</div>
+                        <div>总价: ¥${order.total}</div>
+                        <div>创建时间: ${order.createTime}</div>
+                        ${order.state === '预订' ? `<button onclick="cancelOrder(${order.id})" style="margin-top: 10px;">取消此订单</button>` : ''}
+                    </div>
+                `;
+            });
+
+            orderListDiv.innerHTML = html;
+        }
+
+        async function refreshRoomStatus() {
+            await getRoomStatus();
+        }
+
+        async function refreshOrders() {
+            await getUserOrders();
+        }
+
+        function openAIRooms() {
+            window.open('http://localhost:5174/ai-rooms', '_blank');
+        }
+
+        // 页面加载时检查登录状态
+        window.onload = function() {
+            const token = localStorage.getItem('token');
+            if (token) {
+                currentToken = token;
+                getUserOrders();
+                getRoomStatus();
+            }
+        };
+    </script>
+</body>
+</html>
