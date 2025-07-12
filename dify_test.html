@@ -1,0 +1,305 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Dify AI聊天助手测试</title>
+    <style>
+        body {
+            font-family: 'Microsoft YaHei', sans-serif;
+            margin: 0;
+            padding: 20px;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            min-height: 100vh;
+        }
+        
+        .container {
+            max-width: 1200px;
+            margin: 0 auto;
+            display: flex;
+            gap: 30px;
+            height: calc(100vh - 40px);
+        }
+        
+        .left-panel {
+            flex: 1;
+            background: rgba(255, 255, 255, 0.95);
+            backdrop-filter: blur(10px);
+            border-radius: 20px;
+            padding: 30px;
+            box-shadow: 0 10px 30px rgba(0, 0, 0, 0.1);
+        }
+        
+        .right-panel {
+            width: 400px;
+            flex-shrink: 0;
+        }
+        
+        .dify-chat-container {
+            background: rgba(255, 255, 255, 0.95);
+            backdrop-filter: blur(10px);
+            border-radius: 20px;
+            box-shadow: 0 10px 30px rgba(0, 0, 0, 0.1);
+            height: 100%;
+            display: flex;
+            flex-direction: column;
+            overflow: hidden;
+        }
+        
+        .dify-chat-header {
+            padding: 25px 25px 20px;
+            border-bottom: 1px solid #e9ecef;
+            flex-shrink: 0;
+        }
+        
+        .dify-chat-header h3 {
+            font-size: 1.4rem;
+            font-weight: bold;
+            color: #2c3e50;
+            margin: 0 0 8px 0;
+        }
+        
+        .dify-chat-header p {
+            color: #6c757d;
+            font-size: 0.9rem;
+            margin: 0;
+        }
+        
+        .dify-chat-wrapper {
+            flex: 1;
+            position: relative;
+            overflow: hidden;
+        }
+        
+        .dify-chat-wrapper iframe {
+            width: 100% !important;
+            height: 100% !important;
+            border: none !important;
+            border-radius: 0 !important;
+        }
+        
+        #dify-chatbot-bubble-button {
+            display: none !important;
+        }
+        
+        #dify-chatbot-bubble-window {
+            position: static !important;
+            bottom: auto !important;
+            right: auto !important;
+            width: 100% !important;
+            height: 100% !important;
+            max-width: none !important;
+            max-height: none !important;
+            border: none !important;
+            border-radius: 0 !important;
+            box-shadow: none !important;
+            background: transparent !important;
+        }
+        
+        .test-info {
+            background: #fff3cd;
+            border: 1px solid #ffeaa7;
+            border-radius: 10px;
+            padding: 20px;
+            margin-bottom: 20px;
+        }
+        
+        .test-info h2 {
+            color: #856404;
+            margin: 0 0 15px 0;
+        }
+        
+        .test-info ul {
+            margin: 0;
+            padding-left: 20px;
+        }
+        
+        .test-info li {
+            margin-bottom: 8px;
+            color: #856404;
+        }
+        
+        .status {
+            background: #d4edda;
+            border: 1px solid #c3e6cb;
+            border-radius: 10px;
+            padding: 15px;
+            margin-top: 20px;
+        }
+        
+        .status h3 {
+            color: #155724;
+            margin: 0 0 10px 0;
+        }
+        
+        .status p {
+            color: #155724;
+            margin: 0;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div class="left-panel">
+            <div class="test-info">
+                <h2>🧪 Dify AI聊天助手集成测试</h2>
+                <ul>
+                    <li><strong>Token:</strong> fggmGdSFt6MSQFJa</li>
+                    <li><strong>Base URL:</strong> http://47be5268.r28.cpolar.top</li>
+                    <li><strong>API Key:</strong> app-oaUwvb7k2zbC8Bi03EO977nN</li>
+                    <li><strong>直接调用:</strong> http://47be5268.r28.cpolar.top/chat/fggmGdSFt6MSQFJa</li>
+                </ul>
+            </div>
+            
+            <div class="status">
+                <h3>✅ 集成状态</h3>
+                <p id="status-text">正在初始化Dify聊天助手...</p>
+            </div>
+            
+            <div style="margin-top: 30px;">
+                <h3>🎯 测试要点：</h3>
+                <ol>
+                    <li>右侧应该显示Dify聊天助手界面</li>
+                    <li>聊天助手应该嵌入在右侧容器中，而不是浮动窗口</li>
+                    <li>界面应该完全填充右侧区域</li>
+                    <li>可以正常进行对话交互</li>
+                    <li>样式应该与页面整体设计保持一致</li>
+                </ol>
+            </div>
+            
+            <div style="margin-top: 30px;">
+                <h3>🔧 技术实现：</h3>
+                <ul>
+                    <li>隐藏默认的聊天气泡按钮</li>
+                    <li>将聊天窗口移动到指定容器</li>
+                    <li>重置聊天窗口样式为静态布局</li>
+                    <li>确保完全填充容器区域</li>
+                </ul>
+            </div>
+        </div>
+        
+        <div class="right-panel">
+            <div class="dify-chat-container">
+                <div class="dify-chat-header">
+                    <h3>💬 Dify AI助手</h3>
+                    <p>普洱蘑菇庄园民宿智能选房助手</p>
+                </div>
+                
+                <div class="dify-chat-wrapper" id="dify-chat-wrapper">
+                    <div style="display: flex; align-items: center; justify-content: center; height: 100%; color: #6c757d;">
+                        <div style="text-align: center;">
+                            <div style="font-size: 3rem; margin-bottom: 15px;">🤖</div>
+                            <p>正在加载Dify聊天助手...</p>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Dify聊天助手配置和脚本 -->
+    <script>
+        window.difyChatbotConfig = {
+            token: 'fggmGdSFt6MSQFJa',
+            baseUrl: 'http://47be5268.r28.cpolar.top'
+        }
+    </script>
+    <script
+        src="http://47be5268.r28.cpolar.top/embed.min.js"
+        id="fggmGdSFt6MSQFJa"
+        defer
+        onload="handleDifyLoad()"
+        onerror="handleDifyError()">
+    </script>
+
+    <script>
+        function handleDifyLoad() {
+            console.log('Dify聊天助手脚本加载成功')
+            document.getElementById('status-text').textContent = 'Dify脚本加载成功，正在初始化聊天助手...'
+            
+            // 等待DOM更新后自定义聊天助手
+            setTimeout(() => {
+                customizeDifyChatbot()
+            }, 1000)
+        }
+        
+        function handleDifyError() {
+            console.error('Dify聊天助手脚本加载失败')
+            document.getElementById('status-text').textContent = '❌ Dify脚本加载失败，请检查网络连接'
+        }
+        
+        function customizeDifyChatbot() {
+            console.log('开始自定义Dify聊天助手')
+            
+            // 隐藏默认的聊天气泡按钮
+            const bubbleButton = document.getElementById('dify-chatbot-bubble-button')
+            if (bubbleButton) {
+                bubbleButton.style.display = 'none'
+                console.log('已隐藏聊天气泡按钮')
+            }
+
+            // 查找聊天窗口
+            let chatWindow = document.getElementById('dify-chatbot-bubble-window')
+            if (chatWindow) {
+                moveChatWindow(chatWindow)
+            } else {
+                // 如果聊天窗口还没有创建，尝试触发创建
+                if (bubbleButton) {
+                    console.log('尝试触发聊天窗口创建')
+                    bubbleButton.click()
+                    setTimeout(() => {
+                        chatWindow = document.getElementById('dify-chatbot-bubble-window')
+                        if (chatWindow) {
+                            moveChatWindow(chatWindow)
+                        }
+                    }, 500)
+                }
+            }
+        }
+        
+        function moveChatWindow(chatWindow) {
+            console.log('移动聊天窗口到容器中')
+            
+            // 移动聊天窗口到我们的容器中
+            const wrapper = document.getElementById('dify-chat-wrapper')
+            if (wrapper) {
+                // 清空容器
+                wrapper.innerHTML = ''
+                
+                // 重置聊天窗口样式
+                chatWindow.style.position = 'static'
+                chatWindow.style.bottom = 'auto'
+                chatWindow.style.right = 'auto'
+                chatWindow.style.width = '100%'
+                chatWindow.style.height = '100%'
+                chatWindow.style.maxWidth = 'none'
+                chatWindow.style.maxHeight = 'none'
+                chatWindow.style.border = 'none'
+                chatWindow.style.borderRadius = '0'
+                chatWindow.style.boxShadow = 'none'
+                chatWindow.style.display = 'block'
+                
+                // 移动到我们的容器
+                wrapper.appendChild(chatWindow)
+                
+                document.getElementById('status-text').textContent = '✅ Dify聊天助手集成成功！'
+                console.log('聊天窗口移动完成')
+            }
+        }
+        
+        // 定期检查聊天窗口是否出现
+        let checkCount = 0
+        const checkInterval = setInterval(() => {
+            checkCount++
+            const chatWindow = document.getElementById('dify-chatbot-bubble-window')
+            if (chatWindow) {
+                clearInterval(checkInterval)
+                moveChatWindow(chatWindow)
+            } else if (checkCount > 20) {
+                clearInterval(checkInterval)
+                document.getElementById('status-text').textContent = '⚠️ 聊天窗口未能正确加载'
+            }
+        }, 500)
+    </script>
+</body>
+</html>
