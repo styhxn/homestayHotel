@@ -1,0 +1,250 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>AI选房对话测试</title>
+    <style>
+        body {
+            font-family: 'Microsoft YaHei', sans-serif;
+            margin: 0;
+            padding: 20px;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            min-height: 100vh;
+        }
+        
+        .container {
+            max-width: 800px;
+            margin: 0 auto;
+            background: white;
+            border-radius: 15px;
+            padding: 30px;
+            box-shadow: 0 10px 30px rgba(0,0,0,0.2);
+        }
+        
+        .title {
+            text-align: center;
+            color: #333;
+            margin-bottom: 30px;
+            font-size: 24px;
+            font-weight: bold;
+        }
+        
+        .chat-container {
+            border: 2px solid #e0e0e0;
+            border-radius: 10px;
+            height: 400px;
+            overflow-y: auto;
+            padding: 20px;
+            margin-bottom: 20px;
+            background: #f9f9f9;
+        }
+        
+        .message {
+            margin-bottom: 15px;
+            padding: 10px 15px;
+            border-radius: 10px;
+            max-width: 80%;
+        }
+        
+        .user-message {
+            background: #007bff;
+            color: white;
+            margin-left: auto;
+            text-align: right;
+        }
+        
+        .ai-message {
+            background: #e9ecef;
+            color: #333;
+            margin-right: auto;
+        }
+        
+        .input-container {
+            display: flex;
+            gap: 10px;
+        }
+        
+        .input-field {
+            flex: 1;
+            padding: 12px;
+            border: 2px solid #ddd;
+            border-radius: 8px;
+            font-size: 16px;
+        }
+        
+        .send-btn {
+            padding: 12px 24px;
+            background: #007bff;
+            color: white;
+            border: none;
+            border-radius: 8px;
+            cursor: pointer;
+            font-size: 16px;
+            font-weight: bold;
+        }
+        
+        .send-btn:hover {
+            background: #0056b3;
+        }
+        
+        .test-buttons {
+            margin-bottom: 20px;
+            display: flex;
+            flex-wrap: wrap;
+            gap: 10px;
+        }
+        
+        .test-btn {
+            padding: 8px 16px;
+            background: #28a745;
+            color: white;
+            border: none;
+            border-radius: 5px;
+            cursor: pointer;
+            font-size: 14px;
+        }
+        
+        .test-btn:hover {
+            background: #1e7e34;
+        }
+        
+        .expected-result {
+            background: #fff3cd;
+            border: 1px solid #ffeaa7;
+            border-radius: 5px;
+            padding: 10px;
+            margin-bottom: 20px;
+            font-size: 14px;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1 class="title">🍄 AI选房对话功能测试</h1>
+        
+        <div class="expected-result">
+            <strong>📋 测试要求（根据图片）：</strong><br>
+            1. 输入"推荐房间"应返回：201、302、405房间推荐<br>
+            2. 输入"预订201"应返回：确认预订信息和感谢语<br>
+            3. 默认回复应包含功能介绍
+        </div>
+        
+        <div class="test-buttons">
+            <button class="test-btn" onclick="testMessage('推荐房间')">测试：推荐房间</button>
+            <button class="test-btn" onclick="testMessage('预订201')">测试：预订201</button>
+            <button class="test-btn" onclick="testMessage('201')">测试：201</button>
+            <button class="test-btn" onclick="testMessage('你好')">测试：默认回复</button>
+            <button class="test-btn" onclick="testMessage('便宜的房间')">测试：便宜房间</button>
+            <button class="test-btn" onclick="clearChat()">清空对话</button>
+        </div>
+        
+        <div class="chat-container" id="chatContainer">
+            <div class="message ai-message">
+                🍄 您好！我是普洱蘑菇庄园民宿的AI选房助手，请输入您的需求进行测试！
+            </div>
+        </div>
+        
+        <div class="input-container">
+            <input type="text" class="input-field" id="messageInput" placeholder="请输入测试消息..." onkeypress="handleKeyPress(event)">
+            <button class="send-btn" onclick="sendMessage()">发送</button>
+        </div>
+    </div>
+
+    <script>
+        // 模拟AI回复逻辑（根据图片要求）
+        function generateAIResponse(message) {
+            const lowerMessage = message.toLowerCase();
+            
+            // 1. 推荐房间
+            if (lowerMessage.includes('推荐') || lowerMessage.includes('房间') || 
+                lowerMessage.includes('选房') || lowerMessage.includes('住宿')) {
+                return '我可以为您定酒店，为您推荐美食，我还可以...\n' +
+                       '等您来挖掘呢！类似介绍下功能！\n\n' +
+                       '根据您的需求，我们给您推荐了：\n' +
+                       '🏠 201（大床房，35平米，350元/晚）\n' +
+                       '🏠 302（大床房，37平米，380元/晚）\n' +
+                       '🏠 405（大床房，34平米，320元/晚）\n\n' +
+                       '房间供您选择！';
+            }
+            
+            // 2. 预订201
+            if (lowerMessage.includes('201') || lowerMessage.includes('预订201')) {
+                const today = new Date();
+                const checkIn = new Date(today.getTime() + 24 * 60 * 60 * 1000);
+                const checkOut = new Date(today.getTime() + 3 * 24 * 60 * 60 * 1000);
+                
+                const formatDate = (date) => {
+                    return `${date.getFullYear()}年${date.getMonth() + 1}月${date.getDate()}日`;
+                };
+                
+                return `感谢您对我们酒店的信任，欢迎入住我们酒店！\n` +
+                       `您的定单位${formatDate(checkIn)}-${formatDate(checkOut)}\n` +
+                       `房间号码为201，大床房，房价350元/晚。\n` +
+                       `我们民宿还可以给您推荐美食，景点，也欢迎您多多跟我们小普交流！`;
+            }
+            
+            // 3. 便宜房间
+            if (lowerMessage.includes('便宜') || lowerMessage.includes('经济')) {
+                return '🍄 为您推荐性价比最高的经济型房间：\n\n' +
+                       '🏠 405（大床房，34平米，320元/晚）- 最经济实惠\n' +
+                       '🏠 201（大床房，35平米，350元/晚）- 性价比高\n\n' +
+                       '这些房间价格实惠，设施齐全！';
+            }
+            
+            // 4. 默认回复
+            return '🍄 感谢您的咨询！我是普洱蘑菇庄园民宿的AI选房助手。\n\n' +
+                   '我可以为您定酒店，为您推荐美食，我还可以...\n' +
+                   '等您来挖掘呢！类似介绍下功能！\n\n' +
+                   '您可以说：\n' +
+                   '• "推荐房间" - 获取智能房间推荐\n' +
+                   '• "预订201" - 预订指定房间\n' +
+                   '• "便宜的房间" / "豪华房间"\n\n' +
+                   'AI对话框 问答等等';
+        }
+        
+        function addMessage(content, isUser = false) {
+            const chatContainer = document.getElementById('chatContainer');
+            const messageDiv = document.createElement('div');
+            messageDiv.className = `message ${isUser ? 'user-message' : 'ai-message'}`;
+            messageDiv.innerHTML = content.replace(/\n/g, '<br>');
+            chatContainer.appendChild(messageDiv);
+            chatContainer.scrollTop = chatContainer.scrollHeight;
+        }
+        
+        function sendMessage() {
+            const input = document.getElementById('messageInput');
+            const message = input.value.trim();
+            
+            if (message) {
+                // 添加用户消息
+                addMessage(message, true);
+                
+                // 生成AI回复
+                setTimeout(() => {
+                    const aiResponse = generateAIResponse(message);
+                    addMessage(aiResponse, false);
+                }, 500);
+                
+                input.value = '';
+            }
+        }
+        
+        function testMessage(message) {
+            document.getElementById('messageInput').value = message;
+            sendMessage();
+        }
+        
+        function clearChat() {
+            const chatContainer = document.getElementById('chatContainer');
+            chatContainer.innerHTML = '<div class="message ai-message">🍄 对话已清空，请继续测试！</div>';
+        }
+        
+        function handleKeyPress(event) {
+            if (event.key === 'Enter') {
+                sendMessage();
+            }
+        }
+    </script>
+</body>
+</html>
