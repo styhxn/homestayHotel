@@ -1,0 +1,322 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>聊天功能测试</title>
+    <style>
+        body {
+            font-family: 'Microsoft YaHei', sans-serif;
+            margin: 0;
+            padding: 20px;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            min-height: 100vh;
+        }
+        
+        .container {
+            max-width: 800px;
+            margin: 0 auto;
+            background: white;
+            border-radius: 20px;
+            padding: 30px;
+            box-shadow: 0 10px 30px rgba(0, 0, 0, 0.1);
+        }
+        
+        h1 {
+            text-align: center;
+            color: #2c3e50;
+            margin-bottom: 30px;
+        }
+        
+        .test-section {
+            margin-bottom: 30px;
+            padding: 20px;
+            border: 1px solid #e9ecef;
+            border-radius: 10px;
+        }
+        
+        .test-section h3 {
+            color: #495057;
+            margin-bottom: 15px;
+        }
+        
+        .status {
+            padding: 10px 15px;
+            border-radius: 5px;
+            margin-bottom: 15px;
+        }
+        
+        .status.success {
+            background: #d4edda;
+            color: #155724;
+            border: 1px solid #c3e6cb;
+        }
+        
+        .status.error {
+            background: #f8d7da;
+            color: #721c24;
+            border: 1px solid #f5c6cb;
+        }
+        
+        .status.warning {
+            background: #fff3cd;
+            color: #856404;
+            border: 1px solid #ffeaa7;
+        }
+        
+        .test-button {
+            background: #007bff;
+            color: white;
+            border: none;
+            padding: 10px 20px;
+            border-radius: 5px;
+            cursor: pointer;
+            margin-right: 10px;
+            margin-bottom: 10px;
+        }
+        
+        .test-button:hover {
+            background: #0056b3;
+        }
+        
+        .test-button:disabled {
+            background: #6c757d;
+            cursor: not-allowed;
+        }
+        
+        .log-area {
+            background: #f8f9fa;
+            border: 1px solid #dee2e6;
+            border-radius: 5px;
+            padding: 15px;
+            height: 200px;
+            overflow-y: auto;
+            font-family: monospace;
+            font-size: 12px;
+            white-space: pre-wrap;
+        }
+        
+        .input-group {
+            display: flex;
+            gap: 10px;
+            margin-bottom: 15px;
+        }
+        
+        .input-group input {
+            flex: 1;
+            padding: 8px 12px;
+            border: 1px solid #ced4da;
+            border-radius: 4px;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1>🧪 聊天功能测试工具</h1>
+        
+        <div class="test-section">
+            <h3>1. Dify服务连接测试</h3>
+            <div id="dify-status" class="status warning">
+                ⏳ 等待测试...
+            </div>
+            <button class="test-button" onclick="testDifyConnection()">测试Dify连接</button>
+            <button class="test-button" onclick="testDifyEmbed()">测试Dify嵌入</button>
+        </div>
+        
+        <div class="test-section">
+            <h3>2. 后端API测试</h3>
+            <div id="api-status" class="status warning">
+                ⏳ 等待测试...
+            </div>
+            <div class="input-group">
+                <input type="text" id="test-message" placeholder="输入测试消息..." value="你好，请推荐房间">
+                <button class="test-button" onclick="testBackendAPI()">测试后端API</button>
+            </div>
+        </div>
+        
+        <div class="test-section">
+            <h3>3. 前端页面测试</h3>
+            <div id="frontend-status" class="status warning">
+                ⏳ 等待测试...
+            </div>
+            <button class="test-button" onclick="testFrontendPage()">打开AI选房页面</button>
+            <button class="test-button" onclick="checkPageElements()">检查页面元素</button>
+        </div>
+        
+        <div class="test-section">
+            <h3>4. 测试日志</h3>
+            <div id="log-area" class="log-area">等待测试开始...\n</div>
+            <button class="test-button" onclick="clearLog()">清空日志</button>
+        </div>
+    </div>
+
+    <script>
+        function log(message) {
+            const logArea = document.getElementById('log-area');
+            const timestamp = new Date().toLocaleTimeString();
+            logArea.textContent += `[${timestamp}] ${message}\n`;
+            logArea.scrollTop = logArea.scrollHeight;
+        }
+        
+        function clearLog() {
+            document.getElementById('log-area').textContent = '';
+        }
+        
+        function updateStatus(elementId, type, message) {
+            const element = document.getElementById(elementId);
+            element.className = `status ${type}`;
+            element.textContent = message;
+        }
+        
+        async function testDifyConnection() {
+            log('开始测试Dify服务连接...');
+            updateStatus('dify-status', 'warning', '⏳ 正在测试Dify连接...');
+            
+            try {
+                const response = await fetch('http://47be5268.r28.cpolar.top/embed.min.js', {
+                    method: 'HEAD',
+                    mode: 'no-cors'
+                });
+                
+                log('Dify嵌入脚本可访问');
+                updateStatus('dify-status', 'success', '✅ Dify服务连接正常');
+                
+                // 测试直接调用端点
+                const chatResponse = await fetch('http://47be5268.r28.cpolar.top/chat/fggmGdSFt6MSQFJa', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                    },
+                    body: JSON.stringify({
+                        query: '测试连接',
+                        response_mode: 'streaming',
+                        user: 'test-user'
+                    })
+                });
+                
+                if (chatResponse.ok) {
+                    log('Dify聊天端点响应正常');
+                } else {
+                    log(`Dify聊天端点响应异常: ${chatResponse.status}`);
+                }
+                
+            } catch (error) {
+                log(`Dify连接测试失败: ${error.message}`);
+                updateStatus('dify-status', 'error', '❌ Dify服务连接失败');
+            }
+        }
+        
+        async function testDifyEmbed() {
+            log('开始测试Dify嵌入功能...');
+            
+            // 设置Dify配置
+            window.difyChatbotConfig = {
+                token: 'fggmGdSFt6MSQFJa',
+                baseUrl: 'http://47be5268.r28.cpolar.top'
+            };
+            
+            // 动态加载Dify脚本
+            const script = document.createElement('script');
+            script.src = 'http://47be5268.r28.cpolar.top/embed.min.js';
+            script.id = 'fggmGdSFt6MSQFJa';
+            script.defer = true;
+            
+            script.onload = () => {
+                log('Dify嵌入脚本加载成功');
+                updateStatus('dify-status', 'success', '✅ Dify嵌入功能正常');
+            };
+            
+            script.onerror = () => {
+                log('Dify嵌入脚本加载失败');
+                updateStatus('dify-status', 'error', '❌ Dify嵌入功能失败');
+            };
+            
+            document.head.appendChild(script);
+        }
+        
+        async function testBackendAPI() {
+            const message = document.getElementById('test-message').value;
+            log(`开始测试后端API，消息: ${message}`);
+            updateStatus('api-status', 'warning', '⏳ 正在测试后端API...');
+            
+            try {
+                const response = await fetch('http://localhost:8080/chat/messages', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                    },
+                    body: JSON.stringify({
+                        query: message,
+                        response_mode: 'streaming',
+                        user: 'test-user'
+                    })
+                });
+                
+                if (response.ok) {
+                    log('后端API响应正常');
+                    updateStatus('api-status', 'success', '✅ 后端API连接正常');
+                    
+                    // 读取SSE响应
+                    const reader = response.body.getReader();
+                    const decoder = new TextDecoder();
+                    
+                    while (true) {
+                        const { done, value } = await reader.read();
+                        if (done) break;
+                        
+                        const chunk = decoder.decode(value);
+                        log(`收到响应: ${chunk}`);
+                    }
+                } else {
+                    log(`后端API响应异常: ${response.status}`);
+                    updateStatus('api-status', 'error', '❌ 后端API连接失败');
+                }
+                
+            } catch (error) {
+                log(`后端API测试失败: ${error.message}`);
+                updateStatus('api-status', 'error', '❌ 后端API连接失败');
+            }
+        }
+        
+        function testFrontendPage() {
+            log('打开AI选房页面进行测试...');
+            window.open('http://localhost:5173/ai-rooms', '_blank');
+            updateStatus('frontend-status', 'success', '✅ 已打开AI选房页面');
+        }
+        
+        function checkPageElements() {
+            log('检查页面元素...');
+            
+            // 这里可以添加更多的页面元素检查逻辑
+            const elements = [
+                'dify-chat-wrapper',
+                'dify-loading',
+                'fallback-chat'
+            ];
+            
+            let allFound = true;
+            elements.forEach(id => {
+                const element = document.getElementById(id);
+                if (element) {
+                    log(`✅ 找到元素: ${id}`);
+                } else {
+                    log(`❌ 未找到元素: ${id}`);
+                    allFound = false;
+                }
+            });
+            
+            if (allFound) {
+                updateStatus('frontend-status', 'success', '✅ 页面元素检查通过');
+            } else {
+                updateStatus('frontend-status', 'error', '❌ 页面元素检查失败');
+            }
+        }
+        
+        // 页面加载完成后自动开始基础测试
+        window.onload = function() {
+            log('测试工具加载完成');
+            log('请点击相应按钮开始测试');
+        };
+    </script>
+</body>
+</html>
