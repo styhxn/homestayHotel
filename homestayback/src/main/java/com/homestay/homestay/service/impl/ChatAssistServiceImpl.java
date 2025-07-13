@@ -49,8 +49,8 @@ public class ChatAssistServiceImpl implements ChatAssistService {
             try {
                 // 首先尝试调用Dify服务
                 try {
-                    // 使用直接调用URL
-                    String messageUrl = "http://47be5268.r28.cpolar.top/chat/fggmGdSFt6MSQFJa";
+                    // 使用最新的Dify API URL
+                    String messageUrl = "http://4295a4ce.r28.cpolar.top/v1/chat-messages";
 
                     // 创建请求头
                     HttpHeaders headers = new HttpHeaders();

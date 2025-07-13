@@ -31,7 +31,7 @@
 ```javascript
 window.difyChatbotConfig = {
   token: 'fggmGdSFt6MSQFJa',
-  baseUrl: 'http://47be5268.r28.cpolar.top'
+  baseUrl: 'http://4295a4ce.r28.cpolar.top'
 }
 ```
 
@@ -82,15 +82,15 @@ window.difyChatbotConfig = {
 
 ### Dify服务配置
 - **Token**: fggmGdSFt6MSQFJa
-- **Base URL**: http://47be5268.r28.cpolar.top
-- **Embed Script**: http://47be5268.r28.cpolar.top/embed.min.js
+- **Base URL**: http://4295a4ce.r28.cpolar.top
+- **Embed Script**: http://4295a4ce.r28.cpolar.top/embed.min.js
 - **API Key**: app-oaUwvb7k2zbC8Bi03EO977nN
 
 ### 后端API配置
 ```properties
 # application.properties
 chatAssist.authorization=Bearer app-oaUwvb7k2zbC8Bi03EO977nN
-chatAssist.url=http://47be5268.r28.cpolar.top/v1
+chatAssist.url=http://4295a4ce.r28.cpolar.top/v1
 ```
 
 ## 🎯 关键特性
