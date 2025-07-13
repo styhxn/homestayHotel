@@ -40,40 +40,60 @@ public class TestDataInitializer {
 
     private void createTestUser() {
         System.out.println("👤 创建测试用户...");
-        
-        String sql = "INSERT IGNORE INTO sys_user (" +
-                "username, password, real_name, email, phonenumber, " +
-                "gender, role, status, create_time, update_time, remark" +
+
+        // 创建普通用户（h_user表）
+        String hUserSql = "INSERT IGNORE INTO h_user (" +
+                "username, password, real_name, phone, " +
+                "gender, status, login_time, create_time, update_time, remark" +
                 ") VALUES (" +
-                "'testuser', '123456', '测试用户', 'test@mushroom-garden.com', '13800138888', " +
-                "'男', 0, 0, NOW(), NOW(), '系统测试用户'" +
+                "'testuser', '123456', '测试用户', '13800138888', " +
+                "'男', 0, NOW(), NOW(), NOW(), '系统测试用户'" +
                 ")";
-        
-        int result = jdbcTemplate.update(sql);
+
+        int result = jdbcTemplate.update(hUserSql);
         System.out.println("   - 测试用户创建结果: " + (result > 0 ? "成功" : "已存在"));
     }
 
     private void createTestRooms() {
         System.out.println("🏠 创建测试房间...");
 
+        // 首先更新现有房间的code字段
+        String[] updateSqls = {
+            "UPDATE h_room SET code = '201', name = '蘑菇森林小屋' WHERE id = 1",
+            "UPDATE h_room SET code = '202', name = '云雾山景房' WHERE id = 2",
+            "UPDATE h_room SET code = '203', name = '普洱茶香阁' WHERE id = 3",
+            "UPDATE h_room SET code = '204', name = '竹林静舍' WHERE id = 4",
+            "UPDATE h_room SET code = '205', name = '山景别墅' WHERE id = 5",
+            "UPDATE h_room SET code = '206', name = '湖畔小筑' WHERE id = 6"
+        };
+
+        for (int i = 0; i < updateSqls.length; i++) {
+            try {
+                int result = jdbcTemplate.update(updateSqls[i]);
+                System.out.println("   - 房间" + (i + 1) + "更新结果: " + (result > 0 ? "成功" : "无变化"));
+            } catch (Exception e) {
+                System.err.println("   - 房间" + (i + 1) + "更新失败: " + e.getMessage());
+            }
+        }
+
         String[] roomSqls = {
             "INSERT IGNORE INTO h_room (id, name, code, category, price, status, state, seat, device, address, city, banner, `describe`, end_time, create_time, update_time) " +
-            "VALUES (1, '豪华海景房', 'ROOM-001', '豪华间', 9999.00, 0, '空闲', 2, '空调,电视,WiFi,独立卫浴', '亚龙湾度假区1号', '三亚', 'room1.jpg', '豪华海景房，带阳台，可欣赏无敌海景', '2022-01-01', '2025-07-03 17:42:30', NULL)",
+            "VALUES (1, '蘑菇森林小屋', '201', '大床房', 350.00, 0, '空闲', 2, 'WiFi,空调,电视,独立卫浴,茶具套装,观景窗', '普洱蘑菇庄园茶园区A栋201', '普洱市', 'room1.jpg', '坐落在蘑菇森林中的精致小屋，房间内陈设着各种普洱茶具和茶叶。您可以在房间内品茶赏景。', DATE_ADD(NOW(), INTERVAL 1 YEAR), NOW(), NOW())",
 
             "INSERT IGNORE INTO h_room (id, name, code, category, price, status, state, seat, device, address, city, banner, `describe`, end_time, create_time, update_time) " +
-            "VALUES (2, '普洱茶香木屋', 'MG-002', '标准间', 288.00, 0, '空闲', 2, 'WiFi,空调,电视,独立卫浴,茶具套装,观景窗', '普洱蘑菇庄园茶园区B栋', '普洱市', 'room2.jpg', '充满茶香的精致木屋，房间内陈设着各种普洱茶具和茶叶。您可以在房间内品茶赏景。', DATE_ADD(NOW(), INTERVAL 1 YEAR), NOW(), NOW())",
+            "VALUES (2, '云雾山景房', '202', '双床房', 380.00, 0, '空闲', 2, 'WiFi,空调,电视,独立卫浴,观景阳台,迷你吧', '普洱蘑菇庄园主楼B栋202', '普洱市', 'room2.jpg', '位于山景最佳位置的房间，推窗即可看到云雾缭绕的山峦美景，享受宁静的山居时光。', DATE_ADD(NOW(), INTERVAL 1 YEAR), NOW(), NOW())",
 
             "INSERT IGNORE INTO h_room (id, name, code, category, price, status, state, seat, device, address, city, banner, `describe`, end_time, create_time, update_time) " +
-            "VALUES (3, '庄园豪华套房', 'MG-003', '套房', 588.00, 0, '空闲', 4, 'WiFi,空调,电视,独立卫浴,客厅,阳台,迷你吧,保险箱', '普洱蘑菇庄园主楼C栋', '普洱市', 'room3.jpg', '庄园内最豪华的套房，拥有独立客厅、卧室和观景阳台。房间装修典雅，设施齐全。', DATE_ADD(NOW(), INTERVAL 1 YEAR), NOW(), NOW())",
+            "VALUES (3, '普洱茶香阁', '203', '标准间', 280.00, 0, '空闲', 2, 'WiFi,空调,电视,独立卫浴,茶艺桌,品茶区', '普洱蘑菇庄园茶园区C栋203', '普洱市', 'room3.jpg', '专为茶文化爱好者设计的房间，配备专业茶艺桌和品茶区，可体验正宗的普洱茶文化。', DATE_ADD(NOW(), INTERVAL 1 YEAR), NOW(), NOW())",
 
             "INSERT IGNORE INTO h_room (id, name, code, category, price, status, state, seat, device, address, city, banner, `describe`, end_time, create_time, update_time) " +
-            "VALUES (4, '竹林雅居', 'MG-004', '标准间', 258.00, 0, '空闲', 2, 'WiFi,空调,电视,独立卫浴,竹制家具,禅意装饰', '普洱蘑菇庄园竹林区D栋', '普洱市', 'room4.jpg', '坐落在翠绿竹林中的雅致居所，环境清幽，空气清新，是放松身心的理想之地。', DATE_ADD(NOW(), INTERVAL 1 YEAR), NOW(), NOW())",
+            "VALUES (4, '竹林静舍', '204', '标准间', 320.00, 0, '空闲', 2, 'WiFi,空调,电视,独立卫浴,竹制家具,禅意装饰', '普洱蘑菇庄园竹林区D栋204', '普洱市', 'room4.jpg', '坐落在翠绿竹林中的雅致居所，环境清幽，空气清新，是放松身心的理想之地。', DATE_ADD(NOW(), INTERVAL 1 YEAR), NOW(), NOW())",
 
             "INSERT IGNORE INTO h_room (id, name, code, category, price, status, state, seat, device, address, city, banner, `describe`, end_time, create_time, update_time) " +
-            "VALUES (5, '山景别墅', 'MG-005', '别墅', 888.00, 0, '空闲', 6, 'WiFi,空调,电视,独立卫浴,厨房,花园,露台,停车位', '普洱蘑菇庄园山景区E栋', '普洱市', 'room5.jpg', '独栋山景别墅，拥有私人花园和露台，可俯瞰整个庄园美景，适合家庭度假。', DATE_ADD(NOW(), INTERVAL 1 YEAR), NOW(), NOW())",
+            "VALUES (5, '山景别墅', '205', '别墅', 888.00, 0, '空闲', 6, 'WiFi,空调,电视,独立卫浴,厨房,花园,露台,停车位', '普洱蘑菇庄园山景区E栋205', '普洱市', 'room5.jpg', '独栋山景别墅，拥有私人花园和露台，可俯瞰整个庄园美景，适合家庭度假。', DATE_ADD(NOW(), INTERVAL 1 YEAR), NOW(), NOW())",
 
             "INSERT IGNORE INTO h_room (id, name, code, category, price, status, state, seat, device, address, city, banner, `describe`, end_time, create_time, update_time) " +
-            "VALUES (6, '湖畔小筑', 'MG-006', '豪华间', 428.00, 0, '预订', 2, 'WiFi,空调,电视,独立卫浴,湖景阳台,垂钓设备', '普洱蘑菇庄园湖畔区F栋', '普洱市', 'room6.jpg', '紧邻人工湖的精美小筑，推窗即可看到波光粼粼的湖面，享受宁静的湖畔时光。', DATE_ADD(NOW(), INTERVAL 1 YEAR), NOW(), NOW())"
+            "VALUES (6, '湖畔小筑', '206', '豪华间', 428.00, 0, '预订', 2, 'WiFi,空调,电视,独立卫浴,湖景阳台,垂钓设备', '普洱蘑菇庄园湖畔区F栋206', '普洱市', 'room6.jpg', '紧邻人工湖的精美小筑，推窗即可看到波光粼粼的湖面，享受宁静的湖畔时光。', DATE_ADD(NOW(), INTERVAL 1 YEAR), NOW(), NOW())"
         };
 
         for (int i = 0; i < roomSqls.length; i++) {
@@ -141,7 +161,7 @@ public class TestDataInitializer {
         System.out.println("📝 创建测试订单...");
         
         // 获取测试用户ID
-        String getUserIdSql = "SELECT id FROM sys_user WHERE username = 'testuser' LIMIT 1";
+        String getUserIdSql = "SELECT id FROM h_user WHERE username = 'testuser' LIMIT 1";
         Integer userId;
         try {
             userId = jdbcTemplate.queryForObject(getUserIdSql, Integer.class);
@@ -161,30 +181,30 @@ public class TestDataInitializer {
             "id, user_id, room_id, room_code, start_date, end_date, " +
             "days, total, phone, state, status, create_time, update_time" +
             ") VALUES (" +
-            "1, " + userId + ", 1, '豪华海景房', '2025-01-15', '2025-01-17', " +
-            "2, '776.00', '13800138888', '入住', 0, DATE_SUB(NOW(), INTERVAL 2 DAY), DATE_SUB(NOW(), INTERVAL 2 DAY)" +
+            "1, " + userId + ", 1, '201', '2025-01-15', '2025-01-17', " +
+            "2, '700.00', '13800138888', '入住', 0, DATE_SUB(NOW(), INTERVAL 2 DAY), DATE_SUB(NOW(), INTERVAL 2 DAY)" +
             ")",
-            
+
             // 订单2：预订状态（可以取消）
             "INSERT IGNORE INTO h_order (" +
             "id, user_id, room_id, room_code, start_date, end_date, " +
             "days, total, phone, state, status, create_time, update_time" +
             ") VALUES (" +
-            "2, " + userId + ", 2, '普洱茶香木屋', '2025-01-20', '2025-01-22', " +
-            "2, '576.00', '13800138888', '预订', 0, DATE_SUB(NOW(), INTERVAL 3 HOUR), DATE_SUB(NOW(), INTERVAL 3 HOUR)" +
+            "2, " + userId + ", 2, '202', '2025-01-20', '2025-01-22', " +
+            "2, '760.00', '13800138888', '预订', 0, DATE_SUB(NOW(), INTERVAL 3 HOUR), DATE_SUB(NOW(), INTERVAL 3 HOUR)" +
             ")",
-            
+
             // 订单3：预订状态（可以取消）
             "INSERT IGNORE INTO h_order (" +
             "id, user_id, room_id, room_code, start_date, end_date, " +
             "days, total, phone, state, status, create_time, update_time" +
             ") VALUES (" +
-            "3, " + userId + ", 3, '庄园豪华套房', '2025-01-25', '2025-01-27', " +
-            "2, '1176.00', '13800138888', '预订', 0, DATE_SUB(NOW(), INTERVAL 1 HOUR), DATE_SUB(NOW(), INTERVAL 1 HOUR)" +
+            "3, " + userId + ", 3, '203', '2025-01-25', '2025-01-27', " +
+            "2, '560.00', '13800138888', '预订', 0, DATE_SUB(NOW(), INTERVAL 1 HOUR), DATE_SUB(NOW(), INTERVAL 1 HOUR)" +
             ")"
         };
         
-        String[] orderNames = {"豪华海景房(入住)", "普洱茶香木屋(预订)", "庄园豪华套房(预订)"};
+        String[] orderNames = {"蘑菇森林小屋201(入住)", "云雾山景房202(预订)", "普洱茶香阁203(预订)"};
         
         for (int i = 0; i < orderSqls.length; i++) {
             try {
