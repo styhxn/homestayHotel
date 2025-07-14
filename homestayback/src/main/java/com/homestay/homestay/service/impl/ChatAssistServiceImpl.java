@@ -5,6 +5,8 @@ import cn.hutool.core.convert.Convert;
 import cn.hutool.core.date.DateUtil;
 import cn.hutool.core.util.ObjectUtil;
 import cn.hutool.core.util.StrUtil;
+import com.alibaba.fastjson.JSON;
+import com.alibaba.fastjson.JSONObject;
 import com.baomidou.mybatisplus.core.conditions.query.LambdaQueryWrapper;
 import com.baomidou.mybatisplus.core.toolkit.Wrappers;
 import com.fasterxml.jackson.databind.ObjectMapper;
@@ -19,6 +21,7 @@ import com.homestay.homestay.service.HRoomService;
 import com.homestay.homestay.service.HUserService;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.http.HttpEntity;
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpMethod;
@@ -61,6 +64,13 @@ public class ChatAssistServiceImpl implements ChatAssistService {
     @Autowired
     private RestTemplate restTemplate;
 
+    // 从配置文件注入Dify配置
+    @Value("${chatAssist.url}")
+    private String chatAssistUrl;
+
+    @Value("${chatAssist.authorization}")
+    private String chatAssistAuthorization;
+
     /**
      * 聊天对话
      *
@@ -78,12 +88,12 @@ public class ChatAssistServiceImpl implements ChatAssistService {
             try {
                 // 首先尝试调用Dify服务
                 try {
-                    // 使用最新的Dify API URL
-                    String messageUrl = "http://4295a4ce.r28.cpolar.top/v1/chat-messages";
+                    // 使用配置的Dify API URL
+                    String messageUrl = chatAssistUrl + "/chat-messages";
 
                     // 创建请求头
                     HttpHeaders headers = new HttpHeaders();
-                    headers.set("Authorization", "Bearer app-oaUwvb7k2zbC8Bi03EO977nN");
+                    headers.set("Authorization", chatAssistAuthorization);
                     headers.setContentType(MediaType.APPLICATION_JSON);
 
                     // 设置response_mode为streaming
@@ -111,11 +121,56 @@ public class ChatAssistServiceImpl implements ChatAssistService {
                             response -> {
                                 try (BufferedReader reader = new BufferedReader(new InputStreamReader(response.getBody()))) {
                                     String line;
+                                    StringBuilder fullResponse = new StringBuilder();
+
                                     while ((line = reader.readLine()) != null) {
-                                        log.info("line: {}", line);
-                                        // 将每一行数据推送到前端
-                                        emitter.send(SseEmitter.event().data(line));
+                                        log.info("Dify响应行: {}", line);
+
+                                        // 处理SSE格式的数据
+                                        if (line.startsWith("data: ")) {
+                                            String data = line.substring(6);
+
+                                            if ("[DONE]".equals(data)) {
+                                                break;
+                                            }
+
+                                            try {
+                                                // 尝试解析JSON
+                                                JSONObject jsonData = JSON.parseObject(data);
+
+                                                // 检查是否有answer字段
+                                                if (jsonData.containsKey("answer")) {
+                                                    String answer = jsonData.getString("answer");
+                                                    if (answer != null && !answer.trim().isEmpty()) {
+                                                        fullResponse.append(answer);
+                                                        // 实时推送部分响应
+                                                        emitter.send(SseEmitter.event().data(answer));
+                                                    }
+                                                }
+
+                                                // 更新会话ID
+                                                if (jsonData.containsKey("conversation_id")) {
+                                                    log.info("会话ID: {}", jsonData.getString("conversation_id"));
+                                                }
+
+                                            } catch (Exception parseException) {
+                                                // 如果不是JSON格式，直接作为文本处理
+                                                if (!data.trim().isEmpty()) {
+                                                    fullResponse.append(data);
+                                                    emitter.send(SseEmitter.event().data(data));
+                                                }
+                                            }
+                                        }
                                     }
+
+                                    log.info("Dify完整响应: {}", fullResponse.toString());
+
+                                    // 如果没有收到任何有效响应，发送错误信息
+                                    if (fullResponse.length() == 0) {
+                                        log.warn("Dify服务返回空响应");
+                                        emitter.send(SseEmitter.event().data("抱歉，AI服务暂时无响应，请稍后重试。"));
+                                    }
+
                                     // 完成推送
                                     emitter.complete();
                                 }
@@ -147,7 +202,8 @@ public class ChatAssistServiceImpl implements ChatAssistService {
     }
 
     /**
-     * 生成模拟响应（当Dify服务不可用时使用）
+     * 生成降级响应（当Dify服务不可用时使用）
+     * 只处理核心业务功能，避免硬编码回复
      */
     private String generateMockResponse(String query) {
         String lowerQuery = query.toLowerCase();
@@ -158,32 +214,17 @@ public class ChatAssistServiceImpl implements ChatAssistService {
         }
 
         // 检查是否是推荐房间请求
-        if (lowerQuery.contains("推荐") || lowerQuery.contains("房间") || lowerQuery.contains("住宿")) {
+        if (lowerQuery.contains("推荐") && lowerQuery.contains("房间")) {
             return recommendRooms(query);
-        } else if (lowerQuery.contains("价格") || lowerQuery.contains("费用") || lowerQuery.contains("多少钱")) {
-            return "🍄 我们的房间价格根据房型和季节有所不同：" +
-                   "\n• 普洱茶香阁(203)：280元/晚" +
-                   "\n• 竹林静舍(204)：320元/晚" +
-                   "\n• 蘑菇森林小屋(201)：350元/晚" +
-                   "\n• 云雾山景房(202)：380元/晚" +
-                   "\n• 湖畔小筑(206)：428元/晚" +
-                   "\n• 山景别墅(205)：888元/晚" +
-                   "\n\n所有房间都包含免费早餐和茶艺体验。如需预订请说'我要预订201'等。";
-        } else if (lowerQuery.contains("茶") || lowerQuery.contains("普洱")) {
-            return "🍄 普洱蘑菇庄园民宿以茶文化为特色！" +
-                   "我们提供正宗的普洱茶品鉴体验，包括古树茶、熟茶、生茶等多个品种。" +
-                   "庄园内还有茶艺师现场表演，您可以学习传统的普洱茶冲泡技艺。" +
-                   "每位客人都可以免费参加我们的茶文化体验活动！";
-        } else if (lowerQuery.contains("位置") || lowerQuery.contains("地址") || lowerQuery.contains("交通")) {
-            return "🍄 普洱蘑菇庄园位于风景秀丽的普洱茶山脚下，" +
-                   "距离市中心约30分钟车程，环境清幽，空气清新。" +
-                   "我们提供免费接送服务，也可以自驾前往，庄园内有充足的停车位。" +
-                   "具体地址和路线信息我可以为您详细介绍！";
+        } else if (lowerQuery.contains("价格") && (lowerQuery.contains("房间") || lowerQuery.contains("费用"))) {
+            return getPriceInfo();
         } else {
-            return "🍄 您好！我是普洱蘑菇庄园的AI助手普普1.0。" +
-                   "我可以为您推荐房间、处理预订、介绍茶文化体验等。" +
-                   "请告诉我您想了解什么，我会竭诚为您服务！" +
-                   "您也可以说'推荐房间'或'我要预订201'等指令。";
+            // 其他问题不提供硬编码回复，提示用户稍后重试或使用具体功能
+            return "🍄 抱歉，AI服务暂时不可用。您可以稍后重试，或者直接说：\n" +
+                   "• '推荐房间' - 查看可用房间\n" +
+                   "• '预订201' - 预订指定房间\n" +
+                   "• '房间价格' - 查看价格信息\n" +
+                   "我会为您处理这些具体需求。";
         }
     }
 
@@ -351,6 +392,40 @@ public class ChatAssistServiceImpl implements ChatAssistService {
         } catch (Exception e) {
             log.error("推荐房间异常", e);
             return "🍄 获取房间信息时出现异常，请稍后重试。";
+        }
+    }
+
+    /**
+     * 获取价格信息
+     */
+    private String getPriceInfo() {
+        try {
+            // 获取所有可用房间的价格信息
+            LambdaQueryWrapper<HRoom> wrapper = Wrappers.<HRoom>lambdaQuery();
+            wrapper.eq(HRoom::getStatus, 0); // 上架状态
+            wrapper.orderByAsc(HRoom::getPrice); // 按价格排序
+            wrapper.last("LIMIT 6"); // 限制6个
+
+            List<HRoom> rooms = hRoomService.list(wrapper);
+
+            if (rooms.isEmpty()) {
+                return "🍄 抱歉，暂时无法获取房间价格信息。";
+            }
+
+            StringBuilder response = new StringBuilder("🍄 我们的房间价格根据房型和季节有所不同：\n\n");
+            for (HRoom room : rooms) {
+                response.append(String.format("• %s(%s)：¥%s/晚\n",
+                    room.getName().replace("雨林景观豪华蘑菇屋", "蘑菇屋"),
+                    room.getCode(),
+                    room.getPrice()));
+            }
+
+            response.append("\n所有房间都包含免费早餐和茶艺体验。如需预订请说'我要预订201'等。");
+            return response.toString();
+
+        } catch (Exception e) {
+            log.error("获取价格信息异常", e);
+            return "🍄 获取价格信息时出现异常，请稍后重试。";
         }
     }
 }

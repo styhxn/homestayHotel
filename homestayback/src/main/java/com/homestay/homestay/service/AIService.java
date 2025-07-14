@@ -133,22 +133,8 @@ public class AIService {
      * 获取默认回复（当AI服务不可用时）
      */
     private String getDefaultResponse(String message) {
-        // 简单的关键词匹配回复
-        String lowerMessage = message.toLowerCase();
-
-        if (lowerMessage.contains("房间") || lowerMessage.contains("预订")) {
-            return "您好！我们民宿有多种房型可供选择，包括标准间、大床房、家庭房等。您可以通过我们的预订系统查看详细信息和价格。需要我为您介绍具体的房型吗？";
-        } else if (lowerMessage.contains("普洱") || lowerMessage.contains("茶")) {
-            return "普洱茶是我们这里的特色！我们民宿周围有很多茶园，您可以体验采茶、制茶的过程。我们也提供普洱茶品鉴服务，让您深入了解普洱茶文化。";
-        } else if (lowerMessage.contains("蘑菇")) {
-            return "我们的蘑菇庄园种植了多种优质蘑菇，包括香菇、平菇、茶树菇等。您可以参观我们的蘑菇种植基地，了解蘑菇的生长过程，还可以亲手采摘新鲜蘑菇！";
-        } else if (lowerMessage.contains("景点") || lowerMessage.contains("旅游")) {
-            return "普洱有很多美丽的景点！推荐您游览普洱国家公园、茶马古道、澜沧江风光等。我们可以为您安排当地的旅游路线，让您充分体验普洱的自然风光和人文魅力。";
-        } else if (lowerMessage.contains("美食") || lowerMessage.contains("吃")) {
-            return "普洱的美食非常丰富！推荐您尝试普洱茶宴、野生菌火锅、傣族风味菜等。我们民宿的餐厅也提供地道的云南菜，使用新鲜的当地食材烹制。";
-        } else {
-            return "您好！我是普普1.0，普洱蘑菇庄园民宿的AI助手。很高兴为您服务！我可以帮您了解房间信息、预订服务、当地景点、普洱茶文化等。请问有什么可以帮助您的吗？";
-        }
+        // 简化的降级回复，避免硬编码详细内容
+        return "🍄 抱歉，AI服务暂时不可用。您可以稍后重试，或者访问我们的网站了解更多信息。";
     }
 
     /**
