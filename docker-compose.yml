@@ -1,0 +1,105 @@
+version: '3.8'
+
+services:
+  # MySQL数据库
+  mysql:
+    image: mysql:8.0
+    container_name: homestay-mysql
+    restart: unless-stopped
+    environment:
+      MYSQL_ROOT_PASSWORD: ${DB_ROOT_PASSWORD:-root123}
+      MYSQL_DATABASE: ${DB_NAME:-homestay}
+      MYSQL_USER: ${DB_USER:-homestay}
+      MYSQL_PASSWORD: ${DB_PASSWORD:-homestay123}
+    ports:
+      - "3306:3306"
+    volumes:
+      - mysql_data:/var/lib/mysql
+      - ./homestay-backend/schema.sql:/docker-entrypoint-initdb.d/01-schema.sql
+      - ./homestay-backend/test_data.sql:/docker-entrypoint-initdb.d/02-test_data.sql
+    command: --default-authentication-plugin=mysql_native_password
+    networks:
+      - homestay-network
+    healthcheck:
+      test: ["CMD", "mysqladmin", "ping", "-h", "localhost"]
+      timeout: 20s
+      retries: 10
+
+  # Redis缓存（可选）
+  redis:
+    image: redis:7-alpine
+    container_name: homestay-redis
+    restart: unless-stopped
+    ports:
+      - "6379:6379"
+    volumes:
+      - redis_data:/data
+    networks:
+      - homestay-network
+    healthcheck:
+      test: ["CMD", "redis-cli", "ping"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+
+  # 后端服务
+  homestay-backend:
+    build:
+      context: ./homestay-backend
+      dockerfile: Dockerfile
+    container_name: homestay-backend
+    restart: unless-stopped
+    environment:
+      SPRING_PROFILES_ACTIVE: prod
+      SPRING_DATASOURCE_URL: jdbc:mysql://mysql:3306/${DB_NAME:-homestay}?useUnicode=true&characterEncoding=UTF-8&serverTimezone=Asia/Shanghai
+      SPRING_DATASOURCE_USERNAME: ${DB_USER:-homestay}
+      SPRING_DATASOURCE_PASSWORD: ${DB_PASSWORD:-homestay123}
+      SPRING_REDIS_HOST: redis
+      SPRING_REDIS_PORT: 6379
+      SERVER_PORT: 8091
+      FILE_IP: ${BACKEND_HOST:-localhost}
+    ports:
+      - "8091:8091"
+    depends_on:
+      mysql:
+        condition: service_healthy
+      redis:
+        condition: service_healthy
+    networks:
+      - homestay-network
+    volumes:
+      - backend_logs:/app/logs
+      - backend_files:/app/files
+
+  # 前端服务
+  homestay-frontend:
+    build:
+      context: ./homestay-frontend
+      dockerfile: Dockerfile
+    container_name: homestay-frontend
+    restart: unless-stopped
+    ports:
+      - "80:80"
+      - "443:443"
+    depends_on:
+      - homestay-backend
+    networks:
+      - homestay-network
+    volumes:
+      - frontend_logs:/var/log/nginx
+
+volumes:
+  mysql_data:
+    driver: local
+  redis_data:
+    driver: local
+  backend_logs:
+    driver: local
+  backend_files:
+    driver: local
+  frontend_logs:
+    driver: local
+
+networks:
+  homestay-network:
+    driver: bridge
