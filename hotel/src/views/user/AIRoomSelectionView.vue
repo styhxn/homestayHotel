@@ -1755,6 +1755,10 @@ const parseOrderInfo = (message: string) => {
         // 入住时间7月20日，离开时间7月25日
         orderInfo.checkInDate = `${currentYear}-${rangeMatch[1].padStart(2, '0')}-${rangeMatch[2].padStart(2, '0')}`
         orderInfo.checkOutDate = `${currentYear}-${rangeMatch[3].padStart(2, '0')}-${rangeMatch[4].padStart(2, '0')}`
+      } else if (pattern.source.includes('月.*?日.*?入住.*?月.*?日.*?离开')) {
+        // 7月20日入住，7月25日离开
+        orderInfo.checkInDate = `${currentYear}-${rangeMatch[1].padStart(2, '0')}-${rangeMatch[2].padStart(2, '0')}`
+        orderInfo.checkOutDate = `${currentYear}-${rangeMatch[3].padStart(2, '0')}-${rangeMatch[4].padStart(2, '0')}`
       } else if (pattern.source.includes('月.*?日.*?到.*?月.*?日')) {
         // 7月20日到7月25日
         orderInfo.checkInDate = `${currentYear}-${rangeMatch[1].padStart(2, '0')}-${rangeMatch[2].padStart(2, '0')}`
