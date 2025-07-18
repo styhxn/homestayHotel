@@ -1,0 +1,317 @@
+/* 普洱蘑菇庄园管理后台主题样式 */
+
+/* CSS 变量定义 */
+:root {
+  /* 主色调 - 普洱茶金色 */
+  --admin-primary: #d4af37;
+  --admin-primary-dark: #b8941f;
+  --admin-primary-darker: #9a7b1a;
+  --admin-primary-light: #e6c55a;
+  --admin-primary-lighter: #f2d97d;
+  
+  /* 辅助色 */
+  --admin-secondary: #10b981;
+  --admin-secondary-dark: #059669;
+  --admin-warning: #f59e0b;
+  --admin-warning-dark: #d97706;
+  --admin-danger: #ef4444;
+  --admin-danger-dark: #dc2626;
+  --admin-info: #3b82f6;
+  --admin-info-dark: #2563eb;
+  
+  /* 中性色 */
+  --admin-gray-50: #f9fafb;
+  --admin-gray-100: #f3f4f6;
+  --admin-gray-200: #e5e7eb;
+  --admin-gray-300: #d1d5db;
+  --admin-gray-400: #9ca3af;
+  --admin-gray-500: #6b7280;
+  --admin-gray-600: #4b5563;
+  --admin-gray-700: #374151;
+  --admin-gray-800: #1f2937;
+  --admin-gray-900: #111827;
+  
+  /* 背景色 */
+  --admin-bg-primary: linear-gradient(135deg, #f9fafb 0%, #f3f4f6 50%, #e5e7eb 100%);
+  --admin-bg-card: #ffffff;
+  --admin-bg-overlay: rgba(255, 255, 255, 0.9);
+  
+  /* 阴影 */
+  --admin-shadow-sm: 0 1px 2px rgba(0, 0, 0, 0.05);
+  --admin-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+  --admin-shadow-md: 0 4px 12px rgba(0, 0, 0, 0.15);
+  --admin-shadow-lg: 0 8px 25px rgba(0, 0, 0, 0.15);
+  --admin-shadow-xl: 0 20px 60px rgba(0, 0, 0, 0.3);
+  
+  /* 边框半径 */
+  --admin-radius-sm: 6px;
+  --admin-radius: 8px;
+  --admin-radius-md: 12px;
+  --admin-radius-lg: 16px;
+  --admin-radius-xl: 24px;
+  --admin-radius-full: 50%;
+  
+  /* 间距 */
+  --admin-space-xs: 4px;
+  --admin-space-sm: 8px;
+  --admin-space: 12px;
+  --admin-space-md: 16px;
+  --admin-space-lg: 24px;
+  --admin-space-xl: 32px;
+  --admin-space-2xl: 48px;
+  
+  /* 字体 */
+  --admin-font-family: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+  --admin-font-size-xs: 12px;
+  --admin-font-size-sm: 14px;
+  --admin-font-size: 16px;
+  --admin-font-size-lg: 18px;
+  --admin-font-size-xl: 20px;
+  --admin-font-size-2xl: 24px;
+  --admin-font-size-3xl: 30px;
+  
+  /* 过渡动画 */
+  --admin-transition: all 0.3s ease;
+  --admin-transition-fast: all 0.15s ease;
+  --admin-transition-slow: all 0.5s ease;
+}
+
+/* 通用按钮样式 */
+.admin-btn {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: var(--admin-space-sm);
+  padding: var(--admin-space) var(--admin-space-lg);
+  border: none;
+  border-radius: var(--admin-radius);
+  font-family: var(--admin-font-family);
+  font-size: var(--admin-font-size-sm);
+  font-weight: 600;
+  text-decoration: none;
+  cursor: pointer;
+  transition: var(--admin-transition);
+  user-select: none;
+  white-space: nowrap;
+}
+
+.admin-btn:disabled {
+  opacity: 0.6;
+  cursor: not-allowed;
+  transform: none !important;
+}
+
+.admin-btn-primary {
+  background: linear-gradient(135deg, var(--admin-primary) 0%, var(--admin-primary-dark) 100%);
+  color: white;
+  box-shadow: 0 4px 12px rgba(212, 175, 55, 0.3);
+}
+
+.admin-btn-primary:hover:not(:disabled) {
+  background: linear-gradient(135deg, var(--admin-primary-dark) 0%, var(--admin-primary-darker) 100%);
+  transform: translateY(-2px);
+  box-shadow: 0 6px 20px rgba(212, 175, 55, 0.4);
+}
+
+.admin-btn-secondary {
+  background: var(--admin-gray-100);
+  color: var(--admin-gray-700);
+  border: 1px solid var(--admin-gray-300);
+}
+
+.admin-btn-secondary:hover:not(:disabled) {
+  background: var(--admin-gray-200);
+  border-color: var(--admin-gray-400);
+  transform: translateY(-1px);
+}
+
+.admin-btn-success {
+  background: linear-gradient(135deg, var(--admin-secondary) 0%, var(--admin-secondary-dark) 100%);
+  color: white;
+  box-shadow: 0 4px 12px rgba(16, 185, 129, 0.3);
+}
+
+.admin-btn-success:hover:not(:disabled) {
+  transform: translateY(-2px);
+  box-shadow: 0 6px 20px rgba(16, 185, 129, 0.4);
+}
+
+.admin-btn-warning {
+  background: linear-gradient(135deg, var(--admin-warning) 0%, var(--admin-warning-dark) 100%);
+  color: white;
+  box-shadow: 0 4px 12px rgba(245, 158, 11, 0.3);
+}
+
+.admin-btn-warning:hover:not(:disabled) {
+  transform: translateY(-2px);
+  box-shadow: 0 6px 20px rgba(245, 158, 11, 0.4);
+}
+
+.admin-btn-danger {
+  background: linear-gradient(135deg, var(--admin-danger) 0%, var(--admin-danger-dark) 100%);
+  color: white;
+  box-shadow: 0 4px 12px rgba(239, 68, 68, 0.3);
+}
+
+.admin-btn-danger:hover:not(:disabled) {
+  transform: translateY(-2px);
+  box-shadow: 0 6px 20px rgba(239, 68, 68, 0.4);
+}
+
+/* 按钮尺寸 */
+.admin-btn-sm {
+  padding: var(--admin-space-sm) var(--admin-space-md);
+  font-size: var(--admin-font-size-xs);
+}
+
+.admin-btn-lg {
+  padding: var(--admin-space-md) var(--admin-space-xl);
+  font-size: var(--admin-font-size);
+}
+
+/* 卡片样式 */
+.admin-card {
+  background: var(--admin-bg-card);
+  border-radius: var(--admin-radius-md);
+  box-shadow: var(--admin-shadow);
+  overflow: hidden;
+  transition: var(--admin-transition);
+}
+
+.admin-card:hover {
+  box-shadow: var(--admin-shadow-md);
+  transform: translateY(-2px);
+}
+
+.admin-card-header {
+  padding: var(--admin-space-lg);
+  border-bottom: 1px solid var(--admin-gray-200);
+  background: var(--admin-gray-50);
+}
+
+.admin-card-body {
+  padding: var(--admin-space-lg);
+}
+
+.admin-card-footer {
+  padding: var(--admin-space-lg);
+  border-top: 1px solid var(--admin-gray-200);
+  background: var(--admin-gray-50);
+}
+
+/* 表单样式 */
+.admin-form-group {
+  margin-bottom: var(--admin-space-lg);
+}
+
+.admin-form-label {
+  display: block;
+  margin-bottom: var(--admin-space-sm);
+  font-size: var(--admin-font-size-sm);
+  font-weight: 600;
+  color: var(--admin-gray-700);
+}
+
+.admin-form-input {
+  width: 100%;
+  padding: var(--admin-space) var(--admin-space-md);
+  border: 2px solid var(--admin-gray-300);
+  border-radius: var(--admin-radius);
+  font-size: var(--admin-font-size-sm);
+  transition: var(--admin-transition);
+}
+
+.admin-form-input:focus {
+  outline: none;
+  border-color: var(--admin-primary);
+  box-shadow: 0 0 0 3px rgba(212, 175, 55, 0.1);
+}
+
+.admin-form-input:invalid {
+  border-color: var(--admin-danger);
+}
+
+/* 徽章样式 */
+.admin-badge {
+  display: inline-flex;
+  align-items: center;
+  padding: var(--admin-space-xs) var(--admin-space);
+  border-radius: var(--admin-radius-full);
+  font-size: var(--admin-font-size-xs);
+  font-weight: 600;
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+}
+
+.admin-badge-primary {
+  background: rgba(212, 175, 55, 0.1);
+  color: var(--admin-primary-dark);
+}
+
+.admin-badge-success {
+  background: rgba(16, 185, 129, 0.1);
+  color: var(--admin-secondary-dark);
+}
+
+.admin-badge-warning {
+  background: rgba(245, 158, 11, 0.1);
+  color: var(--admin-warning-dark);
+}
+
+.admin-badge-danger {
+  background: rgba(239, 68, 68, 0.1);
+  color: var(--admin-danger-dark);
+}
+
+/* 工具类 */
+.admin-text-primary { color: var(--admin-primary); }
+.admin-text-secondary { color: var(--admin-secondary); }
+.admin-text-warning { color: var(--admin-warning); }
+.admin-text-danger { color: var(--admin-danger); }
+.admin-text-muted { color: var(--admin-gray-500); }
+
+.admin-bg-primary { background: var(--admin-primary); }
+.admin-bg-secondary { background: var(--admin-secondary); }
+.admin-bg-warning { background: var(--admin-warning); }
+.admin-bg-danger { background: var(--admin-danger); }
+
+.admin-border-primary { border-color: var(--admin-primary); }
+.admin-border-secondary { border-color: var(--admin-secondary); }
+.admin-border-warning { border-color: var(--admin-warning); }
+.admin-border-danger { border-color: var(--admin-danger); }
+
+/* 响应式工具类 */
+@media (max-width: 768px) {
+  .admin-btn {
+    padding: var(--admin-space-sm) var(--admin-space-md);
+    font-size: var(--admin-font-size-xs);
+  }
+  
+  .admin-card-header,
+  .admin-card-body,
+  .admin-card-footer {
+    padding: var(--admin-space-md);
+  }
+}
+
+/* 蘑菇庄园特色装饰 */
+.admin-mushroom-pattern {
+  background-image: url('data:image/svg+xml,<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 100 100"><defs><pattern id="mushroom" patternUnits="userSpaceOnUse" width="20" height="20"><circle cx="10" cy="10" r="1" fill="rgba(212,175,55,0.1)"/></pattern></defs><rect width="100" height="100" fill="url(%23mushroom)"/></svg>');
+}
+
+.admin-gradient-bg {
+  background: var(--admin-bg-primary);
+  position: relative;
+}
+
+.admin-gradient-bg::before {
+  content: '';
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  background: url('data:image/svg+xml,<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 100 100"><defs><pattern id="mushroom" patternUnits="userSpaceOnUse" width="20" height="20"><circle cx="10" cy="10" r="1" fill="rgba(212,175,55,0.1)"/></pattern></defs><rect width="100" height="100" fill="url(%23mushroom)"/></svg>');
+  opacity: 0.3;
+  pointer-events: none;
+}

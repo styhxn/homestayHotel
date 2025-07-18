@@ -1,0 +1,277 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>AI选房页面调试</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            margin: 0;
+            padding: 20px;
+            background: #f5f5f5;
+        }
+        .container {
+            max-width: 1200px;
+            margin: 0 auto;
+            display: grid;
+            grid-template-columns: 1fr 400px;
+            gap: 20px;
+            height: 80vh;
+        }
+        .left-panel {
+            background: white;
+            border-radius: 10px;
+            padding: 20px;
+            box-shadow: 0 4px 15px rgba(0,0,0,0.1);
+        }
+        .right-panel {
+            background: white;
+            border-radius: 10px;
+            padding: 20px;
+            box-shadow: 0 4px 15px rgba(0,0,0,0.1);
+            display: flex;
+            flex-direction: column;
+        }
+        .chat-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 20px;
+            padding-bottom: 15px;
+            border-bottom: 2px solid #eee;
+        }
+        .chat-container {
+            flex: 1;
+            display: flex;
+            flex-direction: column;
+            min-height: 0;
+        }
+        .dify-chat-wrapper {
+            flex: 1;
+            display: flex;
+            flex-direction: column;
+            min-height: 0;
+            border: 2px solid #007bff;
+            border-radius: 8px;
+            position: relative;
+        }
+        .debug-info {
+            background: #f8f9fa;
+            border: 1px solid #dee2e6;
+            border-radius: 5px;
+            padding: 15px;
+            margin-bottom: 20px;
+            font-family: monospace;
+            font-size: 12px;
+        }
+        .status-dot {
+            width: 8px;
+            height: 8px;
+            border-radius: 50%;
+            background: #dc3545;
+            display: inline-block;
+            margin-right: 5px;
+        }
+        .status-dot.online {
+            background: #28a745;
+        }
+        button {
+            background: #007bff;
+            color: white;
+            border: none;
+            padding: 8px 16px;
+            border-radius: 4px;
+            cursor: pointer;
+            margin: 5px;
+        }
+        button:hover {
+            background: #0056b3;
+        }
+        #ai-room-dify-container {
+            width: 100%;
+            height: 100%;
+            background: #f8f9fa;
+            border: 1px dashed #ccc;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            color: #666;
+            font-size: 14px;
+        }
+    </style>
+</head>
+<body>
+    <h1>🏠 AI选房页面调试版</h1>
+    
+    <div class="container">
+        <!-- 左侧：房间信息 -->
+        <div class="left-panel">
+            <h3>🏨 房间列表</h3>
+            <div class="debug-info">
+                <strong>调试信息:</strong><br>
+                页面加载时间: <span id="load-time">--</span><br>
+                容器检查状态: <span id="container-status">检查中...</span><br>
+                Dify初始化状态: <span id="dify-status">等待中...</span>
+            </div>
+            
+            <div style="margin-top: 20px;">
+                <h4>测试房间</h4>
+                <div style="padding: 15px; border: 1px solid #ddd; border-radius: 5px; margin: 10px 0;">
+                    <strong>201号房 - 蘑菇森林小屋</strong><br>
+                    价格: ¥19/晚<br>
+                    状态: 可预订
+                </div>
+                <div style="padding: 15px; border: 1px solid #ddd; border-radius: 5px; margin: 10px 0;">
+                    <strong>301号房 - 云雾山景房</strong><br>
+                    价格: ¥486/晚<br>
+                    状态: 可预订
+                </div>
+            </div>
+        </div>
+
+        <!-- 右侧：AI聊天 -->
+        <div class="right-panel">
+            <div class="chat-header">
+                <h3>
+                    <i>💬</i>
+                    与AI助手对话
+                </h3>
+                <div class="chat-status">
+                    <span class="status-dot" id="status-indicator"></span>
+                    <span id="status-text">离线</span>
+                </div>
+            </div>
+
+            <div class="chat-container">
+                <div class="debug-info">
+                    <strong>容器调试:</strong><br>
+                    容器ID: ai-room-dify-container<br>
+                    容器存在: <span id="container-exists">检查中...</span><br>
+                    容器尺寸: <span id="container-size">--</span><br>
+                    <button onclick="checkContainer()">检查容器</button>
+                    <button onclick="createIframe()">手动创建iframe</button>
+                    <button onclick="clearContainer()">清空容器</button>
+                </div>
+
+                <!-- Dify聊天组件容器 -->
+                <div class="dify-chat-wrapper">
+                    <div id="ai-room-dify-container">
+                        等待Dify AI助手加载...
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        const DIFY_CONFIG = {
+            token: 'fggmGdSFt6MSQFJa',
+            baseUrl: 'http://4295a4ce.r28.cpolar.top'
+        };
+
+        let checkInterval;
+
+        function updateStatus(text, isOnline = false) {
+            document.getElementById('status-text').textContent = text;
+            document.getElementById('status-indicator').className = `status-dot ${isOnline ? 'online' : ''}`;
+        }
+
+        function checkContainer() {
+            const container = document.getElementById('ai-room-dify-container');
+            const exists = container !== null;
+            
+            document.getElementById('container-exists').textContent = exists ? '是' : '否';
+            document.getElementById('container-status').textContent = exists ? '容器已找到' : '容器未找到';
+            
+            if (exists) {
+                const rect = container.getBoundingClientRect();
+                document.getElementById('container-size').textContent = `${Math.round(rect.width)}x${Math.round(rect.height)}px`;
+                console.log('容器元素:', container);
+                console.log('容器尺寸:', rect);
+            }
+            
+            return exists;
+        }
+
+        function createIframe() {
+            const container = document.getElementById('ai-room-dify-container');
+            if (!container) {
+                alert('容器不存在！');
+                return;
+            }
+
+            // 清空容器
+            container.innerHTML = '';
+
+            // 创建iframe
+            const iframe = document.createElement('iframe');
+            iframe.src = `${DIFY_CONFIG.baseUrl}/chat/${DIFY_CONFIG.token}`;
+            iframe.style.width = '100%';
+            iframe.style.height = '100%';
+            iframe.style.border = 'none';
+            iframe.allow = 'fullscreen;microphone';
+            iframe.title = 'Dify AI助手';
+
+            console.log('创建iframe:', iframe.src);
+
+            iframe.onload = () => {
+                console.log('iframe加载成功');
+                updateStatus('AI助手已连接', true);
+                document.getElementById('dify-status').textContent = 'iframe加载成功';
+            };
+
+            iframe.onerror = () => {
+                console.error('iframe加载失败');
+                updateStatus('AI助手连接失败', false);
+                document.getElementById('dify-status').textContent = 'iframe加载失败';
+            };
+
+            container.appendChild(iframe);
+            updateStatus('正在连接AI助手...', false);
+            document.getElementById('dify-status').textContent = '正在加载iframe...';
+        }
+
+        function clearContainer() {
+            const container = document.getElementById('ai-room-dify-container');
+            if (container) {
+                container.innerHTML = '等待Dify AI助手加载...';
+                updateStatus('AI助手已断开', false);
+                document.getElementById('dify-status').textContent = '容器已清空';
+            }
+        }
+
+        // 页面加载时的初始化
+        window.addEventListener('load', () => {
+            const loadTime = new Date().toLocaleTimeString();
+            document.getElementById('load-time').textContent = loadTime;
+            
+            console.log('页面加载完成:', loadTime);
+            
+            // 立即检查容器
+            setTimeout(() => {
+                const containerExists = checkContainer();
+                if (containerExists) {
+                    console.log('容器检查通过，可以手动创建iframe测试');
+                    document.getElementById('dify-status').textContent = '容器准备就绪，可手动测试';
+                } else {
+                    console.error('容器检查失败');
+                    document.getElementById('dify-status').textContent = '容器检查失败';
+                }
+            }, 100);
+
+            // 定期检查容器状态
+            checkInterval = setInterval(() => {
+                checkContainer();
+            }, 2000);
+        });
+
+        // 页面卸载时清理
+        window.addEventListener('beforeunload', () => {
+            if (checkInterval) {
+                clearInterval(checkInterval);
+            }
+        });
+    </script>
+</body>
+</html>

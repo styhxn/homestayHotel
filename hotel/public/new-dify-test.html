@@ -1,0 +1,458 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>新Dify配置测试 - 普洱蘑菇庄园民宿</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Arial', sans-serif;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            min-height: 100vh;
+            padding: 20px;
+        }
+
+        .container {
+            max-width: 1200px;
+            margin: 0 auto;
+            background: white;
+            border-radius: 20px;
+            padding: 40px;
+            box-shadow: 0 20px 40px rgba(0,0,0,0.1);
+        }
+
+        .header {
+            text-align: center;
+            margin-bottom: 30px;
+            padding-bottom: 20px;
+            border-bottom: 2px solid #e9ecef;
+        }
+
+        .header h1 {
+            color: #2c3e50;
+            margin-bottom: 10px;
+            font-size: 2rem;
+        }
+
+        .config-section {
+            background: #d4edda;
+            border: 1px solid #c3e6cb;
+            border-radius: 10px;
+            padding: 20px;
+            margin-bottom: 30px;
+        }
+
+        .config-section h3 {
+            color: #155724;
+            margin-bottom: 15px;
+        }
+
+        .config-item {
+            margin-bottom: 10px;
+            padding: 10px;
+            background: white;
+            border-radius: 6px;
+            font-family: monospace;
+            font-size: 14px;
+        }
+
+        .test-section {
+            margin-bottom: 30px;
+            padding: 20px;
+            background: #f8f9fa;
+            border-radius: 10px;
+        }
+
+        .test-section h3 {
+            color: #495057;
+            margin-bottom: 15px;
+        }
+
+        .input-group {
+            display: flex;
+            gap: 10px;
+            margin-bottom: 20px;
+        }
+
+        .input-group input {
+            flex: 1;
+            padding: 12px;
+            border: 1px solid #ddd;
+            border-radius: 6px;
+            font-size: 14px;
+        }
+
+        .btn {
+            padding: 12px 24px;
+            border: none;
+            border-radius: 6px;
+            cursor: pointer;
+            font-weight: 500;
+            transition: all 0.3s ease;
+        }
+
+        .btn-primary {
+            background: #007bff;
+            color: white;
+        }
+
+        .btn-success {
+            background: #28a745;
+            color: white;
+        }
+
+        .btn-warning {
+            background: #ffc107;
+            color: #212529;
+        }
+
+        .btn:hover {
+            transform: translateY(-1px);
+        }
+
+        .btn:disabled {
+            background: #6c757d;
+            cursor: not-allowed;
+            transform: none;
+        }
+
+        .response-area {
+            background: white;
+            border: 1px solid #ddd;
+            border-radius: 6px;
+            padding: 15px;
+            min-height: 200px;
+            white-space: pre-wrap;
+            font-family: monospace;
+            font-size: 12px;
+            overflow-y: auto;
+            max-height: 400px;
+        }
+
+        .status {
+            padding: 10px;
+            border-radius: 6px;
+            margin-bottom: 15px;
+            font-weight: 500;
+        }
+
+        .status.success {
+            background: #d4edda;
+            color: #155724;
+            border: 1px solid #c3e6cb;
+        }
+
+        .status.error {
+            background: #f8d7da;
+            color: #721c24;
+            border: 1px solid #f5c6cb;
+        }
+
+        .status.info {
+            background: #d1ecf1;
+            color: #0c5460;
+            border: 1px solid #bee5eb;
+        }
+
+        .status.warning {
+            background: #fff3cd;
+            color: #856404;
+            border: 1px solid #ffeaa7;
+        }
+
+        .grid {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 20px;
+        }
+
+        @media (max-width: 768px) {
+            .container {
+                padding: 20px;
+            }
+            .grid {
+                grid-template-columns: 1fr;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div class="header">
+            <h1>🆕 新Dify配置测试工具</h1>
+            <p>使用您提供的新链接和配置进行测试</p>
+        </div>
+
+        <div class="config-section">
+            <h3>📋 新的Dify配置信息</h3>
+            <div class="config-item">
+                <strong>🌐 公网链接 (优先使用):</strong> http://4295a4ce.r28.cpolar.top/chat/fggmGdSFt6MSQFJa
+            </div>
+            <div class="config-item">
+                <strong>🔗 后端API:</strong> http://4295a4ce.r28.cpolar.top/v1
+            </div>
+            <div class="config-item">
+                <strong>📡 Chat Messages Endpoint:</strong> http://4295a4ce.r28.cpolar.top/v1/chat-messages
+            </div>
+            <div class="config-item">
+                <strong>🔑 App Key:</strong> app-oaUwvb7k2zbC8Bi03EO977nN
+            </div>
+            <div class="config-item" style="background: #d4edda; color: #155724;">
+                <strong>✅ 配置状态:</strong> 已更新为新的公网链接配置
+            </div>
+        </div>
+
+        <div class="grid">
+            <div class="test-section">
+                <h3>🌐 公网链接测试 (优先)</h3>
+                <div class="input-group">
+                    <input type="text" id="publicMessage" placeholder="输入测试消息" value="推荐一下便宜的房间">
+                    <button class="btn btn-success" onclick="testPublicAPI()" id="publicBtn">测试公网链接</button>
+                </div>
+                <div id="publicStatus"></div>
+                <div id="publicResponse" class="response-area"></div>
+            </div>
+
+            <div class="test-section">
+                <h3>🔗 后端API测试</h3>
+                <div class="input-group">
+                    <input type="text" id="backendMessage" placeholder="输入测试消息" value="推荐一下便宜的房间">
+                    <button class="btn btn-primary" onclick="testBackendAPI()" id="backendBtn">测试后端API</button>
+                </div>
+                <div id="backendStatus"></div>
+                <div id="backendResponse" class="response-area"></div>
+            </div>
+        </div>
+
+        <div class="test-section">
+            <h3>🔍 完整诊断</h3>
+            <button class="btn btn-warning" onclick="runFullDiagnostics()" id="diagBtn">运行完整诊断</button>
+            <div id="diagStatus"></div>
+            <div id="diagResponse" class="response-area"></div>
+        </div>
+    </div>
+
+    <script>
+        // 测试公网链接
+        async function testPublicAPI() {
+            const message = document.getElementById('publicMessage').value;
+            const statusDiv = document.getElementById('publicStatus');
+            const responseDiv = document.getElementById('publicResponse');
+            const btn = document.getElementById('publicBtn');
+
+            if (!message.trim()) {
+                statusDiv.innerHTML = '<div class="status error">请输入测试消息</div>';
+                return;
+            }
+
+            btn.disabled = true;
+            btn.textContent = '测试中...';
+            statusDiv.innerHTML = '<div class="status info">正在测试公网链接...</div>';
+            responseDiv.textContent = '等待响应...';
+
+            try {
+                const startTime = Date.now();
+                
+                const response = await fetch('http://4295a4ce.r28.cpolar.top/chat/fggmGdSFt6MSQFJa', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json'
+                    },
+                    body: JSON.stringify({
+                        query: message,
+                        inputs: {
+                            room_info: `普洱蘑菇庄园民宿房间信息：
+- 201号房：大床房，19元/晚，温馨舒适
+- 301号房：家庭房，486元/晚，适合家庭入住  
+- 204号房：单人间带窗，999元/晚，景观优美
+- 105号房：单人间无窗，256元/晚，经济实惠
+- 303号房：双人间，标准配置`
+                        },
+                        response_mode: 'blocking',
+                        user: 'test-user'
+                    })
+                });
+
+                const endTime = Date.now();
+                const responseTime = endTime - startTime;
+
+                if (response.ok) {
+                    const data = await response.json();
+                    statusDiv.innerHTML = `<div class="status success">✅ 公网链接调用成功 (${responseTime}ms)</div>`;
+                    responseDiv.textContent = JSON.stringify(data, null, 2);
+                    
+                    if (data.answer) {
+                        const answer = data.answer;
+                        if (answer.includes('🌟**--|-**--|-✨') || answer.includes('🍄💰🌿') || answer.includes('▶▶▶▶▶▶')) {
+                            statusDiv.innerHTML += `<div class="status warning">⚠️ 检测到异常符号响应</div>`;
+                        } else {
+                            statusDiv.innerHTML += `<div class="status success">✅ 收到正常AI回复: ${answer.substring(0, 100)}...</div>`;
+                        }
+                    }
+                } else {
+                    const errorText = await response.text();
+                    statusDiv.innerHTML = `<div class="status error">❌ 公网链接调用失败: ${response.status}</div>`;
+                    responseDiv.textContent = errorText;
+                }
+            } catch (error) {
+                statusDiv.innerHTML = `<div class="status error">❌ 网络错误: ${error.message}</div>`;
+                responseDiv.textContent = error.stack;
+            } finally {
+                btn.disabled = false;
+                btn.textContent = '测试公网链接';
+            }
+        }
+
+        // 测试后端API
+        async function testBackendAPI() {
+            const message = document.getElementById('backendMessage').value;
+            const statusDiv = document.getElementById('backendStatus');
+            const responseDiv = document.getElementById('backendResponse');
+            const btn = document.getElementById('backendBtn');
+
+            if (!message.trim()) {
+                statusDiv.innerHTML = '<div class="status error">请输入测试消息</div>';
+                return;
+            }
+
+            btn.disabled = true;
+            btn.textContent = '测试中...';
+            statusDiv.innerHTML = '<div class="status info">正在测试后端API...</div>';
+            responseDiv.textContent = '等待响应...';
+
+            try {
+                const startTime = Date.now();
+                
+                const response = await fetch('http://4295a4ce.r28.cpolar.top/v1/chat-messages', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                        'Authorization': 'Bearer app-oaUwvb7k2zbC8Bi03EO977nN'
+                    },
+                    body: JSON.stringify({
+                        inputs: {
+                            room_info: `普洱蘑菇庄园民宿房间信息：
+- 201号房：大床房，19元/晚，温馨舒适
+- 301号房：家庭房，486元/晚，适合家庭入住  
+- 204号房：单人间带窗，999元/晚，景观优美
+- 105号房：单人间无窗，256元/晚，经济实惠
+- 303号房：双人间，标准配置`
+                        },
+                        query: message,
+                        response_mode: 'blocking',
+                        user: 'test-user'
+                    })
+                });
+
+                const endTime = Date.now();
+                const responseTime = endTime - startTime;
+
+                if (response.ok) {
+                    const data = await response.json();
+                    statusDiv.innerHTML = `<div class="status success">✅ 后端API调用成功 (${responseTime}ms)</div>`;
+                    responseDiv.textContent = JSON.stringify(data, null, 2);
+                    
+                    if (data.answer) {
+                        const answer = data.answer;
+                        if (answer.includes('🌟**--|-**--|-✨') || answer.includes('🍄💰🌿') || answer.includes('▶▶▶▶▶▶')) {
+                            statusDiv.innerHTML += `<div class="status warning">⚠️ 检测到异常符号响应</div>`;
+                        } else {
+                            statusDiv.innerHTML += `<div class="status success">✅ 收到正常AI回复: ${answer.substring(0, 100)}...</div>`;
+                        }
+                    }
+                } else {
+                    const errorText = await response.text();
+                    statusDiv.innerHTML = `<div class="status error">❌ 后端API调用失败: ${response.status}</div>`;
+                    responseDiv.textContent = errorText;
+                }
+            } catch (error) {
+                statusDiv.innerHTML = `<div class="status error">❌ 网络错误: ${error.message}</div>`;
+                responseDiv.textContent = error.stack;
+            } finally {
+                btn.disabled = false;
+                btn.textContent = '测试后端API';
+            }
+        }
+
+        // 运行完整诊断
+        async function runFullDiagnostics() {
+            const statusDiv = document.getElementById('diagStatus');
+            const responseDiv = document.getElementById('diagResponse');
+            const btn = document.getElementById('diagBtn');
+
+            btn.disabled = true;
+            btn.textContent = '诊断中...';
+            statusDiv.innerHTML = '<div class="status info">正在运行完整诊断...</div>';
+            responseDiv.textContent = '';
+
+            let diagnostics = [];
+
+            // 1. 公网链接连接测试
+            try {
+                const response = await fetch('http://4295a4ce.r28.cpolar.top/chat/fggmGdSFt6MSQFJa', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ query: 'test', inputs: {}, response_mode: 'blocking', user: 'test' })
+                });
+                diagnostics.push(`✅ 公网链接连接: ${response.status}`);
+                if (response.ok) {
+                    const data = await response.json();
+                    if (data.answer) {
+                        diagnostics.push(`✅ 公网链接AI响应: ${data.answer.substring(0, 50)}...`);
+                    }
+                }
+            } catch (error) {
+                diagnostics.push(`❌ 公网链接连接失败: ${error.message}`);
+            }
+
+            // 2. 后端API测试
+            try {
+                const response = await fetch('http://4295a4ce.r28.cpolar.top/v1/chat-messages', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                        'Authorization': 'Bearer app-oaUwvb7k2zbC8Bi03EO977nN'
+                    },
+                    body: JSON.stringify({
+                        inputs: {},
+                        query: 'test',
+                        response_mode: 'blocking',
+                        user: 'test'
+                    })
+                });
+                
+                if (response.ok) {
+                    const data = await response.json();
+                    diagnostics.push(`✅ 后端API认证成功: ${response.status}`);
+                    if (data.answer) {
+                        diagnostics.push(`✅ 后端API AI响应: ${data.answer.substring(0, 50)}...`);
+                    }
+                } else {
+                    diagnostics.push(`❌ 后端API失败: ${response.status}`);
+                }
+            } catch (error) {
+                diagnostics.push(`❌ 后端API测试失败: ${error.message}`);
+            }
+
+            diagnostics.push(`ℹ️ 当前时间: ${new Date().toLocaleString()}`);
+
+            statusDiv.innerHTML = '<div class="status success">✅ 诊断完成</div>';
+            responseDiv.textContent = diagnostics.join('\n');
+
+            btn.disabled = false;
+            btn.textContent = '运行完整诊断';
+        }
+
+        // 页面加载时自动运行诊断
+        window.addEventListener('load', () => {
+            setTimeout(runFullDiagnostics, 1000);
+        });
+    </script>
+</body>
+</html>

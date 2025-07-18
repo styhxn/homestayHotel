@@ -1,0 +1,392 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Dify服务状态检测 - 普洱蘑菇庄园</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Microsoft YaHei', sans-serif;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            min-height: 100vh;
+            padding: 20px;
+        }
+
+        .container {
+            max-width: 900px;
+            margin: 0 auto;
+            background: white;
+            border-radius: 20px;
+            box-shadow: 0 20px 40px rgba(0,0,0,0.1);
+            overflow: hidden;
+        }
+
+        .header {
+            background: linear-gradient(135deg, #ff6b6b 0%, #ee5a24 100%);
+            color: white;
+            padding: 30px;
+            text-align: center;
+        }
+
+        .header h1 {
+            font-size: 2.2em;
+            margin-bottom: 10px;
+        }
+
+        .status-section {
+            padding: 30px;
+        }
+
+        .status-card {
+            background: #f8f9fa;
+            border-radius: 15px;
+            padding: 25px;
+            margin-bottom: 20px;
+            border-left: 5px solid #dc3545;
+        }
+
+        .status-card.success {
+            border-left-color: #28a745;
+            background: #d4edda;
+        }
+
+        .status-card.warning {
+            border-left-color: #ffc107;
+            background: #fff3cd;
+        }
+
+        .status-card.error {
+            border-left-color: #dc3545;
+            background: #f8d7da;
+        }
+
+        .status-title {
+            font-size: 1.3em;
+            font-weight: bold;
+            margin-bottom: 10px;
+        }
+
+        .status-message {
+            line-height: 1.6;
+            margin-bottom: 15px;
+        }
+
+        .check-button {
+            background: #007bff;
+            color: white;
+            border: none;
+            padding: 12px 25px;
+            border-radius: 25px;
+            cursor: pointer;
+            font-size: 1em;
+            margin-right: 10px;
+            margin-bottom: 10px;
+            transition: all 0.3s ease;
+        }
+
+        .check-button:hover {
+            background: #0056b3;
+            transform: translateY(-2px);
+        }
+
+        .check-button:disabled {
+            background: #6c757d;
+            cursor: not-allowed;
+            transform: none;
+        }
+
+        .solution-section {
+            background: #e9ecef;
+            padding: 25px;
+            border-radius: 15px;
+            margin-top: 20px;
+        }
+
+        .solution-title {
+            color: #495057;
+            font-size: 1.2em;
+            margin-bottom: 15px;
+            font-weight: bold;
+        }
+
+        .solution-list {
+            list-style: none;
+            padding: 0;
+        }
+
+        .solution-list li {
+            background: white;
+            padding: 15px;
+            margin-bottom: 10px;
+            border-radius: 8px;
+            border-left: 4px solid #007bff;
+        }
+
+        .loading {
+            display: inline-block;
+            width: 20px;
+            height: 20px;
+            border: 3px solid #f3f3f3;
+            border-top: 3px solid #007bff;
+            border-radius: 50%;
+            animation: spin 1s linear infinite;
+        }
+
+        @keyframes spin {
+            0% { transform: rotate(0deg); }
+            100% { transform: rotate(360deg); }
+        }
+
+        .config-info {
+            background: #f1f3f4;
+            padding: 20px;
+            border-radius: 10px;
+            margin: 20px 0;
+            font-family: monospace;
+            font-size: 0.9em;
+        }
+
+        .backup-ai {
+            background: linear-gradient(135deg, #4CAF50 0%, #8BC34A 100%);
+            color: white;
+            padding: 25px;
+            border-radius: 15px;
+            margin-top: 20px;
+            text-align: center;
+        }
+
+        .backup-ai h3 {
+            margin-bottom: 15px;
+        }
+
+        .backup-ai button {
+            background: rgba(255,255,255,0.2);
+            color: white;
+            border: 2px solid white;
+            padding: 12px 25px;
+            border-radius: 25px;
+            cursor: pointer;
+            font-size: 1em;
+            transition: all 0.3s ease;
+        }
+
+        .backup-ai button:hover {
+            background: white;
+            color: #4CAF50;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div class="header">
+            <h1>🔍 Dify服务状态检测</h1>
+            <p>检测AI聊天服务连接状态并提供解决方案</p>
+        </div>
+
+        <div class="status-section">
+            <div class="status-card error" id="mainStatus">
+                <div class="status-title">❌ Dify服务连接失败</div>
+                <div class="status-message">
+                    当前Dify服务地址 <code>http://4295a4ce.r28.cpolar.top</code> 无法访问，可能的原因：
+                    <ul style="margin-top: 10px; margin-left: 20px;">
+                        <li>Cpolar隧道已过期或关闭</li>
+                        <li>Dify服务器临时维护</li>
+                        <li>网络连接问题</li>
+                        <li>API密钥已失效</li>
+                    </ul>
+                </div>
+                <button class="check-button" onclick="checkDifyStatus()" id="checkBtn">
+                    <span id="checkBtnText">重新检测</span>
+                </button>
+                <button class="check-button" onclick="checkAlternativeServices()">检测备用服务</button>
+            </div>
+
+            <div class="config-info">
+                <strong>当前配置信息：</strong><br>
+                Base URL: http://4295a4ce.r28.cpolar.top<br>
+                API Key: app-oaUwvb7k2zbC8Bi03EO977nN<br>
+                Token: fggmGdSFt6MSQFJa<br>
+                Chat URL: http://4295a4ce.r28.cpolar.top/chat/fggmGdSFt6MSQFJa
+            </div>
+
+            <div class="solution-section">
+                <div class="solution-title">🛠️ 解决方案</div>
+                <ul class="solution-list">
+                    <li>
+                        <strong>方案1：重新启动Cpolar隧道</strong><br>
+                        如果您有Cpolar账号，请重新启动隧道服务并更新配置文件中的URL
+                    </li>
+                    <li>
+                        <strong>方案2：使用本地Dify服务</strong><br>
+                        在本地部署Dify服务，修改配置为 <code>http://localhost:3000</code>
+                    </li>
+                    <li>
+                        <strong>方案3：切换到备用AI服务</strong><br>
+                        使用OpenAI API或其他AI服务作为临时替代方案
+                    </li>
+                    <li>
+                        <strong>方案4：使用模拟AI响应</strong><br>
+                        启用本地模拟AI服务，提供基础的对话功能
+                    </li>
+                </ul>
+            </div>
+
+            <div class="backup-ai">
+                <h3>🤖 启用备用AI助手</h3>
+                <p>当Dify服务不可用时，您可以启用本地模拟的茶茶AI助手</p>
+                <button onclick="enableBackupAI()">启用备用AI助手</button>
+            </div>
+
+            <div id="testResults" style="margin-top: 20px;"></div>
+        </div>
+    </div>
+
+    <script>
+        // 检测Dify服务状态
+        async function checkDifyStatus() {
+            const checkBtn = document.getElementById('checkBtn');
+            const checkBtnText = document.getElementById('checkBtnText');
+            const mainStatus = document.getElementById('mainStatus');
+            
+            checkBtn.disabled = true;
+            checkBtnText.innerHTML = '<span class="loading"></span> 检测中...';
+            
+            const services = [
+                {
+                    name: 'Dify主服务',
+                    url: 'http://4295a4ce.r28.cpolar.top',
+                    timeout: 5000
+                },
+                {
+                    name: 'Dify API端点',
+                    url: 'http://4295a4ce.r28.cpolar.top/v1',
+                    timeout: 5000
+                },
+                {
+                    name: 'Dify聊天页面',
+                    url: 'http://4295a4ce.r28.cpolar.top/chat/fggmGdSFt6MSQFJa',
+                    timeout: 5000
+                }
+            ];
+            
+            let allFailed = true;
+            
+            for (const service of services) {
+                try {
+                    const controller = new AbortController();
+                    const timeoutId = setTimeout(() => controller.abort(), service.timeout);
+                    
+                    const response = await fetch(service.url, {
+                        method: 'GET',
+                        mode: 'no-cors',
+                        signal: controller.signal
+                    });
+                    
+                    clearTimeout(timeoutId);
+                    addTestResult(service.name, true, '服务可访问');
+                    allFailed = false;
+                    
+                } catch (error) {
+                    addTestResult(service.name, false, `连接失败: ${error.message}`);
+                }
+            }
+            
+            if (allFailed) {
+                mainStatus.className = 'status-card error';
+                mainStatus.querySelector('.status-title').textContent = '❌ 所有Dify服务均不可用';
+                mainStatus.querySelector('.status-message').innerHTML = 
+                    '建议启用备用AI助手或联系技术支持更新服务地址。';
+            } else {
+                mainStatus.className = 'status-card warning';
+                mainStatus.querySelector('.status-title').textContent = '⚠️ 部分Dify服务可用';
+                mainStatus.querySelector('.status-message').innerHTML = 
+                    '部分服务可以访问，但可能存在功能限制。建议检查具体的API端点。';
+            }
+            
+            checkBtn.disabled = false;
+            checkBtnText.textContent = '重新检测';
+        }
+
+        // 检测备用服务
+        async function checkAlternativeServices() {
+            const alternatives = [
+                {
+                    name: '本地后端AI服务',
+                    url: 'http://localhost:8091/api/ai-chat',
+                    description: '使用本地Spring Boot后端的AI服务'
+                },
+                {
+                    name: '模拟AI响应',
+                    url: '/ai-decision-demo.html',
+                    description: '使用预设的模拟AI响应'
+                }
+            ];
+            
+            for (const alt of alternatives) {
+                try {
+                    const response = await fetch(alt.url, { 
+                        method: 'GET',
+                        timeout: 3000 
+                    });
+                    addTestResult(alt.name, true, alt.description);
+                } catch (error) {
+                    addTestResult(alt.name, false, `${alt.description} - 不可用`);
+                }
+            }
+        }
+
+        // 启用备用AI助手
+        function enableBackupAI() {
+            // 跳转到本地AI演示页面
+            window.open('/ai-decision-demo.html', '_blank');
+            
+            addTestResult('备用AI助手', true, '已启用本地模拟AI助手，新窗口已打开');
+            
+            // 显示配置说明
+            const backupInfo = document.createElement('div');
+            backupInfo.className = 'status-card success';
+            backupInfo.innerHTML = `
+                <div class="status-title">✅ 备用AI助手已启用</div>
+                <div class="status-message">
+                    本地模拟AI助手已启动，提供以下功能：<br>
+                    • 房间信息查询<br>
+                    • 预订流程演示<br>
+                    • 活动推荐<br>
+                    • 基础对话功能<br><br>
+                    <strong>注意：</strong>这是模拟服务，不会连接真实的AI模型。
+                </div>
+            `;
+            
+            document.querySelector('.status-section').appendChild(backupInfo);
+        }
+
+        // 添加测试结果
+        function addTestResult(name, success, message) {
+            const resultsDiv = document.getElementById('testResults');
+            const resultClass = success ? 'success' : 'error';
+            const icon = success ? '✅' : '❌';
+            const timestamp = new Date().toLocaleTimeString();
+            
+            const resultElement = document.createElement('div');
+            resultElement.className = `status-card ${resultClass}`;
+            resultElement.innerHTML = `
+                <div class="status-title">${icon} ${name}</div>
+                <div class="status-message">${message} <small>[${timestamp}]</small></div>
+            `;
+            
+            resultsDiv.appendChild(resultElement);
+        }
+
+        // 页面加载时自动检测
+        window.addEventListener('load', () => {
+            setTimeout(checkDifyStatus, 1000);
+        });
+    </script>
+</body>
+</html>

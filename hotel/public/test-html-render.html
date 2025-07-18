@@ -1,0 +1,243 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>HTML渲染测试</title>
+    <style>
+        body {
+            font-family: 'Microsoft YaHei', sans-serif;
+            max-width: 800px;
+            margin: 0 auto;
+            padding: 20px;
+            background: #f5f5f5;
+        }
+        .container {
+            background: white;
+            border-radius: 10px;
+            padding: 30px;
+            box-shadow: 0 2px 10px rgba(0,0,0,0.1);
+        }
+        h1 {
+            color: #333;
+            text-align: center;
+            margin-bottom: 30px;
+        }
+        .test-section {
+            margin-bottom: 30px;
+            padding: 20px;
+            border: 1px solid #ddd;
+            border-radius: 8px;
+            background: #fafafa;
+        }
+        .test-input {
+            width: 100%;
+            padding: 10px;
+            border: 1px solid #ddd;
+            border-radius: 5px;
+            margin-bottom: 10px;
+            font-family: monospace;
+        }
+        .test-button {
+            background: #007bff;
+            color: white;
+            border: none;
+            padding: 10px 20px;
+            border-radius: 5px;
+            cursor: pointer;
+            margin: 5px;
+        }
+        .test-button:hover {
+            background: #0056b3;
+        }
+        .result {
+            margin-top: 15px;
+            padding: 15px;
+            border-radius: 5px;
+            background: #e9ecef;
+            min-height: 50px;
+        }
+        .original {
+            background: #fff3cd;
+            border: 1px solid #ffeaa7;
+            margin-bottom: 10px;
+        }
+        .converted {
+            background: #d4edda;
+            border: 1px solid #c3e6cb;
+        }
+        .message-link {
+            color: #059669;
+            text-decoration: underline;
+            font-weight: 600;
+            transition: all 0.3s ease;
+        }
+        .message-link:hover {
+            color: #047857;
+            background: rgba(5, 150, 105, 0.1);
+            padding: 2px 4px;
+            border-radius: 4px;
+            text-decoration: none;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1>🔗 HTML渲染测试</h1>
+        
+        <div class="test-section">
+            <h3>📝 问题内容测试</h3>
+            <textarea id="problemInput" class="test-input" rows="12">目前可推荐的房间有：
+
+1. 204号房（2楼）
+- 双人间 999元/晚 🌄
+- 特色：山景阳台+南向采光
+查看房型" target="_blank" rel="noopener noreferrer" class="message-link">查看房间
+
+2. 208号房（2楼）
+- 单人间 198元/晚 🍃
+- 特色：茶园景观+北向安静
+查看房型" target="_blank" rel="noopener noreferrer" class="message-link">查看房间
+
+3. 202号房（2楼）
+- 双人间 486元/晚 🌱
+- 特色：茶园景观+南向采光
+查看房型" target="_blank" rel="noopener noreferrer" class="message-link">查看房间</textarea>
+            <button class="test-button" onclick="testProblemContent()">测试修复</button>
+            <div id="problemResult" class="result" style="display: none;"></div>
+        </div>
+
+        <div class="test-section">
+            <h3>🧪 其他测试用例</h3>
+            <button class="test-button" onclick="testCase1()">测试用例1：简单链接</button>
+            <button class="test-button" onclick="testCase2()">测试用例2：多个链接</button>
+            <button class="test-button" onclick="testCase3()">测试用例3：混合格式</button>
+            <div id="otherResult" class="result" style="display: none;"></div>
+        </div>
+    </div>
+
+    <script>
+        // 格式化消息内容的函数（与Vue组件中的函数相同）
+        function formatMessageContent(content) {
+            if (!content) return ''
+
+            console.log('原始消息内容:', content)
+
+            let formattedContent = content
+
+            // 1. 彻底清理所有错误的HTML标签和属性
+            formattedContent = formattedContent
+                // 清理各种错误的HTML标签片段
+                .replace(/查看房型" target="_blank" rel="noopener noreferrer" class="message-link">查看房型/g, '')
+                .replace(/查看房型" target="_blank" rel="noopener noreferrer" class="message-link">查看房间/g, '')
+                .replace(/查看详情" target="_blank" rel="noopener noreferrer" class="message-link">查看房型/g, '')
+                .replace(/查看详情" target="_blank" rel="noopener noreferrer" class="message-link">查看房间/g, '')
+                .replace(/" target="_blank" rel="noopener noreferrer" class="message-link">查看房型/g, '')
+                .replace(/" target="_blank" rel="noopener noreferrer" class="message-link">查看房间/g, '')
+                .replace(/查看房型" target="_blank"[^>]*>/g, '')
+                .replace(/查看房间" target="_blank"[^>]*>/g, '')
+                // 清理其他可能的HTML片段
+                .replace(/<a[^>]*>查看房型<\/a>/g, '')
+                .replace(/<a[^>]*>查看房间<\/a>/g, '')
+                .replace(/target="_blank"[^>]*>/g, '')
+                .replace(/rel="noopener noreferrer"[^>]*>/g, '')
+                .replace(/class="message-link"[^>]*>/g, '')
+                // 清理多余的空行
+                .replace(/\n\s*\n/g, '\n')
+
+            console.log('清理后内容:', formattedContent)
+
+            // 2. 在每个房间信息后添加查看房型链接
+            formattedContent = formattedContent.replace(
+                /(- 特色：[^\n]+)/g,
+                '$1\n<a href="https://share-xt.hwbim.com/qlh/ffd333620ebb4e83b50899653b516f00" target="_blank" rel="noopener noreferrer" class="message-link">🏠 查看房型</a>'
+            )
+
+            // 3. 处理特殊的链接格式：查看房间：[点击前往](URL)
+            formattedContent = formattedContent.replace(
+                /查看房间[：:]\s*\[([^\]]+)\]\(([^)]+)\)/g,
+                '<a href="$2" target="_blank" rel="noopener noreferrer" class="message-link">查看房型</a>'
+            )
+
+            // 4. 处理一般的Markdown链接格式 [文本](URL)
+            formattedContent = formattedContent.replace(
+                /\[([^\]]+)\]\(([^)]+)\)/g,
+                function(match, text, url) {
+                    // 将常见的英文链接文本替换为中文
+                    let linkText = '🏠 查看房型'
+                    if (text === 'book now' || text === 'Book Now' || text === '立即预订') {
+                        linkText = '📝 立即预订'
+                    }
+
+                    console.log('链接转换: "' + text + '" → "' + linkText + '"')
+                    return '<a href="' + url + '" target="_blank" rel="noopener noreferrer" class="message-link">' + linkText + '</a>'
+                }
+            )
+
+            // 5. 处理纯URL链接
+            formattedContent = formattedContent.replace(
+                /(https?:\/\/[^\s<>"']+)/g,
+                '<a href="$1" target="_blank" rel="noopener noreferrer" class="message-link">🏠 查看房型</a>'
+            )
+
+            // 6. 处理换行符
+            formattedContent = formattedContent.replace(/\n/g, '<br>')
+
+            console.log('最终格式化内容:', formattedContent)
+            return formattedContent
+        }
+
+        function showResult(elementId, original, converted) {
+            const element = document.getElementById(elementId)
+            element.innerHTML = `
+                <div class="original">
+                    <strong>原始文本:</strong><br>
+                    <pre>${original}</pre>
+                </div>
+                <div class="converted">
+                    <strong>转换结果:</strong><br>
+                    ${converted}
+                </div>
+            `
+            element.style.display = 'block'
+        }
+
+        function testProblemContent() {
+            const input = document.getElementById('problemInput').value
+            const converted = formatMessageContent(input)
+            showResult('problemResult', input, converted)
+        }
+
+        function testCase1() {
+            const text = `简单链接测试：
+查看房型" target="_blank" rel="noopener noreferrer" class="message-link">查看房型`
+            
+            const converted = formatMessageContent(text)
+            showResult('otherResult', text, converted)
+        }
+
+        function testCase2() {
+            const text = `多个链接测试：
+1. 房间A - 查看房型" target="_blank" rel="noopener noreferrer" class="message-link">查看房型
+2. 房间B - 查看房型" target="_blank" rel="noopener noreferrer" class="message-link">查看房型`
+            
+            const converted = formatMessageContent(text)
+            showResult('otherResult', text, converted)
+        }
+
+        function testCase3() {
+            const text = `混合格式测试：
+正常文本
+查看房型" target="_blank" rel="noopener noreferrer" class="message-link">查看房型
+[点击这里](https://example.com)
+https://example.com/direct-link`
+            
+            const converted = formatMessageContent(text)
+            showResult('otherResult', text, converted)
+        }
+
+        // 页面加载完成
+        console.log('HTML渲染测试页面已加载')
+    </script>
+</body>
+</html>

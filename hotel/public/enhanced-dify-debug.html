@@ -1,0 +1,442 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>增强版Dify调试工具 - 普洱蘑菇庄园民宿</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Arial', sans-serif;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            min-height: 100vh;
+            padding: 20px;
+        }
+
+        .container {
+            max-width: 1400px;
+            margin: 0 auto;
+            background: white;
+            border-radius: 20px;
+            padding: 40px;
+            box-shadow: 0 20px 40px rgba(0,0,0,0.1);
+        }
+
+        .header {
+            text-align: center;
+            margin-bottom: 30px;
+            padding-bottom: 20px;
+            border-bottom: 2px solid #e9ecef;
+        }
+
+        .header h1 {
+            color: #2c3e50;
+            margin-bottom: 10px;
+            font-size: 2rem;
+        }
+
+        .error-section {
+            background: #f8d7da;
+            border: 1px solid #f5c6cb;
+            border-radius: 10px;
+            padding: 20px;
+            margin-bottom: 30px;
+        }
+
+        .error-section h3 {
+            color: #721c24;
+            margin-bottom: 15px;
+        }
+
+        .test-section {
+            margin-bottom: 30px;
+            padding: 20px;
+            background: #f8f9fa;
+            border-radius: 10px;
+        }
+
+        .test-section h3 {
+            color: #495057;
+            margin-bottom: 15px;
+        }
+
+        .input-group {
+            display: flex;
+            gap: 10px;
+            margin-bottom: 20px;
+        }
+
+        .input-group input {
+            flex: 1;
+            padding: 12px;
+            border: 1px solid #ddd;
+            border-radius: 6px;
+            font-size: 14px;
+        }
+
+        .btn {
+            padding: 12px 24px;
+            border: none;
+            border-radius: 6px;
+            cursor: pointer;
+            font-weight: 500;
+            transition: all 0.3s ease;
+        }
+
+        .btn-primary {
+            background: #007bff;
+            color: white;
+        }
+
+        .btn-success {
+            background: #28a745;
+            color: white;
+        }
+
+        .btn-warning {
+            background: #ffc107;
+            color: #212529;
+        }
+
+        .btn-danger {
+            background: #dc3545;
+            color: white;
+        }
+
+        .btn:hover {
+            transform: translateY(-1px);
+        }
+
+        .btn:disabled {
+            background: #6c757d;
+            cursor: not-allowed;
+            transform: none;
+        }
+
+        .response-area {
+            background: white;
+            border: 1px solid #ddd;
+            border-radius: 6px;
+            padding: 15px;
+            min-height: 200px;
+            white-space: pre-wrap;
+            font-family: monospace;
+            font-size: 12px;
+            overflow-y: auto;
+            max-height: 400px;
+        }
+
+        .status {
+            padding: 10px;
+            border-radius: 6px;
+            margin-bottom: 15px;
+            font-weight: 500;
+        }
+
+        .status.success {
+            background: #d4edda;
+            color: #155724;
+            border: 1px solid #c3e6cb;
+        }
+
+        .status.error {
+            background: #f8d7da;
+            color: #721c24;
+            border: 1px solid #f5c6cb;
+        }
+
+        .status.info {
+            background: #d1ecf1;
+            color: #0c5460;
+            border: 1px solid #bee5eb;
+        }
+
+        .status.warning {
+            background: #fff3cd;
+            color: #856404;
+            border: 1px solid #ffeaa7;
+        }
+
+        .grid {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 20px;
+        }
+
+        .url-test {
+            background: #e3f2fd;
+            border: 1px solid #90caf9;
+            border-radius: 10px;
+            padding: 15px;
+            margin-bottom: 15px;
+        }
+
+        .url-test h4 {
+            color: #1565c0;
+            margin-bottom: 10px;
+        }
+
+        @media (max-width: 768px) {
+            .container {
+                padding: 20px;
+            }
+            .grid {
+                grid-template-columns: 1fr;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div class="header">
+            <h1>🔍 增强版Dify调试工具</h1>
+            <p>详细诊断Dify服务响应问题</p>
+        </div>
+
+        <div class="error-section">
+            <h3>❌ 检测到的问题</h3>
+            <div style="line-height: 1.8; color: #721c24;">
+                <p><strong>错误信息：</strong><code>Unexpected token '&lt;', "&lt;!DOCTYPE "... is not valid JSON</code></p>
+                <p><strong>问题分析：</strong></p>
+                <ul style="margin-left: 20px; margin-top: 10px;">
+                    <li>服务器返回了HTML页面而不是JSON数据</li>
+                    <li>可能是URL路径不正确</li>
+                    <li>可能是Dify服务返回了错误页面</li>
+                    <li>需要检查具体的响应内容</li>
+                </ul>
+            </div>
+        </div>
+
+        <div class="test-section">
+            <h3>🌐 URL路径测试</h3>
+            <div class="url-test">
+                <h4>测试不同的URL路径</h4>
+                <button class="btn btn-primary" onclick="testURL('/api/dify/chat/fggmGdSFt6MSQFJa')" style="margin: 5px;">测试代理路径</button>
+                <button class="btn btn-warning" onclick="testURL('http://4295a4ce.r28.cpolar.top/chat/fggmGdSFt6MSQFJa')" style="margin: 5px;">测试直接路径</button>
+                <button class="btn btn-success" onclick="testURL('http://4295a4ce.r28.cpolar.top/')" style="margin: 5px;">测试根路径</button>
+                <button class="btn btn-danger" onclick="testURL('http://4295a4ce.r28.cpolar.top/v1/chat-messages')" style="margin: 5px;">测试API路径</button>
+            </div>
+            <div id="urlTestStatus"></div>
+            <div id="urlTestResponse" class="response-area"></div>
+        </div>
+
+        <div class="grid">
+            <div class="test-section">
+                <h3>🔍 详细响应检查</h3>
+                <div class="input-group">
+                    <input type="text" id="detailMessage" placeholder="输入测试消息" value="test">
+                    <button class="btn btn-primary" onclick="detailedTest()" id="detailBtn">详细检查</button>
+                </div>
+                <div id="detailStatus"></div>
+                <div id="detailResponse" class="response-area"></div>
+            </div>
+
+            <div class="test-section">
+                <h3>🛠️ 修复建议</h3>
+                <div id="fixSuggestions" class="response-area">
+等待测试结果...
+                </div>
+            </div>
+        </div>
+
+        <div class="test-section">
+            <h3>📊 完整诊断报告</h3>
+            <button class="btn btn-warning" onclick="runFullDiagnostics()" id="diagBtn">运行完整诊断</button>
+            <div id="diagStatus"></div>
+            <div id="diagResponse" class="response-area"></div>
+        </div>
+    </div>
+
+    <script>
+        // 测试不同的URL路径
+        async function testURL(url) {
+            const statusDiv = document.getElementById('urlTestStatus');
+            const responseDiv = document.getElementById('urlTestResponse');
+
+            statusDiv.innerHTML = `<div class="status info">正在测试: ${url}</div>`;
+            responseDiv.textContent = '发送请求...';
+
+            try {
+                const response = await fetch(url, {
+                    method: 'GET'
+                });
+
+                const responseText = await response.text();
+                
+                statusDiv.innerHTML = `<div class="status ${response.ok ? 'success' : 'error'}">
+                    ${response.ok ? '✅' : '❌'} ${url}<br>
+                    状态码: ${response.status}<br>
+                    Content-Type: ${response.headers.get('content-type') || '未知'}
+                </div>`;
+                
+                responseDiv.textContent = `响应内容 (前500字符):\n${responseText.substring(0, 500)}${responseText.length > 500 ? '...' : ''}`;
+                
+            } catch (error) {
+                statusDiv.innerHTML = `<div class="status error">❌ 请求失败: ${error.message}</div>`;
+                responseDiv.textContent = error.stack;
+            }
+        }
+
+        // 详细测试
+        async function detailedTest() {
+            const message = document.getElementById('detailMessage').value;
+            const statusDiv = document.getElementById('detailStatus');
+            const responseDiv = document.getElementById('detailResponse');
+            const btn = document.getElementById('detailBtn');
+
+            btn.disabled = true;
+            btn.textContent = '检查中...';
+            statusDiv.innerHTML = '<div class="status info">正在进行详细检查...</div>';
+            responseDiv.textContent = '发送请求...';
+
+            try {
+                // 测试代理路径
+                const response = await fetch('/api/dify/chat/fggmGdSFt6MSQFJa', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json'
+                    },
+                    body: JSON.stringify({
+                        query: message,
+                        inputs: {},
+                        response_mode: 'blocking',
+                        user: 'test-user'
+                    })
+                });
+
+                const contentType = response.headers.get('content-type');
+                const responseText = await response.text();
+                
+                let result = `请求详情:
+URL: /api/dify/chat/fggmGdSFt6MSQFJa
+方法: POST
+状态码: ${response.status}
+Content-Type: ${contentType}
+
+响应头信息:`;
+                
+                for (let [key, value] of response.headers.entries()) {
+                    result += `\n${key}: ${value}`;
+                }
+                
+                result += `\n\n响应内容:\n${responseText}`;
+                
+                if (contentType && contentType.includes('application/json')) {
+                    try {
+                        const jsonData = JSON.parse(responseText);
+                        result += `\n\n解析后的JSON:\n${JSON.stringify(jsonData, null, 2)}`;
+                        statusDiv.innerHTML = '<div class="status success">✅ 返回了有效的JSON数据</div>';
+                    } catch (e) {
+                        statusDiv.innerHTML = '<div class="status error">❌ JSON解析失败</div>';
+                    }
+                } else {
+                    statusDiv.innerHTML = '<div class="status error">❌ 返回的不是JSON格式</div>';
+                }
+                
+                responseDiv.textContent = result;
+                
+                // 生成修复建议
+                generateFixSuggestions(response.status, contentType, responseText);
+                
+            } catch (error) {
+                statusDiv.innerHTML = `<div class="status error">❌ 请求失败: ${error.message}</div>`;
+                responseDiv.textContent = error.stack;
+            } finally {
+                btn.disabled = false;
+                btn.textContent = '详细检查';
+            }
+        }
+
+        // 生成修复建议
+        function generateFixSuggestions(status, contentType, responseText) {
+            const suggestionsDiv = document.getElementById('fixSuggestions');
+            let suggestions = [];
+
+            if (status === 404) {
+                suggestions.push('❌ 404错误：URL路径不存在');
+                suggestions.push('🔧 建议：检查Dify服务的正确端点路径');
+                suggestions.push('🔧 建议：确认fggmGdSFt6MSQFJa是正确的应用ID');
+            } else if (status === 500) {
+                suggestions.push('❌ 500错误：服务器内部错误');
+                suggestions.push('🔧 建议：检查Dify服务是否正常运行');
+                suggestions.push('🔧 建议：查看Dify服务的日志');
+            } else if (status === 403) {
+                suggestions.push('❌ 403错误：权限不足');
+                suggestions.push('🔧 建议：检查API密钥是否正确');
+                suggestions.push('🔧 建议：确认应用权限配置');
+            } else if (responseText.includes('<!DOCTYPE')) {
+                suggestions.push('❌ 返回HTML页面而不是API响应');
+                suggestions.push('🔧 建议：URL可能指向了网页而不是API端点');
+                suggestions.push('🔧 建议：检查Dify服务的API文档');
+            } else if (!contentType || !contentType.includes('json')) {
+                suggestions.push('❌ 响应格式不是JSON');
+                suggestions.push('🔧 建议：检查请求的Content-Type头');
+                suggestions.push('🔧 建议：确认API端点返回JSON格式');
+            }
+
+            if (suggestions.length === 0) {
+                suggestions.push('✅ 响应看起来正常');
+                suggestions.push('💡 如果仍有问题，请检查响应内容');
+            }
+
+            suggestionsDiv.textContent = suggestions.join('\n');
+        }
+
+        // 运行完整诊断
+        async function runFullDiagnostics() {
+            const statusDiv = document.getElementById('diagStatus');
+            const responseDiv = document.getElementById('diagResponse');
+            const btn = document.getElementById('diagBtn');
+
+            btn.disabled = true;
+            btn.textContent = '诊断中...';
+            statusDiv.innerHTML = '<div class="status info">正在运行完整诊断...</div>';
+            responseDiv.textContent = '';
+
+            let diagnostics = [];
+
+            // 测试各种URL
+            const urls = [
+                'http://4295a4ce.r28.cpolar.top/',
+                'http://4295a4ce.r28.cpolar.top/chat',
+                'http://4295a4ce.r28.cpolar.top/chat/fggmGdSFt6MSQFJa',
+                'http://4295a4ce.r28.cpolar.top/v1',
+                'http://4295a4ce.r28.cpolar.top/v1/chat-messages',
+                '/api/dify/chat/fggmGdSFt6MSQFJa',
+                '/api/dify/v1/chat-messages'
+            ];
+
+            for (const url of urls) {
+                try {
+                    const response = await fetch(url, { method: 'GET' });
+                    const contentType = response.headers.get('content-type');
+                    diagnostics.push(`${response.ok ? '✅' : '❌'} ${url} - ${response.status} - ${contentType || '未知'}`);
+                } catch (error) {
+                    diagnostics.push(`❌ ${url} - 连接失败: ${error.message}`);
+                }
+            }
+
+            diagnostics.push(`\nℹ️ 当前时间: ${new Date().toLocaleString()}`);
+            diagnostics.push(`ℹ️ 浏览器: ${navigator.userAgent.split(' ')[0]}`);
+
+            statusDiv.innerHTML = '<div class="status success">✅ 诊断完成</div>';
+            responseDiv.textContent = diagnostics.join('\n');
+
+            btn.disabled = false;
+            btn.textContent = '运行完整诊断';
+        }
+
+        // 页面加载时自动运行基础测试
+        window.addEventListener('load', () => {
+            setTimeout(() => {
+                testURL('http://4295a4ce.r28.cpolar.top/');
+            }, 1000);
+        });
+    </script>
+</body>
+</html>

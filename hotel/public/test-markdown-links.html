@@ -1,0 +1,245 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Markdown链接转换测试</title>
+    <style>
+        body {
+            font-family: 'Microsoft YaHei', sans-serif;
+            max-width: 800px;
+            margin: 0 auto;
+            padding: 20px;
+            background: #f5f5f5;
+        }
+        .container {
+            background: white;
+            border-radius: 10px;
+            padding: 30px;
+            box-shadow: 0 2px 10px rgba(0,0,0,0.1);
+        }
+        h1 {
+            color: #333;
+            text-align: center;
+            margin-bottom: 30px;
+        }
+        .test-section {
+            margin-bottom: 30px;
+            padding: 20px;
+            border: 1px solid #ddd;
+            border-radius: 8px;
+            background: #fafafa;
+        }
+        .test-input {
+            width: 100%;
+            padding: 10px;
+            border: 1px solid #ddd;
+            border-radius: 5px;
+            margin-bottom: 10px;
+            font-family: monospace;
+        }
+        .test-button {
+            background: #007bff;
+            color: white;
+            border: none;
+            padding: 10px 20px;
+            border-radius: 5px;
+            cursor: pointer;
+            margin: 5px;
+        }
+        .test-button:hover {
+            background: #0056b3;
+        }
+        .result {
+            margin-top: 15px;
+            padding: 15px;
+            border-radius: 5px;
+            background: #e9ecef;
+            min-height: 50px;
+        }
+        .original {
+            background: #fff3cd;
+            border: 1px solid #ffeaa7;
+            margin-bottom: 10px;
+        }
+        .converted {
+            background: #d4edda;
+            border: 1px solid #c3e6cb;
+        }
+        .message-link {
+            color: #059669;
+            text-decoration: underline;
+            font-weight: 600;
+            transition: all 0.3s ease;
+        }
+        .message-link:hover {
+            color: #047857;
+            background: rgba(5, 150, 105, 0.1);
+            padding: 2px 4px;
+            border-radius: 4px;
+            text-decoration: none;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1>🔗 Markdown链接转换测试</h1>
+        
+        <div class="test-section">
+            <h3>📝 自定义测试</h3>
+            <textarea id="customInput" class="test-input" rows="4" placeholder="输入包含Markdown链接的文本...">根据蘑菇庄园当前的房间信息，为您推荐以下特色房型：
+
+1. 【208单人间】茶园景观北向房 🌿
+- 特色：山景阳台+早餐
+- 价格：198元/晚
+查看房间：[点击前往](https://share-xt.hwbim.com/qlh/ffd333620ebb4e83b50899653b516f00)
+
+2. 【204双人间】山景阳台南向房 ☀️
+- 特色：雨林景观+双床
+- 价格：999元/晚
+查看房间：[点击前往](https://share-xt.hwbim.com/qlh/ffd333620ebb4e83b50899653b516f00)</textarea>
+            <button class="test-button" onclick="testCustomInput()">转换测试</button>
+            <div id="customResult" class="result" style="display: none;"></div>
+        </div>
+
+        <div class="test-section">
+            <h3>🧪 预设测试用例</h3>
+            <button class="test-button" onclick="testCase1()">测试用例1：房间推荐</button>
+            <button class="test-button" onclick="testCase2()">测试用例2：多个链接</button>
+            <button class="test-button" onclick="testCase3()">测试用例3：纯URL</button>
+            <button class="test-button" onclick="testCase4()">测试用例4：混合格式</button>
+            <div id="presetResult" class="result" style="display: none;"></div>
+        </div>
+
+        <div class="test-section">
+            <h3>📊 转换规则说明</h3>
+            <ul>
+                <li><strong>Markdown链接</strong>: <code>[文本](URL)</code> → <code>&lt;a href="URL"&gt;文本&lt;/a&gt;</code></li>
+                <li><strong>纯URL</strong>: <code>https://example.com</code> → <code>&lt;a href="URL"&gt;URL&lt;/a&gt;</code></li>
+                <li><strong>换行符</strong>: <code>\n</code> → <code>&lt;br&gt;</code></li>
+                <li><strong>HTML转义</strong>: 特殊字符自动转义</li>
+                <li><strong>链接属性</strong>: 自动添加 <code>target="_blank"</code> 和 <code>rel="noopener noreferrer"</code></li>
+            </ul>
+        </div>
+    </div>
+
+    <script>
+        // 格式化消息内容的函数（与Vue组件中的函数相同）
+        function formatMessageContent(content) {
+            if (!content) return ''
+
+            console.log('原始消息内容:', content)
+
+            let formattedContent = content
+
+            // 1. 先处理特殊的链接格式，将链接文本改为中文
+            formattedContent = formattedContent.replace(
+                /查看房间[：:]\s*\[([^\]]+)\]\(([^)]+)\)/g,
+                '<a href="$2" target="_blank" rel="noopener noreferrer" class="message-link">查看房型</a>'
+            )
+
+            // 2. 处理一般的Markdown链接格式 [文本](URL)
+            formattedContent = formattedContent.replace(
+                /\[([^\]]+)\]\(([^)]+)\)/g,
+                function(match, text, url) {
+                    // 将常见的英文链接文本替换为中文
+                    let linkText = text
+                    if (text === 'click here' || text === 'Click Here' || text === '点击前往' || text === '点击这里') {
+                        linkText = '查看房型'
+                    } else if (text === 'view room' || text === 'View Room') {
+                        linkText = '查看房型'
+                    } else if (text === 'book now' || text === 'Book Now') {
+                        linkText = '立即预订'
+                    }
+
+                    console.log('链接转换: "' + text + '" → "' + linkText + '"')
+                    return '<a href="' + url + '" target="_blank" rel="noopener noreferrer" class="message-link">' + linkText + '</a>'
+                }
+            )
+
+            // 3. 处理纯URL链接
+            formattedContent = formattedContent.replace(
+                /(https?:\/\/[^\s<>"']+)/g,
+                '<a href="$1" target="_blank" rel="noopener noreferrer" class="message-link">查看详情</a>'
+            )
+
+            // 4. 处理换行符
+            formattedContent = formattedContent.replace(/\n/g, '<br>')
+
+            console.log('格式化后内容:', formattedContent)
+            return formattedContent
+        }
+
+        function showResult(elementId, original, converted) {
+            const element = document.getElementById(elementId)
+            element.innerHTML = `
+                <div class="original">
+                    <strong>原始文本:</strong><br>
+                    <pre>${original}</pre>
+                </div>
+                <div class="converted">
+                    <strong>转换结果:</strong><br>
+                    ${converted}
+                </div>
+            `
+            element.style.display = 'block'
+        }
+
+        function testCustomInput() {
+            const input = document.getElementById('customInput').value
+            const converted = formatMessageContent(input)
+            showResult('customResult', input, converted)
+        }
+
+        function testCase1() {
+            const text = `根据蘑菇庄园当前的房间信息，为您推荐以下特色房型：
+
+1. 【208单人间】茶园景观北向房 🌿
+- 特色：山景阳台+早餐
+- 价格：198元/晚
+查看房间：[点击前往](https://share-xt.hwbim.com/qlh/ffd333620ebb4e83b50899653b516f00)`
+            
+            const converted = formatMessageContent(text)
+            showResult('presetResult', text, converted)
+        }
+
+        function testCase2() {
+            const text = `为您推荐以下房间：
+
+1. 【204房】[查看详情](https://example.com/room/204)
+2. 【303房】[立即预订](https://example.com/book/303)
+3. 更多房间：[浏览全部](https://example.com/rooms)`
+            
+            const converted = formatMessageContent(text)
+            showResult('presetResult', text, converted)
+        }
+
+        function testCase3() {
+            const text = `您可以访问以下链接了解更多信息：
+
+官网：https://example.com
+预订页面：https://booking.example.com/rooms
+客服热线：400-123-4567`
+            
+            const converted = formatMessageContent(text)
+            showResult('presetResult', text, converted)
+        }
+
+        function testCase4() {
+            const text = `混合格式测试：
+
+Markdown链接：[点击这里](https://example.com/link1)
+纯URL：https://example.com/link2
+带参数的URL：https://example.com/page?id=123&type=room
+特殊字符：<script>alert('test')</script>
+引号测试："双引号" '单引号'`
+            
+            const converted = formatMessageContent(text)
+            showResult('presetResult', text, converted)
+        }
+
+        // 页面加载完成
+        console.log('Markdown链接转换测试页面已加载')
+    </script>
+</body>
+</html>

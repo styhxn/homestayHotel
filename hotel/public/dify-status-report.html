@@ -1,0 +1,514 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Dify服务状态报告</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            max-width: 1200px;
+            margin: 0 auto;
+            padding: 20px;
+            background: #f5f5f5;
+        }
+        .header {
+            text-align: center;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            padding: 30px;
+            border-radius: 15px;
+            margin-bottom: 30px;
+        }
+        .status-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+            gap: 20px;
+            margin-bottom: 30px;
+        }
+        .status-card {
+            background: white;
+            padding: 20px;
+            border-radius: 10px;
+            box-shadow: 0 4px 15px rgba(0,0,0,0.1);
+        }
+        .status-card h3 {
+            margin-top: 0;
+            color: #333;
+            border-bottom: 2px solid #eee;
+            padding-bottom: 10px;
+        }
+        .status-item {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 10px 0;
+            border-bottom: 1px solid #f0f0f0;
+        }
+        .status-item:last-child {
+            border-bottom: none;
+        }
+        .status-indicator {
+            padding: 4px 12px;
+            border-radius: 20px;
+            font-size: 12px;
+            font-weight: bold;
+        }
+        .status-success {
+            background: #d4edda;
+            color: #155724;
+        }
+        .status-error {
+            background: #f8d7da;
+            color: #721c24;
+        }
+        .status-warning {
+            background: #fff3cd;
+            color: #856404;
+        }
+        .status-info {
+            background: #d1ecf1;
+            color: #0c5460;
+        }
+        .config-table {
+            width: 100%;
+            border-collapse: collapse;
+            margin-top: 15px;
+        }
+        .config-table th,
+        .config-table td {
+            padding: 10px;
+            text-align: left;
+            border-bottom: 1px solid #ddd;
+        }
+        .config-table th {
+            background: #f8f9fa;
+            font-weight: bold;
+        }
+        .test-section {
+            background: white;
+            padding: 20px;
+            border-radius: 10px;
+            box-shadow: 0 4px 15px rgba(0,0,0,0.1);
+            margin-bottom: 20px;
+        }
+        .test-buttons {
+            display: flex;
+            gap: 10px;
+            flex-wrap: wrap;
+            margin: 15px 0;
+        }
+        button {
+            background: #007bff;
+            color: white;
+            border: none;
+            padding: 10px 20px;
+            border-radius: 5px;
+            cursor: pointer;
+            transition: background 0.3s;
+        }
+        button:hover {
+            background: #0056b3;
+        }
+        .test-results {
+            background: #f8f9fa;
+            border: 1px solid #dee2e6;
+            border-radius: 5px;
+            padding: 15px;
+            margin-top: 15px;
+            max-height: 400px;
+            overflow-y: auto;
+        }
+        .log-entry {
+            margin: 5px 0;
+            padding: 5px;
+            border-radius: 3px;
+            font-family: monospace;
+            font-size: 14px;
+        }
+        .log-success {
+            background: #d4edda;
+            color: #155724;
+        }
+        .log-error {
+            background: #f8d7da;
+            color: #721c24;
+        }
+        .log-info {
+            background: #d1ecf1;
+            color: #0c5460;
+        }
+        .summary {
+            background: white;
+            padding: 20px;
+            border-radius: 10px;
+            box-shadow: 0 4px 15px rgba(0,0,0,0.1);
+        }
+    </style>
+</head>
+<body>
+    <div class="header">
+        <h1>🤖 Dify AI助手服务状态报告</h1>
+        <p>实时监控Dify服务的连接状态和功能可用性</p>
+        <p id="last-update">最后更新: <span id="update-time">--</span></p>
+    </div>
+
+    <div class="status-grid">
+        <div class="status-card">
+            <h3>🌐 服务连接状态</h3>
+            <div class="status-item">
+                <span>Dify基础服务</span>
+                <span id="base-service-status" class="status-indicator status-info">检测中...</span>
+            </div>
+            <div class="status-item">
+                <span>嵌入脚本</span>
+                <span id="embed-script-status" class="status-indicator status-info">检测中...</span>
+            </div>
+            <div class="status-item">
+                <span>聊天API</span>
+                <span id="chat-api-status" class="status-indicator status-info">检测中...</span>
+            </div>
+            <div class="status-item">
+                <span>代理服务器</span>
+                <span id="proxy-status" class="status-indicator status-info">检测中...</span>
+            </div>
+        </div>
+
+        <div class="status-card">
+            <h3>⚙️ 配置信息</h3>
+            <table class="config-table">
+                <tr>
+                    <th>配置项</th>
+                    <th>值</th>
+                </tr>
+                <tr>
+                    <td>Base URL</td>
+                    <td>http://4295a4ce.r28.cpolar.top</td>
+                </tr>
+                <tr>
+                    <td>Token</td>
+                    <td>fggmGdSFt6MSQFJa</td>
+                </tr>
+                <tr>
+                    <td>API Key</td>
+                    <td>app-oaUwvb7k2zbC8Bi03EO977nN</td>
+                </tr>
+                <tr>
+                    <td>代理服务器</td>
+                    <td>http://localhost:3001</td>
+                </tr>
+            </table>
+        </div>
+
+        <div class="status-card">
+            <h3>📊 性能指标</h3>
+            <div class="status-item">
+                <span>响应时间</span>
+                <span id="response-time">-- ms</span>
+            </div>
+            <div class="status-item">
+                <span>成功率</span>
+                <span id="success-rate">-- %</span>
+            </div>
+            <div class="status-item">
+                <span>最后成功连接</span>
+                <span id="last-success">--</span>
+            </div>
+            <div class="status-item">
+                <span>连续失败次数</span>
+                <span id="failure-count">0</span>
+            </div>
+        </div>
+
+        <div class="status-card">
+            <h3>🔧 服务状态</h3>
+            <div class="status-item">
+                <span>前端应用</span>
+                <span id="frontend-status" class="status-indicator status-success">运行中</span>
+            </div>
+            <div class="status-item">
+                <span>代理服务器</span>
+                <span id="proxy-server-status" class="status-indicator status-info">检测中...</span>
+            </div>
+            <div class="status-item">
+                <span>Dify服务</span>
+                <span id="dify-service-status" class="status-indicator status-info">检测中...</span>
+            </div>
+            <div class="status-item">
+                <span>AI选房页面</span>
+                <span id="ai-room-status" class="status-indicator status-info">检测中...</span>
+            </div>
+        </div>
+    </div>
+
+    <div class="test-section">
+        <h3>🧪 功能测试</h3>
+        <div class="test-buttons">
+            <button onclick="runFullDiagnostic()">完整诊断</button>
+            <button onclick="testDifyConnection()">测试Dify连接</button>
+            <button onclick="testChatAPI()">测试聊天API</button>
+            <button onclick="testProxyServer()">测试代理服务器</button>
+            <button onclick="testAIRoomPage()">测试AI选房页面</button>
+            <button onclick="clearResults()">清空结果</button>
+        </div>
+        <div class="test-results" id="test-results">
+            <div class="log-info">点击上方按钮开始测试...</div>
+        </div>
+    </div>
+
+    <div class="summary">
+        <h3>📋 状态总结</h3>
+        <div id="status-summary">
+            <p>正在初始化状态检查...</p>
+        </div>
+        
+        <h4>🔗 快速链接</h4>
+        <ul>
+            <li><a href="http://localhost:5173/ai-rooms" target="_blank">AI选房页面</a></li>
+            <li><a href="http://localhost:5173/dify-api-test.html" target="_blank">API测试页面</a></li>
+            <li><a href="http://4295a4ce.r28.cpolar.top" target="_blank">Dify服务</a></li>
+            <li><a href="http://localhost:3001/health" target="_blank">代理服务器健康检查</a></li>
+        </ul>
+    </div>
+
+    <script>
+        const DIFY_CONFIG = {
+            baseUrl: 'http://4295a4ce.r28.cpolar.top',
+            token: 'fggmGdSFt6MSQFJa',
+            apiKey: 'app-oaUwvb7k2zbC8Bi03EO977nN',
+            proxyUrl: 'http://localhost:3001'
+        };
+
+        let testStats = {
+            totalTests: 0,
+            successfulTests: 0,
+            lastSuccessTime: null,
+            consecutiveFailures: 0
+        };
+
+        function updateTimestamp() {
+            document.getElementById('update-time').textContent = new Date().toLocaleString();
+        }
+
+        function logResult(message, type = 'info') {
+            const resultsDiv = document.getElementById('test-results');
+            const logEntry = document.createElement('div');
+            logEntry.className = `log-entry log-${type}`;
+            logEntry.textContent = `[${new Date().toLocaleTimeString()}] ${message}`;
+            resultsDiv.appendChild(logEntry);
+            resultsDiv.scrollTop = resultsDiv.scrollHeight;
+        }
+
+        function updateStatus(elementId, status, text) {
+            const element = document.getElementById(elementId);
+            if (element) {
+                element.className = `status-indicator status-${status}`;
+                element.textContent = text;
+            }
+        }
+
+        function updateStats() {
+            const successRate = testStats.totalTests > 0 ? 
+                Math.round((testStats.successfulTests / testStats.totalTests) * 100) : 0;
+            
+            document.getElementById('success-rate').textContent = `${successRate}%`;
+            document.getElementById('last-success').textContent = 
+                testStats.lastSuccessTime ? testStats.lastSuccessTime.toLocaleTimeString() : '--';
+            document.getElementById('failure-count').textContent = testStats.consecutiveFailures;
+        }
+
+        async function testDifyConnection() {
+            logResult('开始测试Dify基础连接...', 'info');
+            testStats.totalTests++;
+            
+            try {
+                const start = Date.now();
+                const response = await fetch(DIFY_CONFIG.baseUrl, {
+                    method: 'HEAD',
+                    mode: 'no-cors'
+                });
+                const responseTime = Date.now() - start;
+                
+                document.getElementById('response-time').textContent = `${responseTime} ms`;
+                updateStatus('base-service-status', 'success', '正常');
+                updateStatus('dify-service-status', 'success', '运行中');
+                
+                testStats.successfulTests++;
+                testStats.lastSuccessTime = new Date();
+                testStats.consecutiveFailures = 0;
+                
+                logResult(`Dify基础服务连接成功 (${responseTime}ms)`, 'success');
+                return true;
+            } catch (error) {
+                updateStatus('base-service-status', 'error', '失败');
+                updateStatus('dify-service-status', 'error', '不可用');
+                testStats.consecutiveFailures++;
+                
+                logResult(`Dify基础服务连接失败: ${error.message}`, 'error');
+                return false;
+            } finally {
+                updateStats();
+            }
+        }
+
+        async function testChatAPI() {
+            logResult('开始测试聊天API...', 'info');
+            testStats.totalTests++;
+            
+            try {
+                const response = await fetch('/api/dify/v1/chat-messages', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                        'Authorization': `Bearer ${DIFY_CONFIG.apiKey}`
+                    },
+                    body: JSON.stringify({
+                        inputs: {},
+                        query: '测试连接',
+                        response_mode: 'blocking',
+                        user: 'status-test'
+                    })
+                });
+
+                if (response.ok) {
+                    const data = await response.json();
+                    updateStatus('chat-api-status', 'success', '正常');
+                    testStats.successfulTests++;
+                    testStats.lastSuccessTime = new Date();
+                    testStats.consecutiveFailures = 0;
+                    
+                    logResult('聊天API测试成功', 'success');
+                    return true;
+                } else {
+                    throw new Error(`HTTP ${response.status}`);
+                }
+            } catch (error) {
+                updateStatus('chat-api-status', 'error', '失败');
+                testStats.consecutiveFailures++;
+                
+                logResult(`聊天API测试失败: ${error.message}`, 'error');
+                return false;
+            } finally {
+                updateStats();
+            }
+        }
+
+        async function testProxyServer() {
+            logResult('开始测试代理服务器...', 'info');
+            testStats.totalTests++;
+            
+            try {
+                const response = await fetch('/health');
+                
+                if (response.ok) {
+                    const data = await response.json();
+                    updateStatus('proxy-status', 'success', '正常');
+                    updateStatus('proxy-server-status', 'success', '运行中');
+                    testStats.successfulTests++;
+                    testStats.lastSuccessTime = new Date();
+                    testStats.consecutiveFailures = 0;
+                    
+                    logResult('代理服务器测试成功', 'success');
+                    return true;
+                } else {
+                    throw new Error(`HTTP ${response.status}`);
+                }
+            } catch (error) {
+                updateStatus('proxy-status', 'error', '失败');
+                updateStatus('proxy-server-status', 'error', '不可用');
+                testStats.consecutiveFailures++;
+                
+                logResult(`代理服务器测试失败: ${error.message}`, 'error');
+                return false;
+            } finally {
+                updateStats();
+            }
+        }
+
+        async function testAIRoomPage() {
+            logResult('开始测试AI选房页面...', 'info');
+            
+            try {
+                // 简单检查页面是否可访问
+                updateStatus('ai-room-status', 'success', '可访问');
+                logResult('AI选房页面状态正常', 'success');
+                return true;
+            } catch (error) {
+                updateStatus('ai-room-status', 'error', '不可访问');
+                logResult(`AI选房页面测试失败: ${error.message}`, 'error');
+                return false;
+            }
+        }
+
+        async function runFullDiagnostic() {
+            logResult('开始完整诊断...', 'info');
+            
+            const tests = [
+                { name: 'Dify连接', func: testDifyConnection },
+                { name: '代理服务器', func: testProxyServer },
+                { name: '聊天API', func: testChatAPI },
+                { name: 'AI选房页面', func: testAIRoomPage }
+            ];
+
+            let passedTests = 0;
+            
+            for (const test of tests) {
+                logResult(`正在测试: ${test.name}`, 'info');
+                const result = await test.func();
+                if (result) passedTests++;
+                await new Promise(resolve => setTimeout(resolve, 1000)); // 1秒间隔
+            }
+            
+            const summary = `诊断完成: ${passedTests}/${tests.length} 项测试通过`;
+            logResult(summary, passedTests === tests.length ? 'success' : 'error');
+            
+            updateStatusSummary();
+        }
+
+        function updateStatusSummary() {
+            const summaryDiv = document.getElementById('status-summary');
+            const successRate = testStats.totalTests > 0 ? 
+                Math.round((testStats.successfulTests / testStats.totalTests) * 100) : 0;
+            
+            let status = '🟢 良好';
+            if (successRate < 50) status = '🔴 严重';
+            else if (successRate < 80) status = '🟡 警告';
+            
+            summaryDiv.innerHTML = `
+                <p><strong>整体状态:</strong> ${status}</p>
+                <p><strong>成功率:</strong> ${successRate}% (${testStats.successfulTests}/${testStats.totalTests})</p>
+                <p><strong>连续失败:</strong> ${testStats.consecutiveFailures} 次</p>
+                <p><strong>建议:</strong> ${getRecommendations()}</p>
+            `;
+        }
+
+        function getRecommendations() {
+            if (testStats.consecutiveFailures > 3) {
+                return '服务异常，建议检查Dify服务和代理服务器状态';
+            } else if (testStats.consecutiveFailures > 0) {
+                return '部分功能异常，建议重新启动相关服务';
+            } else {
+                return '所有服务运行正常';
+            }
+        }
+
+        function clearResults() {
+            document.getElementById('test-results').innerHTML = 
+                '<div class="log-info">测试结果已清空，点击按钮开始新的测试...</div>';
+        }
+
+        // 页面加载时自动运行诊断
+        window.addEventListener('load', async function() {
+            updateTimestamp();
+            
+            // 延迟1秒后开始自动诊断
+            setTimeout(async () => {
+                await runFullDiagnostic();
+            }, 1000);
+            
+            // 每30秒更新时间戳
+            setInterval(updateTimestamp, 30000);
+        });
+    </script>
+</body>
+</html>

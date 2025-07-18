@@ -1,0 +1,210 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>SSE调试页面</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            max-width: 800px;
+            margin: 0 auto;
+            padding: 20px;
+        }
+        .container {
+            background: #f5f5f5;
+            padding: 20px;
+            border-radius: 8px;
+            margin-bottom: 20px;
+        }
+        button {
+            background: #007bff;
+            color: white;
+            border: none;
+            padding: 10px 20px;
+            border-radius: 4px;
+            cursor: pointer;
+            margin: 5px;
+        }
+        button:hover {
+            background: #0056b3;
+        }
+        .log {
+            background: #fff;
+            border: 1px solid #ddd;
+            padding: 10px;
+            margin: 10px 0;
+            border-radius: 4px;
+            max-height: 300px;
+            overflow-y: auto;
+            font-family: monospace;
+            font-size: 12px;
+        }
+        .response {
+            background: #e8f5e8;
+            border: 1px solid #4caf50;
+            padding: 15px;
+            margin: 10px 0;
+            border-radius: 4px;
+            white-space: pre-wrap;
+        }
+        .error {
+            background: #ffe8e8;
+            border: 1px solid #f44336;
+        }
+    </style>
+</head>
+<body>
+    <h1>🔧 SSE调试页面</h1>
+    
+    <div class="container">
+        <h3>测试按钮</h3>
+        <button onclick="testSSE()">测试SSE连接</button>
+        <button onclick="clearLogs()">清空日志</button>
+    </div>
+
+    <div class="container">
+        <h3>📋 详细日志</h3>
+        <div id="log" class="log"></div>
+    </div>
+
+    <div class="container">
+        <h3>🤖 AI响应</h3>
+        <div id="response" class="response">等待AI响应...</div>
+    </div>
+
+    <script>
+        function log(message) {
+            const logDiv = document.getElementById('log');
+            const timestamp = new Date().toLocaleTimeString();
+            logDiv.innerHTML += `[${timestamp}] ${message}\n`;
+            logDiv.scrollTop = logDiv.scrollHeight;
+        }
+
+        function clearLogs() {
+            document.getElementById('log').innerHTML = '';
+            document.getElementById('response').textContent = '等待AI响应...';
+        }
+
+        async function testSSE() {
+            const responseDiv = document.getElementById('response');
+            responseDiv.className = 'response';
+            responseDiv.textContent = '🔄 正在连接...';
+            
+            log('开始测试SSE连接');
+            
+            try {
+                const response = await fetch('http://localhost:8080/chat/messages', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                        'Accept': 'text/event-stream'
+                    },
+                    body: JSON.stringify({
+                        query: '推荐房间',
+                        user: 'debug-user'
+                    })
+                });
+
+                log(`HTTP状态: ${response.status} ${response.statusText}`);
+                log(`响应头: ${JSON.stringify([...response.headers.entries()])}`);
+
+                if (!response.ok) {
+                    throw new Error(`HTTP错误: ${response.status}`);
+                }
+
+                if (!response.body) {
+                    throw new Error('响应体为空');
+                }
+
+                log('开始读取SSE流...');
+                
+                const reader = response.body.getReader();
+                let fullResponse = '';
+                let chunkCount = 0;
+                let buffer = '';
+                
+                while (true) {
+                    const { done, value } = await reader.read();
+                    
+                    if (done) {
+                        log('流读取完成');
+                        break;
+                    }
+                    
+                    chunkCount++;
+                    const chunk = new TextDecoder().decode(value);
+                    log(`收到数据块 ${chunkCount}: ${chunk.length} 字节`);
+                    log(`数据内容: ${chunk.substring(0, 200)}${chunk.length > 200 ? '...' : ''}`);
+                    
+                    // 处理SSE数据 - 使用缓冲区确保完整性
+                    buffer += chunk;
+                    const lines = buffer.split('\n');
+                    buffer = lines.pop() || ''; // 保留最后一个不完整的行
+
+                    for (const line of lines) {
+                        if (line.startsWith('data: ')) {
+                            const data = line.slice(6).trim();
+                            if (data && data !== '[DONE]') {
+                                try {
+                                    const jsonData = JSON.parse(data);
+                                    if (jsonData.event === 'message' && jsonData.answer) {
+                                        fullResponse += jsonData.answer;
+                                        responseDiv.textContent = fullResponse;
+                                        log(`收到答案片段: "${jsonData.answer}"`);
+                                        log(`累积响应长度: ${fullResponse.length}`);
+                                    } else if (jsonData.event === 'message_end') {
+                                        log('收到消息结束事件');
+                                        log(`最终完整响应: "${fullResponse}"`);
+                                    }
+                                } catch (e) {
+                                    log(`JSON解析错误: ${e.message}, 原始数据: ${data}`);
+                                    // 对于非JSON数据，也累积到响应中
+                                    fullResponse += data + ' ';
+                                    responseDiv.textContent = fullResponse;
+                                }
+                            }
+                        }
+                    }
+                }
+
+                // 处理剩余的缓冲区内容
+                if (buffer.trim()) {
+                    const line = buffer.trim();
+                    if (line.startsWith('data: ')) {
+                        const data = line.slice(6).trim();
+                        if (data && data !== '[DONE]') {
+                            try {
+                                const jsonData = JSON.parse(data);
+                                if (jsonData.event === 'message' && jsonData.answer) {
+                                    fullResponse += jsonData.answer;
+                                    responseDiv.textContent = fullResponse;
+                                    log(`处理剩余缓冲区: "${jsonData.answer}"`);
+                                }
+                            } catch (e) {
+                                fullResponse += data + ' ';
+                                responseDiv.textContent = fullResponse;
+                                log(`处理剩余缓冲区(非JSON): "${data}"`);
+                            }
+                        }
+                    }
+                }
+
+                log(`最终响应长度: ${fullResponse.length}`);
+                if (!fullResponse.trim()) {
+                    responseDiv.className = 'response error';
+                    responseDiv.textContent = '❌ 未收到有效响应';
+                    log('警告: 未收到有效响应内容');
+                } else {
+                    log('✅ 成功接收到完整响应');
+                }
+                
+            } catch (error) {
+                log(`错误: ${error.message}`);
+                responseDiv.className = 'response error';
+                responseDiv.textContent = `❌ 错误: ${error.message}`;
+            }
+        }
+    </script>
+</body>
+</html>

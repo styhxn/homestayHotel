@@ -1,0 +1,495 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>AI选房功能测试</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            min-height: 100vh;
+            padding: 20px;
+        }
+
+        .container {
+            max-width: 1200px;
+            margin: 0 auto;
+            background: rgba(255, 255, 255, 0.95);
+            border-radius: 20px;
+            padding: 30px;
+            box-shadow: 0 20px 60px rgba(0, 0, 0, 0.1);
+        }
+
+        .header {
+            text-align: center;
+            margin-bottom: 40px;
+        }
+
+        .header h1 {
+            color: #1f2937;
+            font-size: 2.5rem;
+            margin-bottom: 10px;
+        }
+
+        .header p {
+            color: #6b7280;
+            font-size: 1.1rem;
+        }
+
+        .test-section {
+            margin-bottom: 40px;
+            padding: 25px;
+            background: #f9fafb;
+            border-radius: 15px;
+            border-left: 4px solid #d4af37;
+        }
+
+        .test-section h3 {
+            color: #1f2937;
+            margin-bottom: 20px;
+            font-size: 1.3rem;
+        }
+
+        .test-buttons {
+            display: flex;
+            gap: 15px;
+            flex-wrap: wrap;
+            margin-bottom: 20px;
+        }
+
+        .test-btn {
+            background: linear-gradient(135deg, #d4af37 0%, #f4d03f 100%);
+            color: white;
+            border: none;
+            padding: 12px 24px;
+            border-radius: 8px;
+            cursor: pointer;
+            font-weight: 600;
+            transition: all 0.3s ease;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+
+        .test-btn:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 8px 25px rgba(212, 175, 55, 0.3);
+        }
+
+        .test-btn.secondary {
+            background: linear-gradient(135deg, #6b7280 0%, #9ca3af 100%);
+        }
+
+        .test-btn.danger {
+            background: linear-gradient(135deg, #ef4444 0%, #f87171 100%);
+        }
+
+        .test-btn.success {
+            background: linear-gradient(135deg, #10b981 0%, #34d399 100%);
+        }
+
+        .test-messages {
+            display: flex;
+            flex-direction: column;
+            gap: 10px;
+            margin-bottom: 20px;
+        }
+
+        .test-message {
+            background: white;
+            padding: 15px;
+            border-radius: 10px;
+            border-left: 4px solid #d4af37;
+            box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+        }
+
+        .test-message.user {
+            background: #e0f2fe;
+            border-left-color: #0284c7;
+        }
+
+        .test-message.ai {
+            background: #f0fdf4;
+            border-left-color: #16a34a;
+        }
+
+        .test-message.order {
+            background: #fef3c7;
+            border-left-color: #d97706;
+        }
+
+        .message-type {
+            font-weight: 600;
+            margin-bottom: 5px;
+            font-size: 0.9rem;
+            text-transform: uppercase;
+        }
+
+        .message-content {
+            color: #374151;
+            line-height: 1.5;
+        }
+
+        .status-indicator {
+            display: inline-block;
+            width: 12px;
+            height: 12px;
+            border-radius: 50%;
+            margin-right: 8px;
+        }
+
+        .status-indicator.success {
+            background: #10b981;
+        }
+
+        .status-indicator.error {
+            background: #ef4444;
+        }
+
+        .status-indicator.warning {
+            background: #f59e0b;
+        }
+
+        .quick-links {
+            margin-top: 30px;
+            text-align: center;
+        }
+
+        .quick-links h3 {
+            margin-bottom: 20px;
+            color: #1f2937;
+        }
+
+        .link-buttons {
+            display: flex;
+            gap: 15px;
+            justify-content: center;
+            flex-wrap: wrap;
+        }
+
+        .link-btn {
+            display: inline-flex;
+            align-items: center;
+            gap: 8px;
+            padding: 12px 24px;
+            background: white;
+            color: #1f2937;
+            text-decoration: none;
+            border-radius: 8px;
+            border: 2px solid #e5e7eb;
+            transition: all 0.3s ease;
+            font-weight: 600;
+        }
+
+        .link-btn:hover {
+            border-color: #d4af37;
+            background: #d4af37;
+            color: white;
+            transform: translateY(-2px);
+        }
+
+        .link-btn.primary {
+            background: #d4af37;
+            color: white;
+            border-color: #d4af37;
+        }
+
+        .link-btn.primary:hover {
+            background: #b8860b;
+            border-color: #b8860b;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div class="header">
+            <h1>🤖 AI选房功能测试</h1>
+            <p>测试AI推荐房间和订单创建功能</p>
+        </div>
+
+        <div class="test-section">
+            <h3>🏠 房间推荐测试</h3>
+            <div class="test-buttons">
+                <button class="test-btn" onclick="testRoomRecommendation('便宜')">
+                    💰 测试便宜房间推荐
+                </button>
+                <button class="test-btn" onclick="testRoomRecommendation('豪华')">
+                    ✨ 测试豪华房间推荐
+                </button>
+                <button class="test-btn" onclick="testRoomRecommendation('家庭')">
+                    👨‍👩‍👧‍👦 测试家庭房间推荐
+                </button>
+                <button class="test-btn" onclick="testRoomRecommendation('101号房')">
+                    🏠 测试具体房间推荐
+                </button>
+            </div>
+            <div id="recommendation-results" class="test-messages"></div>
+        </div>
+
+        <div class="test-section">
+            <h3>📋 订单创建测试</h3>
+            <div class="test-buttons">
+                <button class="test-btn success" onclick="testOrderCreation('简单')">
+                    📝 测试简单订单创建
+                </button>
+                <button class="test-btn success" onclick="testOrderCreation('完整')">
+                    📋 测试完整订单创建
+                </button>
+                <button class="test-btn secondary" onclick="clearTestResults()">
+                    🗑️ 清空测试结果
+                </button>
+            </div>
+            <div id="order-results" class="test-messages"></div>
+        </div>
+
+        <div class="test-section">
+            <h3>🔗 消息解析测试</h3>
+            <div class="test-buttons">
+                <button class="test-btn" onclick="testMessageParsing()">
+                    🔍 测试消息解析
+                </button>
+                <button class="test-btn secondary" onclick="showParsingRules()">
+                    📖 查看解析规则
+                </button>
+            </div>
+            <div id="parsing-results" class="test-messages"></div>
+        </div>
+
+        <div class="quick-links">
+            <h3>🚀 快速访问</h3>
+            <div class="link-buttons">
+                <a href="/ai-rooms" class="link-btn primary">
+                    🤖 AI选房页面
+                </a>
+                <a href="/" class="link-btn">
+                    🏠 返回首页
+                </a>
+                <a href="/orders" class="link-btn">
+                    📋 我的订单
+                </a>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        // 测试房间推荐功能
+        function testRoomRecommendation(type) {
+            const results = document.getElementById('recommendation-results');
+            
+            let testMessage = '';
+            switch(type) {
+                case '便宜':
+                    testMessage = '我想要一个便宜的房间，价格实惠一点的';
+                    break;
+                case '豪华':
+                    testMessage = '推荐一个豪华的房间，设施要好一些';
+                    break;
+                case '家庭':
+                    testMessage = '我们是一家三口，需要适合家庭的房间';
+                    break;
+                case '101号房':
+                    testMessage = '推荐101号房间给我看看';
+                    break;
+            }
+            
+            addTestMessage(results, 'user', `用户消息: ${testMessage}`);
+            
+            // 模拟AI推荐解析
+            setTimeout(() => {
+                const recommendations = parseRoomRecommendations(testMessage);
+                if (recommendations.length > 0) {
+                    addTestMessage(results, 'ai', `✅ 成功解析推荐: ${recommendations.map(r => r.code + '号房').join(', ')}`);
+                } else {
+                    addTestMessage(results, 'ai', `❌ 未能解析出房间推荐`);
+                }
+            }, 500);
+        }
+        
+        // 测试订单创建功能
+        function testOrderCreation(type) {
+            const results = document.getElementById('order-results');
+            
+            let testMessage = '';
+            switch(type) {
+                case '简单':
+                    testMessage = '预订成功！您已预订101号房';
+                    break;
+                case '完整':
+                    testMessage = '预订确认：101号房，入住2025年7月16日，客人张三，电话13812345678，总计48元';
+                    break;
+            }
+            
+            addTestMessage(results, 'user', `AI消息: ${testMessage}`);
+            
+            // 模拟订单解析
+            setTimeout(() => {
+                const orderInfo = parseOrderInfo(testMessage);
+                if (orderInfo.roomCode) {
+                    addTestMessage(results, 'order', `✅ 成功创建订单: 房间${orderInfo.roomCode}号，总计${orderInfo.totalAmount || orderInfo.price || 48}元`);
+                } else {
+                    addTestMessage(results, 'order', `❌ 未能解析出订单信息`);
+                }
+            }, 500);
+        }
+        
+        // 添加测试消息
+        function addTestMessage(container, type, content) {
+            const messageDiv = document.createElement('div');
+            messageDiv.className = `test-message ${type}`;
+            
+            const typeSpan = document.createElement('div');
+            typeSpan.className = 'message-type';
+            typeSpan.textContent = type === 'user' ? '用户' : type === 'ai' ? 'AI推荐' : '订单';
+            
+            const contentDiv = document.createElement('div');
+            contentDiv.className = 'message-content';
+            contentDiv.textContent = content;
+            
+            messageDiv.appendChild(typeSpan);
+            messageDiv.appendChild(contentDiv);
+            container.appendChild(messageDiv);
+            
+            // 滚动到底部
+            container.scrollTop = container.scrollHeight;
+        }
+        
+        // 清空测试结果
+        function clearTestResults() {
+            document.getElementById('recommendation-results').innerHTML = '';
+            document.getElementById('order-results').innerHTML = '';
+            document.getElementById('parsing-results').innerHTML = '';
+        }
+        
+        // 模拟房间推荐解析（简化版本）
+        function parseRoomRecommendations(message) {
+            const recommendations = [];
+            const roomDatabase = [
+                { id: '101', code: '101', name: '雨林景观豪华蘑菇屋', price: 18, type: '单人间' },
+                { id: '202', code: '202', name: '雨林景观豪华蘑菇屋', price: 48, type: '单人间' },
+                { id: '212', code: '212', name: '雨林景观豪华蘑菇屋', price: 418, type: '亲子房' }
+            ];
+            
+            const lowerMessage = message.toLowerCase();
+            
+            // 具体房间号
+            const roomMatch = message.match(/(\d{3})号?房/);
+            if (roomMatch) {
+                const room = roomDatabase.find(r => r.code === roomMatch[1]);
+                if (room) recommendations.push(room);
+            }
+            
+            // 关键词推荐
+            if (lowerMessage.includes('便宜') || lowerMessage.includes('实惠')) {
+                const cheapRoom = roomDatabase.find(r => r.price <= 50);
+                if (cheapRoom) recommendations.push(cheapRoom);
+            }
+            
+            if (lowerMessage.includes('豪华') || lowerMessage.includes('高档')) {
+                const luxuryRoom = roomDatabase.find(r => r.price >= 300);
+                if (luxuryRoom) recommendations.push(luxuryRoom);
+            }
+            
+            if (lowerMessage.includes('家庭') || lowerMessage.includes('亲子')) {
+                const familyRoom = roomDatabase.find(r => r.type === '亲子房');
+                if (familyRoom) recommendations.push(familyRoom);
+            }
+            
+            return recommendations;
+        }
+        
+        // 模拟订单信息解析（简化版本）
+        function parseOrderInfo(message) {
+            const orderInfo = {};
+            
+            // 解析房间号
+            const roomMatch = message.match(/(\d{3})号?房/);
+            if (roomMatch) {
+                orderInfo.roomCode = roomMatch[1];
+                orderInfo.price = 48; // 默认价格
+            }
+            
+            // 解析日期
+            const dateMatch = message.match(/(\d{4})年(\d{1,2})月(\d{1,2})日/);
+            if (dateMatch) {
+                orderInfo.checkInDate = `${dateMatch[1]}-${dateMatch[2].padStart(2, '0')}-${dateMatch[3].padStart(2, '0')}`;
+            }
+            
+            // 解析手机号
+            const phoneMatch = message.match(/1[3-9]\d{9}/);
+            if (phoneMatch) {
+                orderInfo.phone = phoneMatch[0];
+            }
+            
+            // 解析费用
+            const priceMatch = message.match(/(\d+)元/);
+            if (priceMatch) {
+                orderInfo.totalAmount = parseInt(priceMatch[1]);
+            }
+            
+            return orderInfo;
+        }
+        
+        // 测试消息解析
+        function testMessageParsing() {
+            const results = document.getElementById('parsing-results');
+            
+            const testMessages = [
+                '推荐101号房间给我',
+                '我想要便宜的房间',
+                '预订成功！101号房，2025年7月16日入住',
+                '订单确认：202号房，客人李四，13987654321，总计48元'
+            ];
+            
+            testMessages.forEach((msg, index) => {
+                setTimeout(() => {
+                    addTestMessage(results, 'user', `测试消息 ${index + 1}: ${msg}`);
+                    
+                    const recommendations = parseRoomRecommendations(msg);
+                    const orderInfo = parseOrderInfo(msg);
+                    
+                    if (recommendations.length > 0) {
+                        addTestMessage(results, 'ai', `推荐解析: ${recommendations.map(r => r.code + '号房').join(', ')}`);
+                    }
+                    
+                    if (orderInfo.roomCode) {
+                        addTestMessage(results, 'order', `订单解析: 房间${orderInfo.roomCode}号`);
+                    }
+                }, index * 1000);
+            });
+        }
+        
+        // 显示解析规则
+        function showParsingRules() {
+            const results = document.getElementById('parsing-results');
+            
+            const rules = [
+                '房间推荐规则：',
+                '- 识别房间号：101号房、房间101、推荐101等',
+                '- 价格关键词：便宜、实惠 → 推荐低价房间',
+                '- 豪华关键词：豪华、高档 → 推荐高价房间',
+                '- 家庭关键词：家庭、亲子 → 推荐亲子房',
+                '',
+                '订单创建规则：',
+                '- 触发词：预订成功、订单详情、预订确认等',
+                '- 解析房间号、日期、手机号、价格、客人姓名',
+                '- 自动生成订单号和创建时间'
+            ];
+            
+            rules.forEach((rule, index) => {
+                setTimeout(() => {
+                    if (rule) {
+                        addTestMessage(results, 'ai', rule);
+                    }
+                }, index * 200);
+            });
+        }
+    </script>
+</body>
+</html>

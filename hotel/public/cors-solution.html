@@ -1,0 +1,323 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>CORS解决方案 - 普洱蘑菇庄园民宿</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Arial', sans-serif;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            min-height: 100vh;
+            padding: 20px;
+        }
+
+        .container {
+            max-width: 1000px;
+            margin: 0 auto;
+            background: white;
+            border-radius: 20px;
+            padding: 40px;
+            box-shadow: 0 20px 40px rgba(0,0,0,0.1);
+        }
+
+        .header {
+            text-align: center;
+            margin-bottom: 40px;
+            padding-bottom: 20px;
+            border-bottom: 2px solid #e9ecef;
+        }
+
+        .header h1 {
+            color: #2c3e50;
+            margin-bottom: 10px;
+            font-size: 2.5rem;
+        }
+
+        .problem-section {
+            background: #f8d7da;
+            border: 1px solid #f5c6cb;
+            border-radius: 15px;
+            padding: 20px;
+            margin-bottom: 30px;
+        }
+
+        .problem-section h3 {
+            color: #721c24;
+            margin-bottom: 15px;
+        }
+
+        .solution-section {
+            background: #d4edda;
+            border: 1px solid #c3e6cb;
+            border-radius: 15px;
+            padding: 20px;
+            margin-bottom: 30px;
+        }
+
+        .solution-section h3 {
+            color: #155724;
+            margin-bottom: 15px;
+        }
+
+        .quick-links {
+            background: #e3f2fd;
+            border-radius: 15px;
+            padding: 20px;
+            margin-bottom: 30px;
+        }
+
+        .link-buttons {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 15px;
+        }
+
+        .link-btn {
+            padding: 12px 24px;
+            border: none;
+            border-radius: 10px;
+            font-weight: bold;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            text-decoration: none;
+            display: inline-block;
+            color: white;
+        }
+
+        .link-btn.primary {
+            background: #007bff;
+        }
+
+        .link-btn.success {
+            background: #28a745;
+        }
+
+        .link-btn.warning {
+            background: #ffc107;
+            color: #212529;
+        }
+
+        .link-btn.danger {
+            background: #dc3545;
+        }
+
+        .link-btn:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 5px 15px rgba(0,0,0,0.2);
+        }
+
+        .code-block {
+            background: #f8f9fa;
+            border: 1px solid #e9ecef;
+            border-radius: 6px;
+            padding: 15px;
+            font-family: monospace;
+            font-size: 14px;
+            margin: 10px 0;
+            overflow-x: auto;
+        }
+
+        .step-box {
+            background: #fff3cd;
+            border: 1px solid #ffeaa7;
+            border-radius: 10px;
+            padding: 20px;
+            margin-bottom: 20px;
+        }
+
+        .step-box h4 {
+            color: #856404;
+            margin-bottom: 10px;
+        }
+
+        .emoji-large {
+            font-size: 2rem;
+            margin-right: 10px;
+        }
+
+        ul {
+            margin-left: 20px;
+            margin-top: 10px;
+        }
+
+        li {
+            margin-bottom: 8px;
+            line-height: 1.6;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div class="header">
+            <h1>🔧 CORS解决方案</h1>
+            <p>解决Dify API的跨域访问问题</p>
+        </div>
+
+        <div class="problem-section">
+            <h3>❌ 问题分析</h3>
+            <div style="line-height: 1.8; color: #721c24;">
+                <p><strong>错误信息：</strong><code>Failed to fetch</code></p>
+                <p><strong>原因：</strong>浏览器的同源策略阻止了跨域请求</p>
+                <p><strong>详细说明：</strong></p>
+                <ul>
+                    <li>您的前端运行在 <code>http://localhost:5173</code></li>
+                    <li>Dify服务运行在 <code>http://4295a4ce.r28.cpolar.top</code></li>
+                    <li>浏览器认为这是跨域请求，需要CORS头支持</li>
+                </ul>
+            </div>
+        </div>
+
+        <div class="solution-section">
+            <h3>✅ 解决方案</h3>
+            <div style="line-height: 1.8; color: #155724;">
+                <p>我们提供了三种解决方案，按推荐程度排序：</p>
+            </div>
+        </div>
+
+        <div class="step-box">
+            <h4>🥇 方案1：配置Dify服务支持CORS（推荐）</h4>
+            <p>在您的Dify服务配置中添加以下CORS头：</p>
+            <div class="code-block">
+# 在Dify服务的配置文件中添加
+Access-Control-Allow-Origin: http://localhost:5173
+Access-Control-Allow-Methods: POST, GET, OPTIONS
+Access-Control-Allow-Headers: Content-Type, Authorization
+Access-Control-Allow-Credentials: true
+            </div>
+            <p><strong>优点：</strong>彻底解决问题，适用于生产环境</p>
+            <p><strong>缺点：</strong>需要修改Dify服务配置</p>
+        </div>
+
+        <div class="step-box">
+            <h4>🥈 方案2：使用浏览器扩展（临时解决）</h4>
+            <p>安装CORS浏览器扩展来临时禁用CORS检查：</p>
+            <ul>
+                <li><strong>Chrome：</strong>搜索"CORS Unblock"扩展</li>
+                <li><strong>Firefox：</strong>搜索"CORS Everywhere"扩展</li>
+                <li><strong>Edge：</strong>搜索"CORS Helper"扩展</li>
+            </ul>
+            <p><strong>优点：</strong>快速解决，无需修改代码</p>
+            <p><strong>缺点：</strong>仅限开发测试，不适用于生产环境</p>
+        </div>
+
+        <div class="step-box">
+            <h4>🥉 方案3：使用开发服务器代理</h4>
+            <p>修改Vite配置文件添加代理：</p>
+            <div class="code-block">
+// vite.config.ts
+export default defineConfig({
+  // ... 其他配置
+  server: {
+    proxy: {
+      '/api/dify': {
+        target: 'http://4295a4ce.r28.cpolar.top',
+        changeOrigin: true,
+        rewrite: (path) => path.replace(/^\/api\/dify/, '')
+      }
+    }
+  }
+})
+            </div>
+            <p><strong>优点：</strong>开发环境友好</p>
+            <p><strong>缺点：</strong>需要修改前端代码和配置</p>
+        </div>
+
+        <div class="quick-links">
+            <h3>🚀 测试工具</h3>
+            <div class="link-buttons">
+                <a href="/dify-cors-test.html" class="link-btn primary" target="_blank">
+                    🔧 CORS诊断工具
+                </a>
+                <a href="/new-dify-test.html" class="link-btn success" target="_blank">
+                    🧪 Dify配置测试
+                </a>
+                <a href="/ai-room-selection" class="link-btn warning" target="_blank">
+                    🤖 AI选房页面
+                </a>
+                <a href="/test-summary.html" class="link-btn danger" target="_blank">
+                    📋 问题修复总结
+                </a>
+            </div>
+        </div>
+
+        <div style="background: #fff3cd; border-radius: 15px; padding: 20px; margin-bottom: 30px; border-left: 5px solid #ffc107;">
+            <h3 style="color: #856404; margin-bottom: 15px;">🛠️ 快速修复步骤</h3>
+            <div style="color: #856404; line-height: 1.8;">
+                <p><strong>如果您想立即测试，建议：</strong></p>
+                <ol style="margin-left: 20px; margin-top: 10px;">
+                    <li>安装浏览器CORS扩展（Chrome搜索"CORS Unblock"）</li>
+                    <li>启用扩展</li>
+                    <li>刷新页面重新测试</li>
+                    <li>测试完成后记得关闭扩展</li>
+                </ol>
+                
+                <p style="margin-top: 15px;"><strong>长期解决方案：</strong></p>
+                <ol style="margin-left: 20px; margin-top: 10px;">
+                    <li>联系Dify服务提供商配置CORS头</li>
+                    <li>或者在您的服务器上配置反向代理</li>
+                    <li>确保生产环境的CORS配置正确</li>
+                </ol>
+            </div>
+        </div>
+
+        <div style="background: #d1ecf1; border-radius: 15px; padding: 20px; margin-bottom: 30px; border-left: 5px solid #007bff;">
+            <h3 style="color: #0c5460; margin-bottom: 15px;">💡 技术说明</h3>
+            <div style="color: #0c5460; line-height: 1.8;">
+                <p><strong>什么是CORS？</strong></p>
+                <p>CORS（Cross-Origin Resource Sharing）是浏览器的一个安全特性，用于控制跨域请求。当前端和后端运行在不同的域名、端口或协议时，浏览器会阻止请求，除非服务器明确允许。</p>
+                
+                <p style="margin-top: 15px;"><strong>为什么会出现这个问题？</strong></p>
+                <ul style="margin-left: 20px; margin-top: 10px;">
+                    <li>前端：<code>http://localhost:5173</code></li>
+                    <li>Dify服务：<code>http://4295a4ce.r28.cpolar.top</code></li>
+                    <li>不同的域名导致跨域请求被阻止</li>
+                </ul>
+                
+                <p style="margin-top: 15px;"><strong>如何判断CORS问题？</strong></p>
+                <ul style="margin-left: 20px; margin-top: 10px;">
+                    <li>浏览器控制台显示"Failed to fetch"</li>
+                    <li>网络面板显示请求被取消或失败</li>
+                    <li>没有看到实际的HTTP响应</li>
+                </ul>
+            </div>
+        </div>
+
+        <div style="background: #d4edda; border-radius: 15px; padding: 20px; margin-top: 30px; border-left: 5px solid #28a745;">
+            <h3 style="color: #155724; margin-bottom: 15px;">🎯 解决方案总结</h3>
+            <div style="color: #155724; line-height: 1.8;">
+                <p><span class="emoji-large">🔧</span><strong>诊断工具：</strong>提供专业的CORS诊断工具，帮助识别问题</p>
+                <p><span class="emoji-large">⚡</span><strong>快速修复：</strong>使用浏览器扩展立即解决测试问题</p>
+                <p><span class="emoji-large">🏗️</span><strong>长期方案：</strong>配置服务器CORS头或使用代理</p>
+                <p><span class="emoji-large">🧪</span><strong>测试验证：</strong>提供多种测试工具验证修复效果</p>
+                <p><span class="emoji-large">📚</span><strong>技术支持：</strong>详细的技术说明和解决步骤</p>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        // 检测CORS支持
+        window.addEventListener('load', () => {
+            console.log('🔍 检测CORS支持...');
+            
+            // 简单的CORS检测
+            fetch('http://4295a4ce.r28.cpolar.top/', { 
+                method: 'GET', 
+                mode: 'no-cors' 
+            })
+            .then(() => {
+                console.log('✅ 基础连接正常');
+            })
+            .catch(error => {
+                console.log('❌ 连接问题:', error.message);
+            });
+        });
+    </script>
+</body>
+</html>

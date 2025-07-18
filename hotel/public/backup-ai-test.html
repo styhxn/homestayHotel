@@ -1,0 +1,390 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>备用AI助手测试 - 普普</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Microsoft YaHei', sans-serif;
+            background: linear-gradient(135deg, #4CAF50 0%, #8BC34A 100%);
+            min-height: 100vh;
+            padding: 20px;
+        }
+
+        .container {
+            max-width: 800px;
+            margin: 0 auto;
+            background: white;
+            border-radius: 20px;
+            box-shadow: 0 20px 40px rgba(0,0,0,0.1);
+            overflow: hidden;
+        }
+
+        .header {
+            background: linear-gradient(135deg, #4CAF50 0%, #8BC34A 100%);
+            color: white;
+            padding: 30px;
+            text-align: center;
+        }
+
+        .header h1 {
+            font-size: 2.2em;
+            margin-bottom: 10px;
+        }
+
+        .chat-container {
+            padding: 30px;
+        }
+
+        .chat-header {
+            display: flex;
+            align-items: center;
+            margin-bottom: 20px;
+            padding-bottom: 15px;
+            border-bottom: 2px solid #4CAF50;
+        }
+
+        .avatar {
+            width: 60px;
+            height: 60px;
+            border-radius: 50%;
+            background: #4CAF50;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            color: white;
+            font-size: 1.8em;
+            margin-right: 15px;
+        }
+
+        .chat-info h3 {
+            color: #2E7D32;
+            margin-bottom: 5px;
+        }
+
+        .chat-info p {
+            color: #666;
+            margin: 0;
+        }
+
+        .status-indicator {
+            background: #4CAF50;
+            color: white;
+            padding: 5px 12px;
+            border-radius: 15px;
+            font-size: 0.8em;
+            margin-left: auto;
+        }
+
+        .chat-messages {
+            max-height: 400px;
+            overflow-y: auto;
+            margin-bottom: 20px;
+            padding: 10px;
+            background: #f8f9fa;
+            border-radius: 10px;
+        }
+
+        .message {
+            margin-bottom: 15px;
+            padding: 12px 18px;
+            border-radius: 18px;
+            max-width: 80%;
+            line-height: 1.5;
+            animation: fadeIn 0.3s ease;
+        }
+
+        @keyframes fadeIn {
+            from { opacity: 0; transform: translateY(10px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+
+        .user-message {
+            background: #e3f2fd;
+            margin-left: auto;
+            text-align: right;
+        }
+
+        .ai-message {
+            background: #e8f5e8;
+            margin-right: auto;
+            white-space: pre-line;
+        }
+
+        .input-area {
+            display: flex;
+            gap: 10px;
+            margin-bottom: 20px;
+        }
+
+        .input-area input {
+            flex: 1;
+            padding: 12px 18px;
+            border: 2px solid #ddd;
+            border-radius: 25px;
+            font-size: 1em;
+            outline: none;
+            transition: border-color 0.3s ease;
+        }
+
+        .input-area input:focus {
+            border-color: #4CAF50;
+        }
+
+        .send-button {
+            background: #4CAF50;
+            color: white;
+            border: none;
+            padding: 12px 25px;
+            border-radius: 25px;
+            cursor: pointer;
+            font-size: 1em;
+            transition: all 0.3s ease;
+        }
+
+        .send-button:hover {
+            background: #45a049;
+            transform: translateY(-2px);
+        }
+
+        .send-button:disabled {
+            background: #ccc;
+            cursor: not-allowed;
+            transform: none;
+        }
+
+        .quick-questions {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+            gap: 10px;
+            margin-bottom: 20px;
+        }
+
+        .quick-question {
+            background: #f0f8f0;
+            border: 1px solid #4CAF50;
+            color: #2E7D32;
+            padding: 10px 15px;
+            border-radius: 20px;
+            cursor: pointer;
+            text-align: center;
+            transition: all 0.3s ease;
+            font-size: 0.9em;
+        }
+
+        .quick-question:hover {
+            background: #4CAF50;
+            color: white;
+            transform: translateY(-2px);
+        }
+
+        .service-status {
+            background: #d4edda;
+            border: 1px solid #c3e6cb;
+            color: #155724;
+            padding: 15px;
+            border-radius: 10px;
+            margin-bottom: 20px;
+        }
+
+        .loading {
+            display: inline-block;
+            width: 20px;
+            height: 20px;
+            border: 3px solid #f3f3f3;
+            border-top: 3px solid #4CAF50;
+            border-radius: 50%;
+            animation: spin 1s linear infinite;
+        }
+
+        @keyframes spin {
+            0% { transform: rotate(0deg); }
+            100% { transform: rotate(360deg); }
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div class="header">
+            <h1>🍵 茶茶AI助手</h1>
+            <p>备用AI服务 - 本地智能响应系统</p>
+        </div>
+
+        <div class="chat-container">
+            <div class="service-status">
+                <strong>✅ 备用AI服务已启用</strong><br>
+                当Dify服务不可用时，普普将使用本地智能响应为您提供服务。
+            </div>
+
+            <div class="chat-header">
+                <div class="avatar">🍵</div>
+                <div class="chat-info">
+                    <h3>普普AI助手</h3>
+                    <p>普洱蘑菇庄园专属AI顾问</p>
+                </div>
+                <div class="status-indicator">在线</div>
+            </div>
+
+            <div class="quick-questions">
+                <div class="quick-question" onclick="askQuestion('房间信息')">🏠 房间信息</div>
+                <div class="quick-question" onclick="askQuestion('预订房间')">📅 预订房间</div>
+                <div class="quick-question" onclick="askQuestion('茶艺活动')">🍵 茶艺活动</div>
+                <div class="quick-question" onclick="askQuestion('价格咨询')">💰 价格咨询</div>
+            </div>
+
+            <div class="chat-messages" id="chatMessages">
+                <div class="message ai-message">
+                    您好！欢迎来到普洱蘑菇庄园🍄！我是普普，您的专属AI小助手。
+
+我可以帮您：
+🏠 了解房间信息和价格
+📅 协助预订房间
+🍵 推荐茶艺体验活动
+🗺️ 介绍周边景点
+
+有什么可以帮助您的吗？
+                </div>
+            </div>
+
+            <div class="input-area">
+                <input type="text" id="userInput" placeholder="请输入您的问题..." />
+                <button class="send-button" onclick="sendMessage()" id="sendBtn">发送</button>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        // 备用AI响应数据
+        const backupResponses = {
+            '房间': `🏠 我们普洱蘑菇庄园有6种特色房型：
+
+🍄 蘑菇森林小屋(201号) - ¥350/晚，茶园景观，含早餐
+☁️ 云雾山景房(202号) - ¥380/晚，山景阳台，含早餐
+🍵 普洱茶香阁(203号) - ¥280/晚，茶具套装
+🏞️ 湖畔小筑(206号) - ¥428/晚，湖景阳台，垂钓设备
+
+每个房间都有独特的茶文化体验，您想了解哪个房型呢？`,
+
+            '预订': `📅 很高兴为您办理预订！请告诉我：
+
+• 入住和退房日期
+• 入住人数
+• 房型偏好
+
+我会为您查找最合适的房间，并为您生成茶艺体验优惠码！🍵`,
+
+            '活动': `🍵 庄园提供丰富的茶文化体验活动：
+
+• 茶艺课程学习 - ¥88/人（住客8折）
+• 采茶体验活动 - ¥68/人
+• 蘑菇森林探索 - ¥58/人
+• 湖边垂钓休闲 - 免费
+• 茶园日出观赏 - 免费
+
+您对哪个活动感兴趣呢？我可以为您详细介绍！`,
+
+            '价格': `💰 我们的房间价格如下：
+
+🍄 蘑菇森林小屋 - ¥350/晚
+☁️ 云雾山景房 - ¥380/晚
+🍵 普洱茶香阁 - ¥280/晚
+🏞️ 湖畔小筑 - ¥428/晚
+
+价格包含WiFi、空调、独立卫浴等基础设施。
+住客可享受茶艺体验8折优惠！`
+        };
+
+        // 发送消息
+        function sendMessage() {
+            const input = document.getElementById('userInput');
+            const message = input.value.trim();
+            
+            if (!message) return;
+
+            // 添加用户消息
+            addMessage(message, 'user');
+            
+            // 清空输入框
+            input.value = '';
+            
+            // 禁用发送按钮
+            const sendBtn = document.getElementById('sendBtn');
+            sendBtn.disabled = true;
+            sendBtn.innerHTML = '<span class="loading"></span>';
+
+            // 模拟AI响应延迟
+            setTimeout(() => {
+                const response = getBackupResponse(message);
+                addMessage(response, 'ai');
+                
+                // 恢复发送按钮
+                sendBtn.disabled = false;
+                sendBtn.textContent = '发送';
+            }, 1000);
+        }
+
+        // 获取备用AI响应
+        function getBackupResponse(message) {
+            const lowerMessage = message.toLowerCase();
+            
+            if (lowerMessage.includes('房间') || lowerMessage.includes('房型') || lowerMessage.includes('住宿')) {
+                return backupResponses['房间'];
+            }
+            
+            if (lowerMessage.includes('预订') || lowerMessage.includes('订房') || lowerMessage.includes('预约')) {
+                return backupResponses['预订'];
+            }
+            
+            if (lowerMessage.includes('活动') || lowerMessage.includes('体验') || lowerMessage.includes('茶艺')) {
+                return backupResponses['活动'];
+            }
+            
+            if (lowerMessage.includes('价格') || lowerMessage.includes('多少钱') || lowerMessage.includes('费用')) {
+                return backupResponses['价格'];
+            }
+            
+            // 默认回复
+            return `感谢您的咨询！我是普普AI助手，目前使用备用响应系统为您服务。
+
+您可以询问我关于：
+🏠 房间信息和价格
+📅 预订相关问题
+🍵 茶艺体验活动
+🗺️ 庄园周边景点
+
+请告诉我您想了解什么，我会尽力为您解答！`;
+        }
+
+        // 添加消息到聊天界面
+        function addMessage(text, type) {
+            const messagesContainer = document.getElementById('chatMessages');
+            const messageDiv = document.createElement('div');
+            messageDiv.className = `message ${type}-message`;
+            messageDiv.textContent = text;
+            
+            messagesContainer.appendChild(messageDiv);
+            messagesContainer.scrollTop = messagesContainer.scrollHeight;
+        }
+
+        // 快速提问
+        function askQuestion(question) {
+            document.getElementById('userInput').value = question;
+            sendMessage();
+        }
+
+        // 回车发送消息
+        document.getElementById('userInput').addEventListener('keypress', function(e) {
+            if (e.key === 'Enter') {
+                sendMessage();
+            }
+        });
+    </script>
+</body>
+</html>

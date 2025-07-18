@@ -1,0 +1,411 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>IP形象头像展示</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            min-height: 100vh;
+            padding: 20px;
+        }
+
+        .container {
+            max-width: 1200px;
+            margin: 0 auto;
+        }
+
+        .header {
+            text-align: center;
+            margin-bottom: 50px;
+            color: white;
+        }
+
+        .header h1 {
+            font-size: 3rem;
+            font-weight: 700;
+            margin-bottom: 10px;
+            text-shadow: 0 4px 15px rgba(0, 0, 0, 0.3);
+        }
+
+        .header p {
+            font-size: 1.2rem;
+            opacity: 0.9;
+        }
+
+        .showcase-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+            gap: 30px;
+            margin-bottom: 50px;
+        }
+
+        .avatar-card {
+            background: rgba(255, 255, 255, 0.95);
+            border-radius: 20px;
+            padding: 30px;
+            text-align: center;
+            box-shadow: 0 20px 60px rgba(0, 0, 0, 0.15);
+            backdrop-filter: blur(10px);
+            transition: transform 0.3s ease, box-shadow 0.3s ease;
+        }
+
+        .avatar-card:hover {
+            transform: translateY(-10px);
+            box-shadow: 0 30px 80px rgba(0, 0, 0, 0.25);
+        }
+
+        .avatar-container {
+            position: relative;
+            display: inline-block;
+            margin-bottom: 20px;
+        }
+
+        .decoration-ring {
+            position: absolute;
+            top: -15px;
+            left: -15px;
+            right: -15px;
+            bottom: -15px;
+            border-radius: 50%;
+            background: linear-gradient(45deg, 
+                #FFD700 0%, 
+                #4CAF50 25%, 
+                #8B4513 50%, 
+                #CD853F 75%, 
+                #FFD700 100%);
+            opacity: 0.6;
+            animation: rotate 8s linear infinite;
+        }
+
+        .avatar-frame {
+            position: relative;
+            width: 150px;
+            height: 150px;
+            border-radius: 50%;
+            background: linear-gradient(135deg, #FFD700, #4CAF50);
+            padding: 5px;
+            box-shadow: 
+                0 15px 40px rgba(139, 69, 19, 0.3),
+                0 0 0 4px rgba(255, 255, 255, 0.8),
+                inset 0 3px 0 rgba(255, 255, 255, 0.3);
+        }
+
+        .avatar-inner {
+            width: 100%;
+            height: 100%;
+            border-radius: 50%;
+            overflow: hidden;
+            background: white;
+            position: relative;
+        }
+
+        .avatar-image {
+            width: 100%;
+            height: 100%;
+            object-fit: cover;
+            border-radius: 50%;
+            transition: transform 0.3s ease;
+        }
+
+        .avatar-card:hover .avatar-image {
+            transform: scale(1.1);
+        }
+
+        .status-indicator {
+            position: absolute;
+            bottom: 10px;
+            right: 10px;
+            width: 30px;
+            height: 30px;
+            background: #4CAF50;
+            border-radius: 50%;
+            border: 4px solid white;
+            box-shadow: 0 3px 10px rgba(0, 0, 0, 0.2);
+        }
+
+        .status-dot {
+            width: 100%;
+            height: 100%;
+            border-radius: 50%;
+            animation: pulse 2s infinite;
+        }
+
+        .glow-effect {
+            position: absolute;
+            top: -30%;
+            left: -30%;
+            right: -30%;
+            bottom: -30%;
+            border-radius: 50%;
+            background: radial-gradient(circle, rgba(255, 215, 0, 0.4) 0%, transparent 70%);
+            animation: glow 3s ease-in-out infinite alternate;
+        }
+
+        .avatar-info h3 {
+            font-size: 1.5rem;
+            font-weight: 700;
+            color: #2d3748;
+            margin-bottom: 8px;
+        }
+
+        .avatar-info p {
+            color: #718096;
+            font-size: 1rem;
+            margin-bottom: 15px;
+        }
+
+        .avatar-features {
+            display: flex;
+            justify-content: center;
+            gap: 15px;
+            margin-top: 20px;
+        }
+
+        .feature-tag {
+            background: linear-gradient(135deg, rgba(139, 69, 19, 0.1), rgba(205, 133, 63, 0.1));
+            color: #8B4513;
+            padding: 6px 12px;
+            border-radius: 15px;
+            font-size: 0.8rem;
+            font-weight: 600;
+            border: 1px solid rgba(139, 69, 19, 0.2);
+        }
+
+        .size-demo {
+            background: rgba(255, 255, 255, 0.95);
+            border-radius: 20px;
+            padding: 30px;
+            text-align: center;
+            box-shadow: 0 20px 60px rgba(0, 0, 0, 0.15);
+            backdrop-filter: blur(10px);
+        }
+
+        .size-demo h2 {
+            color: #2d3748;
+            margin-bottom: 30px;
+            font-size: 2rem;
+        }
+
+        .size-grid {
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            gap: 30px;
+            flex-wrap: wrap;
+        }
+
+        .size-item {
+            text-align: center;
+        }
+
+        .size-label {
+            margin-top: 10px;
+            font-weight: 600;
+            color: #4a5568;
+        }
+
+        /* 动画 */
+        @keyframes rotate {
+            from { transform: rotate(0deg); }
+            to { transform: rotate(360deg); }
+        }
+
+        @keyframes pulse {
+            0%, 100% { opacity: 1; }
+            50% { opacity: 0.7; }
+        }
+
+        @keyframes glow {
+            from {
+                opacity: 0.5;
+                transform: scale(1);
+            }
+            to {
+                opacity: 0.8;
+                transform: scale(1.1);
+            }
+        }
+
+        /* 响应式设计 */
+        @media (max-width: 768px) {
+            .header h1 {
+                font-size: 2rem;
+            }
+            
+            .showcase-grid {
+                grid-template-columns: 1fr;
+                gap: 20px;
+            }
+            
+            .avatar-frame {
+                width: 120px;
+                height: 120px;
+            }
+            
+            .size-grid {
+                gap: 20px;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div class="header">
+            <h1>🎨 IP形象头像展示</h1>
+            <p>普洱蘑菇庄园专属IP形象 - 普普系列</p>
+        </div>
+
+        <div class="showcase-grid">
+            <!-- 普普正面 -->
+            <div class="avatar-card">
+                <div class="avatar-container">
+                    <div class="decoration-ring"></div>
+                    <div class="glow-effect"></div>
+                    <div class="avatar-frame">
+                        <div class="avatar-inner">
+                            <img src="/src/assets/images/IP形象/普普正面.png" alt="普普正面" class="avatar-image">
+                            <div class="status-indicator">
+                                <div class="status-dot"></div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                <div class="avatar-info">
+                    <h3>普普正面</h3>
+                    <p>温暖亲切的茶文化专家</p>
+                    <div class="avatar-features">
+                        <span class="feature-tag">经典</span>
+                        <span class="feature-tag">亲切</span>
+                        <span class="feature-tag">专业</span>
+                    </div>
+                </div>
+            </div>
+
+            <!-- 普普平面1 -->
+            <div class="avatar-card">
+                <div class="avatar-container">
+                    <div class="decoration-ring"></div>
+                    <div class="glow-effect"></div>
+                    <div class="avatar-frame">
+                        <div class="avatar-inner">
+                            <img src="/src/assets/images/IP形象/普普平面展示2D   1.png" alt="普普平面1" class="avatar-image">
+                            <div class="status-indicator">
+                                <div class="status-dot"></div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                <div class="avatar-info">
+                    <h3>普普平面1</h3>
+                    <p>活泼可爱的2D形象</p>
+                    <div class="avatar-features">
+                        <span class="feature-tag">活泼</span>
+                        <span class="feature-tag">可爱</span>
+                        <span class="feature-tag">2D</span>
+                    </div>
+                </div>
+            </div>
+
+            <!-- 普普平面2 -->
+            <div class="avatar-card">
+                <div class="avatar-container">
+                    <div class="decoration-ring"></div>
+                    <div class="glow-effect"></div>
+                    <div class="avatar-frame">
+                        <div class="avatar-inner">
+                            <img src="/src/assets/images/IP形象/普普平面展示2D    2.png" alt="普普平面2" class="avatar-image">
+                            <div class="status-indicator">
+                                <div class="status-dot"></div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                <div class="avatar-info">
+                    <h3>普普平面2</h3>
+                    <p>优雅精致的2D形象</p>
+                    <div class="avatar-features">
+                        <span class="feature-tag">优雅</span>
+                        <span class="feature-tag">精致</span>
+                        <span class="feature-tag">2D</span>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- 尺寸演示 -->
+        <div class="size-demo">
+            <h2>📏 头像尺寸演示</h2>
+            <div class="size-grid">
+                <div class="size-item">
+                    <div class="avatar-container" style="transform: scale(0.2);">
+                        <div class="avatar-frame">
+                            <div class="avatar-inner">
+                                <img src="/src/assets/images/IP形象/茶茶正面.png" alt="XS" class="avatar-image">
+                            </div>
+                        </div>
+                    </div>
+                    <div class="size-label">XS (32px)</div>
+                </div>
+
+                <div class="size-item">
+                    <div class="avatar-container" style="transform: scale(0.32);">
+                        <div class="avatar-frame">
+                            <div class="avatar-inner">
+                                <img src="/src/assets/images/IP形象/茶茶正面.png" alt="SM" class="avatar-image">
+                            </div>
+                        </div>
+                    </div>
+                    <div class="size-label">SM (48px)</div>
+                </div>
+
+                <div class="size-item">
+                    <div class="avatar-container" style="transform: scale(0.53);">
+                        <div class="avatar-frame">
+                            <div class="avatar-inner">
+                                <img src="/src/assets/images/IP形象/茶茶正面.png" alt="MD" class="avatar-image">
+                            </div>
+                        </div>
+                    </div>
+                    <div class="size-label">MD (80px)</div>
+                </div>
+
+                <div class="size-item">
+                    <div class="avatar-container" style="transform: scale(0.8);">
+                        <div class="avatar-frame">
+                            <div class="avatar-inner">
+                                <img src="/src/assets/images/IP形象/茶茶正面.png" alt="LG" class="avatar-image">
+                            </div>
+                        </div>
+                    </div>
+                    <div class="size-label">LG (120px)</div>
+                </div>
+
+                <div class="size-item">
+                    <div class="avatar-container">
+                        <div class="decoration-ring"></div>
+                        <div class="glow-effect"></div>
+                        <div class="avatar-frame">
+                            <div class="avatar-inner">
+                                <img src="/src/assets/images/IP形象/茶茶正面.png" alt="XL" class="avatar-image">
+                                <div class="status-indicator">
+                                    <div class="status-dot"></div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="size-label">XL (160px)</div>
+                </div>
+            </div>
+        </div>
+    </div>
+</body>
+</html>

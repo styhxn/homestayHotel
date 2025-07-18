@@ -1,0 +1,737 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>AI选房集成测试</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            min-height: 100vh;
+            padding: 20px;
+        }
+
+        .container {
+            max-width: 1400px;
+            margin: 0 auto;
+            background: rgba(255, 255, 255, 0.95);
+            border-radius: 20px;
+            padding: 30px;
+            box-shadow: 0 20px 60px rgba(0, 0, 0, 0.1);
+        }
+
+        .header {
+            text-align: center;
+            margin-bottom: 40px;
+        }
+
+        .header h1 {
+            color: #1f2937;
+            font-size: 2.5rem;
+            margin-bottom: 10px;
+        }
+
+        .header p {
+            color: #6b7280;
+            font-size: 1.1rem;
+        }
+
+        .test-grid {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 30px;
+            margin-bottom: 40px;
+        }
+
+        .test-panel {
+            background: #f9fafb;
+            border-radius: 15px;
+            padding: 25px;
+            border-left: 4px solid #d4af37;
+        }
+
+        .test-panel h3 {
+            color: #1f2937;
+            margin-bottom: 20px;
+            font-size: 1.3rem;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+
+        .test-buttons {
+            display: flex;
+            gap: 10px;
+            flex-wrap: wrap;
+            margin-bottom: 20px;
+        }
+
+        .test-btn {
+            background: linear-gradient(135deg, #d4af37 0%, #f4d03f 100%);
+            color: white;
+            border: none;
+            padding: 10px 20px;
+            border-radius: 8px;
+            cursor: pointer;
+            font-weight: 600;
+            transition: all 0.3s ease;
+            font-size: 0.9rem;
+        }
+
+        .test-btn:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 8px 25px rgba(212, 175, 55, 0.3);
+        }
+
+        .test-btn.secondary {
+            background: linear-gradient(135deg, #6b7280 0%, #9ca3af 100%);
+        }
+
+        .test-btn.success {
+            background: linear-gradient(135deg, #10b981 0%, #34d399 100%);
+        }
+
+        .test-btn.danger {
+            background: linear-gradient(135deg, #ef4444 0%, #f87171 100%);
+        }
+
+        .test-results {
+            max-height: 300px;
+            overflow-y: auto;
+            border: 1px solid #e5e7eb;
+            border-radius: 8px;
+            padding: 15px;
+            background: white;
+        }
+
+        .result-item {
+            padding: 10px;
+            margin-bottom: 10px;
+            border-radius: 6px;
+            border-left: 4px solid #d4af37;
+            background: #f8f9fa;
+        }
+
+        .result-item.success {
+            border-left-color: #10b981;
+            background: #f0fdf4;
+        }
+
+        .result-item.error {
+            border-left-color: #ef4444;
+            background: #fef2f2;
+        }
+
+        .result-item.info {
+            border-left-color: #3b82f6;
+            background: #eff6ff;
+        }
+
+        .result-time {
+            font-size: 0.8rem;
+            color: #6b7280;
+            margin-bottom: 5px;
+        }
+
+        .result-content {
+            color: #374151;
+            line-height: 1.4;
+        }
+
+        .status-section {
+            background: #f3f4f6;
+            border-radius: 15px;
+            padding: 25px;
+            margin-bottom: 30px;
+        }
+
+        .status-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+            gap: 20px;
+        }
+
+        .status-card {
+            background: white;
+            padding: 20px;
+            border-radius: 10px;
+            text-align: center;
+            box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+        }
+
+        .status-card h4 {
+            color: #1f2937;
+            margin-bottom: 10px;
+        }
+
+        .status-indicator {
+            display: inline-block;
+            width: 12px;
+            height: 12px;
+            border-radius: 50%;
+            margin-right: 8px;
+        }
+
+        .status-indicator.online {
+            background: #10b981;
+        }
+
+        .status-indicator.offline {
+            background: #ef4444;
+        }
+
+        .quick-actions {
+            text-align: center;
+            margin-top: 30px;
+        }
+
+        .quick-actions h3 {
+            margin-bottom: 20px;
+            color: #1f2937;
+        }
+
+        .action-buttons {
+            display: flex;
+            gap: 15px;
+            justify-content: center;
+            flex-wrap: wrap;
+        }
+
+        .action-btn {
+            display: inline-flex;
+            align-items: center;
+            gap: 8px;
+            padding: 12px 24px;
+            background: white;
+            color: #1f2937;
+            text-decoration: none;
+            border-radius: 8px;
+            border: 2px solid #e5e7eb;
+            transition: all 0.3s ease;
+            font-weight: 600;
+        }
+
+        .action-btn:hover {
+            border-color: #d4af37;
+            background: #d4af37;
+            color: white;
+            transform: translateY(-2px);
+        }
+
+        .action-btn.primary {
+            background: #d4af37;
+            color: white;
+            border-color: #d4af37;
+        }
+
+        .action-btn.primary:hover {
+            background: #b8860b;
+            border-color: #b8860b;
+        }
+
+        .simulation-panel {
+            grid-column: 1 / -1;
+            background: #e0f2fe;
+            border-left-color: #0284c7;
+        }
+
+        .chat-simulation {
+            background: white;
+            border-radius: 10px;
+            padding: 20px;
+            margin-top: 15px;
+            max-height: 400px;
+            overflow-y: auto;
+        }
+
+        .chat-message {
+            margin-bottom: 15px;
+            padding: 10px 15px;
+            border-radius: 10px;
+            max-width: 80%;
+        }
+
+        .chat-message.user {
+            background: #e0f2fe;
+            margin-left: auto;
+            text-align: right;
+        }
+
+        .chat-message.ai {
+            background: #f0fdf4;
+            margin-right: auto;
+        }
+
+        .chat-message.system {
+            background: #fef3c7;
+            margin: 0 auto;
+            text-align: center;
+            max-width: 90%;
+        }
+
+        .message-time {
+            font-size: 0.8rem;
+            color: #6b7280;
+            margin-bottom: 5px;
+        }
+
+        .message-content {
+            color: #374151;
+            line-height: 1.4;
+        }
+
+        .input-group {
+            display: flex;
+            gap: 10px;
+            margin-top: 15px;
+        }
+
+        .chat-input {
+            flex: 1;
+            padding: 10px 15px;
+            border: 1px solid #d1d5db;
+            border-radius: 8px;
+            font-size: 0.9rem;
+        }
+
+        .send-btn {
+            background: #d4af37;
+            color: white;
+            border: none;
+            padding: 10px 20px;
+            border-radius: 8px;
+            cursor: pointer;
+            font-weight: 600;
+        }
+
+        .send-btn:hover {
+            background: #b8860b;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div class="header">
+            <h1>🤖 AI选房集成测试</h1>
+            <p>测试完整的AI对话 → 房间推荐 → 订单创建流程</p>
+        </div>
+
+        <div class="status-section">
+            <h3>🔍 系统状态检查</h3>
+            <div class="status-grid">
+                <div class="status-card">
+                    <h4>前端服务</h4>
+                    <span class="status-indicator online"></span>
+                    <span id="frontend-status">在线 (5174)</span>
+                </div>
+                <div class="status-card">
+                    <h4>后端服务</h4>
+                    <span class="status-indicator" id="backend-indicator"></span>
+                    <span id="backend-status">检查中...</span>
+                </div>
+                <div class="status-card">
+                    <h4>Dify服务</h4>
+                    <span class="status-indicator" id="dify-indicator"></span>
+                    <span id="dify-status">检查中...</span>
+                </div>
+                <div class="status-card">
+                    <h4>AI推荐</h4>
+                    <span class="status-indicator" id="ai-indicator"></span>
+                    <span id="ai-status">待测试</span>
+                </div>
+            </div>
+        </div>
+
+        <div class="test-grid">
+            <div class="test-panel">
+                <h3>🏠 房间推荐测试</h3>
+                <div class="test-buttons">
+                    <button class="test-btn" onclick="testRecommendation('便宜房间')">💰 便宜房间</button>
+                    <button class="test-btn" onclick="testRecommendation('豪华房间')">✨ 豪华房间</button>
+                    <button class="test-btn" onclick="testRecommendation('家庭房间')">👨‍👩‍👧‍👦 家庭房间</button>
+                    <button class="test-btn" onclick="testRecommendation('101号房')">🏠 指定房间</button>
+                </div>
+                <div id="recommendation-results" class="test-results"></div>
+            </div>
+
+            <div class="test-panel">
+                <h3>📋 订单创建测试</h3>
+                <div class="test-buttons">
+                    <button class="test-btn success" onclick="testOrderCreation('简单订单')">📝 简单订单</button>
+                    <button class="test-btn success" onclick="testOrderCreation('完整订单')">📋 完整订单</button>
+                    <button class="test-btn secondary" onclick="testOrderCreation('复杂订单')">🔧 复杂订单</button>
+                </div>
+                <div id="order-results" class="test-results"></div>
+            </div>
+
+            <div class="simulation-panel">
+                <h3>💬 AI对话模拟</h3>
+                <p>模拟真实的AI对话场景，测试推荐和订单创建功能</p>
+                <div class="chat-simulation" id="chat-simulation">
+                    <div class="chat-message system">
+                        <div class="message-time">系统消息</div>
+                        <div class="message-content">AI对话模拟器已准备就绪，请开始测试</div>
+                    </div>
+                </div>
+                <div class="input-group">
+                    <input type="text" class="chat-input" id="chat-input" placeholder="输入测试消息，例如：我想要一个便宜的房间">
+                    <button class="send-btn" onclick="sendTestMessage()">发送</button>
+                </div>
+                <div class="test-buttons" style="margin-top: 15px;">
+                    <button class="test-btn" onclick="runFullScenario()">🎬 完整场景测试</button>
+                    <button class="test-btn secondary" onclick="clearChat()">🗑️ 清空对话</button>
+                </div>
+            </div>
+        </div>
+
+        <div class="quick-actions">
+            <h3>🚀 快速访问</h3>
+            <div class="action-buttons">
+                <a href="/ai-rooms" class="action-btn primary">🤖 AI选房页面</a>
+                <a href="/ai-room-test.html" class="action-btn">🧪 功能测试</a>
+                <a href="/" class="action-btn">🏠 返回首页</a>
+                <button class="action-btn" onclick="checkAllServices()">🔍 检查所有服务</button>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        // 页面加载时检查服务状态
+        window.onload = function() {
+            checkAllServices();
+        };
+
+        // 检查所有服务状态
+        async function checkAllServices() {
+            await checkBackendService();
+            await checkDifyService();
+            updateAIStatus();
+        }
+
+        // 检查后端服务
+        async function checkBackendService() {
+            try {
+                const response = await fetch('http://localhost:8081/api/health', {
+                    method: 'GET',
+                    headers: {
+                        'Accept': 'application/json'
+                    }
+                });
+
+                if (response.ok) {
+                    const data = await response.json();
+                    if (data && data.code === 200) {
+                        updateServiceStatus('backend', true, '在线 (8081)');
+                        console.log('后端服务状态:', data);
+                        return true;
+                    } else {
+                        updateServiceStatus('backend', false, '服务异常');
+                        return false;
+                    }
+                } else {
+                    updateServiceStatus('backend', false, '服务异常');
+                    return false;
+                }
+            } catch (error) {
+                console.error('后端服务检查错误:', error);
+                updateServiceStatus('backend', false, '离线');
+                return false;
+            }
+        }
+
+        // 检查Dify服务
+        async function checkDifyService() {
+            try {
+                const response = await fetch('http://4295a4ce.r28.cpolar.top', {
+                    method: 'HEAD',
+                    mode: 'no-cors',
+                    timeout: 5000
+                });
+                updateServiceStatus('dify', true, '在线');
+            } catch (error) {
+                updateServiceStatus('dify', false, '离线');
+            }
+        }
+
+        // 更新服务状态显示
+        function updateServiceStatus(service, isOnline, statusText) {
+            const indicator = document.getElementById(`${service}-indicator`);
+            const status = document.getElementById(`${service}-status`);
+            
+            indicator.className = `status-indicator ${isOnline ? 'online' : 'offline'}`;
+            status.textContent = statusText;
+        }
+
+        // 更新AI状态
+        function updateAIStatus() {
+            const backendOnline = document.getElementById('backend-indicator').classList.contains('online');
+            const difyOnline = document.getElementById('dify-indicator').classList.contains('online');
+            
+            if (backendOnline && difyOnline) {
+                updateServiceStatus('ai', true, '就绪');
+            } else {
+                updateServiceStatus('ai', false, '不可用');
+            }
+        }
+
+        // 测试房间推荐
+        function testRecommendation(type) {
+            const results = document.getElementById('recommendation-results');
+            
+            let testMessage = '';
+            switch(type) {
+                case '便宜房间':
+                    testMessage = '我想要一个便宜的房间，价格实惠一点的';
+                    break;
+                case '豪华房间':
+                    testMessage = '推荐一个豪华的房间，设施要好一些';
+                    break;
+                case '家庭房间':
+                    testMessage = '我们是一家三口，需要适合家庭的房间';
+                    break;
+                case '101号房':
+                    testMessage = '推荐101号房间给我看看';
+                    break;
+            }
+            
+            addTestResult(results, 'info', `测试消息: ${testMessage}`);
+            
+            // 模拟推荐解析
+            setTimeout(() => {
+                const recommendations = simulateRoomRecommendation(testMessage);
+                if (recommendations.length > 0) {
+                    addTestResult(results, 'success', `✅ 推荐成功: ${recommendations.map(r => r.code + '号房 (' + r.reason + ')').join(', ')}`);
+                } else {
+                    addTestResult(results, 'error', `❌ 未找到匹配的房间`);
+                }
+            }, 500);
+        }
+
+        // 测试订单创建
+        function testOrderCreation(type) {
+            const results = document.getElementById('order-results');
+            
+            let testMessage = '';
+            switch(type) {
+                case '简单订单':
+                    testMessage = '预订成功！您已预订101号房';
+                    break;
+                case '完整订单':
+                    testMessage = '预订确认：101号房，入住2025年7月16日，客人张三，电话13812345678，总计48元';
+                    break;
+                case '复杂订单':
+                    testMessage = '订单详情：202号房间，2025年7月20日入住，2025年7月22日退房，客人李四，联系方式13987654321，房费96元，服务费10元，总计106元';
+                    break;
+            }
+            
+            addTestResult(results, 'info', `测试消息: ${testMessage}`);
+            
+            // 模拟订单解析
+            setTimeout(() => {
+                const orderInfo = simulateOrderParsing(testMessage);
+                if (orderInfo.roomCode) {
+                    addTestResult(results, 'success', `✅ 订单创建成功: 房间${orderInfo.roomCode}号，总计${orderInfo.totalAmount || 48}元`);
+                } else {
+                    addTestResult(results, 'error', `❌ 订单信息解析失败`);
+                }
+            }, 500);
+        }
+
+        // 添加测试结果
+        function addTestResult(container, type, content) {
+            const resultDiv = document.createElement('div');
+            resultDiv.className = `result-item ${type}`;
+            
+            const timeDiv = document.createElement('div');
+            timeDiv.className = 'result-time';
+            timeDiv.textContent = new Date().toLocaleTimeString();
+            
+            const contentDiv = document.createElement('div');
+            contentDiv.className = 'result-content';
+            contentDiv.textContent = content;
+            
+            resultDiv.appendChild(timeDiv);
+            resultDiv.appendChild(contentDiv);
+            container.appendChild(resultDiv);
+            
+            // 滚动到底部
+            container.scrollTop = container.scrollHeight;
+        }
+
+        // 模拟房间推荐
+        function simulateRoomRecommendation(message) {
+            const recommendations = [];
+            const lowerMessage = message.toLowerCase();
+            
+            if (lowerMessage.includes('便宜') || lowerMessage.includes('实惠')) {
+                recommendations.push({ code: '101', reason: '价格实惠' });
+            }
+            
+            if (lowerMessage.includes('豪华') || lowerMessage.includes('高档')) {
+                recommendations.push({ code: '212', reason: '豪华舒适' });
+            }
+            
+            if (lowerMessage.includes('家庭') || lowerMessage.includes('亲子')) {
+                recommendations.push({ code: '212', reason: '适合家庭' });
+            }
+            
+            const roomMatch = message.match(/(\d{3})号?房/);
+            if (roomMatch) {
+                recommendations.push({ code: roomMatch[1], reason: '指定房间' });
+            }
+            
+            return recommendations;
+        }
+
+        // 模拟订单解析
+        function simulateOrderParsing(message) {
+            const orderInfo = {};
+            
+            const roomMatch = message.match(/(\d{3})号?房/);
+            if (roomMatch) {
+                orderInfo.roomCode = roomMatch[1];
+            }
+            
+            const priceMatch = message.match(/(\d+)元/);
+            if (priceMatch) {
+                orderInfo.totalAmount = parseInt(priceMatch[1]);
+            }
+            
+            return orderInfo;
+        }
+
+        // 发送测试消息
+        function sendTestMessage() {
+            const input = document.getElementById('chat-input');
+            const message = input.value.trim();
+            
+            if (!message) return;
+            
+            addChatMessage('user', message);
+            input.value = '';
+            
+            // 模拟AI回复
+            setTimeout(() => {
+                const aiResponse = generateAIResponse(message);
+                addChatMessage('ai', aiResponse);
+                
+                // 检查是否触发推荐或订单
+                checkForRecommendations(aiResponse);
+                checkForOrders(aiResponse);
+            }, 1000);
+        }
+
+        // 添加聊天消息
+        function addChatMessage(type, content) {
+            const chatContainer = document.getElementById('chat-simulation');
+            
+            const messageDiv = document.createElement('div');
+            messageDiv.className = `chat-message ${type}`;
+            
+            const timeDiv = document.createElement('div');
+            timeDiv.className = 'message-time';
+            timeDiv.textContent = new Date().toLocaleTimeString();
+            
+            const contentDiv = document.createElement('div');
+            contentDiv.className = 'message-content';
+            contentDiv.textContent = content;
+            
+            messageDiv.appendChild(timeDiv);
+            messageDiv.appendChild(contentDiv);
+            chatContainer.appendChild(messageDiv);
+            
+            // 滚动到底部
+            chatContainer.scrollTop = chatContainer.scrollHeight;
+        }
+
+        // 生成AI回复
+        function generateAIResponse(message) {
+            const lowerMessage = message.toLowerCase();
+            
+            if (lowerMessage.includes('便宜') || lowerMessage.includes('实惠')) {
+                return '我为您推荐101号房，价格实惠，只需18元/晚，性价比很高。这是一间雨林景观豪华蘑菇屋，虽然价格便宜但设施齐全。';
+            }
+            
+            if (lowerMessage.includes('豪华') || lowerMessage.includes('高档')) {
+                return '推荐212号房给您，这是我们的豪华亲子房，价格418元/晚。房间宽敞舒适，设施完善，非常适合追求高品质住宿体验的客人。';
+            }
+            
+            if (lowerMessage.includes('家庭') || lowerMessage.includes('亲子')) {
+                return '为您推荐212号房，这是专门的亲子房，空间宽敞，适合家庭入住。房间内有专门的儿童设施，价格418元/晚。';
+            }
+            
+            if (lowerMessage.includes('预订') || lowerMessage.includes('订')) {
+                return '好的，我来为您处理预订。预订成功！您已预订101号房，入住日期2025年7月16日，总计48元。请提供您的联系方式以完成预订。';
+            }
+            
+            return '您好！我是AI选房助手，可以为您推荐合适的房间。请告诉我您的需求，比如价格范围、房间类型等。';
+        }
+
+        // 检查推荐
+        function checkForRecommendations(message) {
+            const recommendations = simulateRoomRecommendation(message);
+            if (recommendations.length > 0) {
+                addChatMessage('system', `🏠 系统检测到房间推荐: ${recommendations.map(r => r.code + '号房').join(', ')}`);
+            }
+        }
+
+        // 检查订单
+        function checkForOrders(message) {
+            const orderInfo = simulateOrderParsing(message);
+            if (orderInfo.roomCode) {
+                addChatMessage('system', `📋 系统检测到订单创建: 房间${orderInfo.roomCode}号`);
+            }
+        }
+
+        // 运行完整场景测试
+        function runFullScenario() {
+            clearChat();
+            
+            const scenarios = [
+                { type: 'user', message: '你好，我想预订一个房间' },
+                { type: 'ai', message: '您好！欢迎来到普洱蘑菇庄园民宿。请告诉我您的需求，比如价格范围、入住时间等。' },
+                { type: 'user', message: '我想要一个便宜一点的房间，价格不要太贵' },
+                { type: 'ai', message: '我为您推荐101号房，价格实惠，只需18元/晚，性价比很高。这是一间雨林景观豪华蘑菇屋。' },
+                { type: 'user', message: '好的，我要预订101号房' },
+                { type: 'ai', message: '预订确认：101号房，入住2025年7月16日，客人张三，电话13812345678，总计18元。预订成功！' }
+            ];
+            
+            scenarios.forEach((scenario, index) => {
+                setTimeout(() => {
+                    addChatMessage(scenario.type, scenario.message);
+                    
+                    if (scenario.type === 'ai') {
+                        checkForRecommendations(scenario.message);
+                        checkForOrders(scenario.message);
+                    }
+                }, index * 2000);
+            });
+        }
+
+        // 清空对话
+        function clearChat() {
+            const chatContainer = document.getElementById('chat-simulation');
+            chatContainer.innerHTML = `
+                <div class="chat-message system">
+                    <div class="message-time">系统消息</div>
+                    <div class="message-content">对话已清空，可以开始新的测试</div>
+                </div>
+            `;
+        }
+
+        // 回车发送消息
+        document.getElementById('chat-input').addEventListener('keypress', function(e) {
+            if (e.key === 'Enter') {
+                sendTestMessage();
+            }
+        });
+    </script>
+</body>
+</html>

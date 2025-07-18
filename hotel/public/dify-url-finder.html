@@ -1,0 +1,381 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Dify URL查找器 - 普洱蘑菇庄园民宿</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Arial', sans-serif;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            min-height: 100vh;
+            padding: 20px;
+        }
+
+        .container {
+            max-width: 1000px;
+            margin: 0 auto;
+            background: white;
+            border-radius: 20px;
+            padding: 40px;
+            box-shadow: 0 20px 40px rgba(0,0,0,0.1);
+        }
+
+        .header {
+            text-align: center;
+            margin-bottom: 30px;
+            padding-bottom: 20px;
+            border-bottom: 2px solid #e9ecef;
+        }
+
+        .header h1 {
+            color: #2c3e50;
+            margin-bottom: 10px;
+            font-size: 2rem;
+        }
+
+        .test-section {
+            margin-bottom: 30px;
+            padding: 20px;
+            background: #f8f9fa;
+            border-radius: 10px;
+        }
+
+        .test-section h3 {
+            color: #495057;
+            margin-bottom: 15px;
+        }
+
+        .btn {
+            padding: 12px 24px;
+            border: none;
+            border-radius: 6px;
+            cursor: pointer;
+            font-weight: 500;
+            transition: all 0.3s ease;
+            margin: 5px;
+        }
+
+        .btn-primary {
+            background: #007bff;
+            color: white;
+        }
+
+        .btn-success {
+            background: #28a745;
+            color: white;
+        }
+
+        .btn-warning {
+            background: #ffc107;
+            color: #212529;
+        }
+
+        .btn:hover {
+            transform: translateY(-1px);
+        }
+
+        .btn:disabled {
+            background: #6c757d;
+            cursor: not-allowed;
+            transform: none;
+        }
+
+        .response-area {
+            background: white;
+            border: 1px solid #ddd;
+            border-radius: 6px;
+            padding: 15px;
+            min-height: 200px;
+            white-space: pre-wrap;
+            font-family: monospace;
+            font-size: 12px;
+            overflow-y: auto;
+            max-height: 400px;
+        }
+
+        .status {
+            padding: 10px;
+            border-radius: 6px;
+            margin-bottom: 15px;
+            font-weight: 500;
+        }
+
+        .status.success {
+            background: #d4edda;
+            color: #155724;
+            border: 1px solid #c3e6cb;
+        }
+
+        .status.error {
+            background: #f8d7da;
+            color: #721c24;
+            border: 1px solid #f5c6cb;
+        }
+
+        .status.info {
+            background: #d1ecf1;
+            color: #0c5460;
+            border: 1px solid #bee5eb;
+        }
+
+        .url-item {
+            background: #e3f2fd;
+            border: 1px solid #90caf9;
+            border-radius: 6px;
+            padding: 10px;
+            margin: 5px 0;
+            font-family: monospace;
+            font-size: 14px;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div class="header">
+            <h1>🔍 Dify URL查找器</h1>
+            <p>找到正确的Dify API端点</p>
+        </div>
+
+        <div class="test-section">
+            <h3>🌐 测试基础连接</h3>
+            <button class="btn btn-primary" onclick="findCorrectURL()" id="findBtn">查找正确的API端点</button>
+            <div id="findStatus"></div>
+            <div id="findResponse" class="response-area"></div>
+        </div>
+
+        <div class="test-section">
+            <h3>📋 可能的URL列表</h3>
+            <div class="url-item">http://4295a4ce.r28.cpolar.top/</div>
+            <div class="url-item">http://4295a4ce.r28.cpolar.top/chat/fggmGdSFt6MSQFJa</div>
+            <div class="url-item">http://4295a4ce.r28.cpolar.top/v1/chat-messages</div>
+            <div class="url-item">http://4295a4ce.r28.cpolar.top/api/v1/chat-messages</div>
+            <div class="url-item">http://4295a4ce.r28.cpolar.top/dify/v1/chat-messages</div>
+            <div class="url-item">http://4295a4ce.r28.cpolar.top/app/fggmGdSFt6MSQFJa</div>
+        </div>
+
+        <div class="test-section">
+            <h3>🔧 手动测试</h3>
+            <input type="text" id="customURL" placeholder="输入自定义URL" style="width: 70%; padding: 10px; margin-right: 10px;">
+            <button class="btn btn-warning" onclick="testCustomURL()" id="customBtn">测试</button>
+            <div id="customStatus"></div>
+            <div id="customResponse" class="response-area"></div>
+        </div>
+    </div>
+
+    <script>
+        // 查找正确的URL
+        async function findCorrectURL() {
+            const statusDiv = document.getElementById('findStatus');
+            const responseDiv = document.getElementById('findResponse');
+            const btn = document.getElementById('findBtn');
+
+            btn.disabled = true;
+            btn.textContent = '查找中...';
+            statusDiv.innerHTML = '<div class="status info">正在测试各种可能的URL...</div>';
+            responseDiv.textContent = '';
+
+            const baseURL = 'http://4295a4ce.r28.cpolar.top';
+            const possiblePaths = [
+                '/',
+                '/chat/fggmGdSFt6MSQFJa',
+                '/v1/chat-messages',
+                '/api/v1/chat-messages',
+                '/dify/v1/chat-messages',
+                '/app/fggmGdSFt6MSQFJa',
+                '/api/chat/fggmGdSFt6MSQFJa',
+                '/chat',
+                '/v1',
+                '/api',
+                '/dify'
+            ];
+
+            let results = [];
+            let workingURLs = [];
+
+            for (const path of possiblePaths) {
+                const fullURL = baseURL + path;
+                try {
+                    // 先尝试GET请求
+                    const getResponse = await fetch(fullURL, { 
+                        method: 'GET',
+                        mode: 'cors'
+                    });
+                    
+                    const contentType = getResponse.headers.get('content-type') || '';
+                    const responseText = await getResponse.text();
+                    
+                    results.push(`GET ${fullURL}:`);
+                    results.push(`  状态: ${getResponse.status}`);
+                    results.push(`  类型: ${contentType}`);
+                    results.push(`  内容: ${responseText.substring(0, 100)}...`);
+                    results.push('');
+
+                    if (getResponse.ok) {
+                        workingURLs.push({
+                            url: fullURL,
+                            method: 'GET',
+                            status: getResponse.status,
+                            contentType: contentType
+                        });
+                    }
+
+                    // 如果是API端点，尝试POST请求
+                    if (path.includes('chat') || path.includes('v1')) {
+                        try {
+                            const postResponse = await fetch(fullURL, {
+                                method: 'POST',
+                                headers: {
+                                    'Content-Type': 'application/json',
+                                    'Authorization': 'Bearer app-oaUwvb7k2zbC8Bi03EO977nN'
+                                },
+                                body: JSON.stringify({
+                                    query: 'test',
+                                    inputs: {},
+                                    response_mode: 'blocking',
+                                    user: 'test'
+                                })
+                            });
+
+                            const postContentType = postResponse.headers.get('content-type') || '';
+                            const postResponseText = await postResponse.text();
+
+                            results.push(`POST ${fullURL}:`);
+                            results.push(`  状态: ${postResponse.status}`);
+                            results.push(`  类型: ${postContentType}`);
+                            results.push(`  内容: ${postResponseText.substring(0, 100)}...`);
+                            results.push('');
+
+                            if (postResponse.ok && postContentType.includes('json')) {
+                                workingURLs.push({
+                                    url: fullURL,
+                                    method: 'POST',
+                                    status: postResponse.status,
+                                    contentType: postContentType,
+                                    isAPI: true
+                                });
+                            }
+                        } catch (postError) {
+                            results.push(`POST ${fullURL}: 失败 - ${postError.message}`);
+                            results.push('');
+                        }
+                    }
+
+                } catch (error) {
+                    results.push(`${fullURL}: 连接失败 - ${error.message}`);
+                    results.push('');
+                }
+            }
+
+            // 显示结果
+            if (workingURLs.length > 0) {
+                statusDiv.innerHTML = '<div class="status success">✅ 找到可用的URL端点</div>';
+                results.unshift('🎯 可用的URL端点:');
+                workingURLs.forEach(url => {
+                    results.unshift(`${url.isAPI ? '🚀 API' : '📄 页面'}: ${url.method} ${url.url} (${url.status})`);
+                });
+                results.unshift('');
+            } else {
+                statusDiv.innerHTML = '<div class="status error">❌ 未找到可用的URL端点</div>';
+            }
+
+            responseDiv.textContent = results.join('\n');
+
+            btn.disabled = false;
+            btn.textContent = '查找正确的API端点';
+        }
+
+        // 测试自定义URL
+        async function testCustomURL() {
+            const url = document.getElementById('customURL').value;
+            const statusDiv = document.getElementById('customStatus');
+            const responseDiv = document.getElementById('customResponse');
+            const btn = document.getElementById('customBtn');
+
+            if (!url.trim()) {
+                statusDiv.innerHTML = '<div class="status error">请输入URL</div>';
+                return;
+            }
+
+            btn.disabled = true;
+            btn.textContent = '测试中...';
+            statusDiv.innerHTML = '<div class="status info">正在测试自定义URL...</div>';
+            responseDiv.textContent = '';
+
+            try {
+                // 尝试GET请求
+                const getResponse = await fetch(url, { method: 'GET' });
+                const getContentType = getResponse.headers.get('content-type') || '';
+                const getResponseText = await getResponse.text();
+
+                let result = `GET ${url}:
+状态码: ${getResponse.status}
+Content-Type: ${getContentType}
+响应内容:
+${getResponseText}
+
+`;
+
+                // 如果GET成功，尝试POST
+                if (getResponse.ok) {
+                    try {
+                        const postResponse = await fetch(url, {
+                            method: 'POST',
+                            headers: {
+                                'Content-Type': 'application/json',
+                                'Authorization': 'Bearer app-oaUwvb7k2zbC8Bi03EO977nN'
+                            },
+                            body: JSON.stringify({
+                                query: 'test',
+                                inputs: {},
+                                response_mode: 'blocking',
+                                user: 'test'
+                            })
+                        });
+
+                        const postContentType = postResponse.headers.get('content-type') || '';
+                        const postResponseText = await postResponse.text();
+
+                        result += `POST ${url}:
+状态码: ${postResponse.status}
+Content-Type: ${postContentType}
+响应内容:
+${postResponseText}`;
+
+                        if (postResponse.ok && postContentType.includes('json')) {
+                            statusDiv.innerHTML = '<div class="status success">✅ 找到有效的API端点！</div>';
+                        } else {
+                            statusDiv.innerHTML = '<div class="status warning">⚠️ GET成功但POST失败</div>';
+                        }
+                    } catch (postError) {
+                        result += `POST请求失败: ${postError.message}`;
+                        statusDiv.innerHTML = '<div class="status warning">⚠️ GET成功但POST失败</div>';
+                    }
+                } else {
+                    statusDiv.innerHTML = '<div class="status error">❌ URL无法访问</div>';
+                }
+
+                responseDiv.textContent = result;
+
+            } catch (error) {
+                statusDiv.innerHTML = '<div class="status error">❌ 连接失败</div>';
+                responseDiv.textContent = `错误: ${error.message}`;
+            } finally {
+                btn.disabled = false;
+                btn.textContent = '测试';
+            }
+        }
+
+        // 页面加载时自动查找
+        window.addEventListener('load', () => {
+            setTimeout(findCorrectURL, 1000);
+        });
+    </script>
+</body>
+</html>

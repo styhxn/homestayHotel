@@ -1,0 +1,224 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>最小化Dify测试</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            margin: 0;
+            padding: 20px;
+            background: #f5f5f5;
+        }
+        .container {
+            max-width: 800px;
+            margin: 0 auto;
+            background: white;
+            border-radius: 10px;
+            padding: 20px;
+            box-shadow: 0 4px 15px rgba(0,0,0,0.1);
+        }
+        .iframe-container {
+            width: 100%;
+            height: 500px;
+            border: 2px solid #007bff;
+            border-radius: 8px;
+            background: #f8f9fa;
+            position: relative;
+        }
+        .status {
+            padding: 10px;
+            margin: 10px 0;
+            border-radius: 5px;
+            font-weight: bold;
+        }
+        .status-loading {
+            background: #d1ecf1;
+            color: #0c5460;
+        }
+        .status-success {
+            background: #d4edda;
+            color: #155724;
+        }
+        .status-error {
+            background: #f8d7da;
+            color: #721c24;
+        }
+        button {
+            background: #007bff;
+            color: white;
+            border: none;
+            padding: 10px 20px;
+            border-radius: 5px;
+            cursor: pointer;
+            margin: 5px;
+        }
+        button:hover {
+            background: #0056b3;
+        }
+        .log {
+            background: #f8f9fa;
+            border: 1px solid #dee2e6;
+            border-radius: 5px;
+            padding: 15px;
+            height: 200px;
+            overflow-y: auto;
+            font-family: monospace;
+            font-size: 12px;
+            margin-top: 20px;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1>🧪 最小化Dify测试</h1>
+        <p>这个页面模拟Vue组件中的iframe创建过程</p>
+        
+        <div id="status" class="status status-loading">
+            等待测试...
+        </div>
+        
+        <div class="controls">
+            <button onclick="testIframeCreation()">测试iframe创建</button>
+            <button onclick="clearContainer()">清空容器</button>
+            <button onclick="checkContainerStatus()">检查容器状态</button>
+        </div>
+        
+        <div id="iframe-container" class="iframe-container">
+            <div style="display: flex; align-items: center; justify-content: center; height: 100%; color: #666;">
+                点击"测试iframe创建"开始测试
+            </div>
+        </div>
+        
+        <div id="log" class="log">
+            <div style="color: #17a2b8;">[等待] 点击按钮开始测试...</div>
+        </div>
+    </div>
+
+    <script>
+        const DIFY_CONFIG = {
+            token: 'fggmGdSFt6MSQFJa',
+            baseUrl: 'http://4295a4ce.r28.cpolar.top'
+        };
+
+        function log(message, type = 'info') {
+            const logDiv = document.getElementById('log');
+            const colors = {
+                info: '#17a2b8',
+                success: '#28a745',
+                error: '#dc3545',
+                warning: '#ffc107'
+            };
+            
+            const entry = document.createElement('div');
+            entry.style.color = colors[type] || colors.info;
+            entry.textContent = `[${new Date().toLocaleTimeString()}] ${message}`;
+            logDiv.appendChild(entry);
+            logDiv.scrollTop = logDiv.scrollHeight;
+        }
+
+        function updateStatus(message, type = 'loading') {
+            const statusDiv = document.getElementById('status');
+            statusDiv.className = `status status-${type}`;
+            statusDiv.textContent = message;
+        }
+
+        function testIframeCreation() {
+            log('开始测试iframe创建...', 'info');
+            updateStatus('正在创建iframe...', 'loading');
+            
+            const container = document.getElementById('iframe-container');
+            if (!container) {
+                log('错误：找不到容器元素', 'error');
+                updateStatus('容器不存在', 'error');
+                return;
+            }
+            
+            log('容器元素已找到', 'success');
+            
+            // 清空容器
+            container.innerHTML = '';
+            log('容器已清空', 'info');
+            
+            // 创建iframe
+            const iframe = document.createElement('iframe');
+            iframe.src = `${DIFY_CONFIG.baseUrl}/chat/${DIFY_CONFIG.token}`;
+            iframe.style.width = '100%';
+            iframe.style.height = '100%';
+            iframe.style.border = 'none';
+            iframe.allow = 'fullscreen;microphone';
+            iframe.title = 'Dify AI助手';
+            
+            log(`创建iframe: ${iframe.src}`, 'info');
+            
+            // 监听iframe事件
+            iframe.onload = () => {
+                log('iframe加载成功！', 'success');
+                updateStatus('Dify AI助手已加载', 'success');
+            };
+            
+            iframe.onerror = () => {
+                log('iframe加载失败', 'error');
+                updateStatus('iframe加载失败', 'error');
+            };
+            
+            // 设置超时检查
+            const timeout = setTimeout(() => {
+                if (!iframe.contentWindow) {
+                    log('iframe加载超时，但可能仍在加载中...', 'warning');
+                    updateStatus('iframe加载超时（可能仍在加载）', 'warning');
+                }
+            }, 10000);
+            
+            // 添加到容器
+            container.appendChild(iframe);
+            log('iframe已添加到容器', 'info');
+            
+            // 清理超时
+            iframe.addEventListener('load', () => {
+                clearTimeout(timeout);
+            });
+        }
+
+        function clearContainer() {
+            const container = document.getElementById('iframe-container');
+            if (container) {
+                container.innerHTML = `
+                    <div style="display: flex; align-items: center; justify-content: center; height: 100%; color: #666;">
+                        容器已清空，点击"测试iframe创建"重新开始
+                    </div>
+                `;
+                log('容器已清空', 'info');
+                updateStatus('容器已清空', 'loading');
+            }
+        }
+
+        function checkContainerStatus() {
+            const container = document.getElementById('iframe-container');
+            if (!container) {
+                log('容器不存在', 'error');
+                return;
+            }
+            
+            const iframe = container.querySelector('iframe');
+            log(`容器状态检查:`, 'info');
+            log(`- 容器存在: 是`, 'info');
+            log(`- 容器尺寸: ${container.offsetWidth}x${container.offsetHeight}px`, 'info');
+            log(`- iframe存在: ${iframe ? '是' : '否'}`, iframe ? 'success' : 'warning');
+            
+            if (iframe) {
+                log(`- iframe src: ${iframe.src}`, 'info');
+                log(`- iframe尺寸: ${iframe.offsetWidth}x${iframe.offsetHeight}px`, 'info');
+            }
+        }
+
+        // 页面加载时自动检查
+        window.addEventListener('load', () => {
+            log('页面加载完成', 'success');
+            log(`Dify配置: ${DIFY_CONFIG.baseUrl}/chat/${DIFY_CONFIG.token}`, 'info');
+            updateStatus('页面已准备，可以开始测试', 'loading');
+        });
+    </script>
+</body>
+</html>

@@ -1,0 +1,352 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>AI订单处理测试</title>
+    <style>
+        body {
+            font-family: 'Microsoft YaHei', sans-serif;
+            max-width: 800px;
+            margin: 0 auto;
+            padding: 20px;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            min-height: 100vh;
+        }
+        
+        .container {
+            background: white;
+            border-radius: 20px;
+            padding: 30px;
+            box-shadow: 0 20px 40px rgba(0,0,0,0.1);
+        }
+        
+        h1 {
+            text-align: center;
+            color: #333;
+            margin-bottom: 30px;
+        }
+        
+        .test-section {
+            margin-bottom: 30px;
+            padding: 20px;
+            border: 2px solid #e9ecef;
+            border-radius: 15px;
+            background: #f8f9fa;
+        }
+        
+        .test-section h3 {
+            color: #495057;
+            margin-bottom: 15px;
+        }
+        
+        .input-group {
+            margin-bottom: 15px;
+        }
+        
+        label {
+            display: block;
+            margin-bottom: 5px;
+            font-weight: bold;
+            color: #495057;
+        }
+        
+        input, textarea {
+            width: 100%;
+            padding: 10px;
+            border: 1px solid #ced4da;
+            border-radius: 8px;
+            font-size: 14px;
+            box-sizing: border-box;
+        }
+        
+        button {
+            background: linear-gradient(45deg, #667eea, #764ba2);
+            color: white;
+            border: none;
+            padding: 12px 24px;
+            border-radius: 8px;
+            cursor: pointer;
+            font-size: 16px;
+            font-weight: bold;
+            transition: transform 0.2s;
+        }
+        
+        button:hover {
+            transform: translateY(-2px);
+        }
+        
+        .response {
+            margin-top: 15px;
+            padding: 15px;
+            border-radius: 8px;
+            background: #e7f3ff;
+            border-left: 4px solid #007bff;
+            white-space: pre-wrap;
+            font-family: monospace;
+            max-height: 300px;
+            overflow-y: auto;
+        }
+        
+        .error {
+            background: #ffe7e7;
+            border-left-color: #dc3545;
+        }
+        
+        .loading {
+            background: #fff3cd;
+            border-left-color: #ffc107;
+        }
+        
+        .examples {
+            display: flex;
+            gap: 10px;
+            flex-wrap: wrap;
+            margin-top: 10px;
+        }
+        
+        .example-btn {
+            background: #6c757d;
+            color: white;
+            border: none;
+            padding: 6px 12px;
+            border-radius: 6px;
+            cursor: pointer;
+            font-size: 12px;
+        }
+        
+        .example-btn:hover {
+            background: #5a6268;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1>🤖 AI订单处理测试</h1>
+        
+        <div class="test-section">
+            <h3>📋 测试AI聊天和订单处理</h3>
+            <div class="input-group">
+                <label for="chatMessage">输入消息:</label>
+                <textarea id="chatMessage" rows="3" placeholder="例如：推荐房间、我要预订201、预订202房间等"></textarea>
+                <div class="examples">
+                    <button class="example-btn" onclick="setMessage('推荐房间')">推荐房间</button>
+                    <button class="example-btn" onclick="setMessage('我要预订201')">预订201</button>
+                    <button class="example-btn" onclick="setMessage('预订202房间')">预订202</button>
+                    <button class="example-btn" onclick="setMessage('我想订203')">订203</button>
+                    <button class="example-btn" onclick="setMessage('房间价格')">查询价格</button>
+                </div>
+            </div>
+            <button onclick="sendChatMessage()">发送消息</button>
+            <div id="chatResponse" class="response" style="display: none;"></div>
+        </div>
+        
+        <div class="test-section">
+            <h3>🔐 登录状态</h3>
+            <p>测试订单功能需要先登录</p>
+            <div class="input-group">
+                <label for="username">用户名:</label>
+                <input type="text" id="username" value="testuser" placeholder="testuser">
+            </div>
+            <div class="input-group">
+                <label for="password">密码:</label>
+                <input type="password" id="password" value="123456" placeholder="123456">
+            </div>
+            <button onclick="login()">登录</button>
+            <button onclick="logout()">退出登录</button>
+            <div id="loginResponse" class="response" style="display: none;"></div>
+        </div>
+    </div>
+
+    <script>
+        function setMessage(message) {
+            document.getElementById('chatMessage').value = message;
+        }
+        
+        async function sendChatMessage() {
+            const message = document.getElementById('chatMessage').value.trim();
+            if (!message) {
+                alert('请输入消息');
+                return;
+            }
+            
+            const responseDiv = document.getElementById('chatResponse');
+            responseDiv.style.display = 'block';
+            responseDiv.className = 'response loading';
+            responseDiv.textContent = '🤖 AI正在思考...';
+            
+            try {
+                const response = await fetch('http://localhost:8080/chat/messages', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                    },
+                    body: JSON.stringify({
+                        query: message,
+                        user: 'test-user',
+                        inputs: {}
+                    })
+                });
+                
+                if (!response.ok) {
+                    throw new Error(`HTTP error! status: ${response.status}`);
+                }
+                
+                // 优化的SSE响应处理
+                const reader = response.body.getReader();
+                let fullResponse = '';
+                let buffer = '';
+                responseDiv.className = 'response';
+                responseDiv.textContent = '🤖 AI正在回复...';
+
+                console.log('开始处理SSE流...');
+
+                try {
+                    while (true) {
+                        const { done, value } = await reader.read();
+                        if (done) {
+                            console.log('SSE流读取完成');
+                            break;
+                        }
+
+                        const chunk = new TextDecoder().decode(value);
+                        buffer += chunk;
+
+                        // 处理完整的行
+                        const lines = buffer.split('\n');
+                        buffer = lines.pop() || ''; // 保留最后一个不完整的行
+
+                        for (const line of lines) {
+                            if (line.startsWith('data: ')) {
+                                const data = line.slice(6).trim();
+                                if (data && data !== '[DONE]') {
+                                    try {
+                                        const jsonData = JSON.parse(data);
+                                        if (jsonData.event === 'message' && jsonData.answer) {
+                                            fullResponse += jsonData.answer;
+                                            responseDiv.textContent = fullResponse;
+                                            console.log('累积响应:', fullResponse.length, '字符');
+                                        } else if (jsonData.event === 'message_end') {
+                                            console.log('消息结束，最终响应:', fullResponse);
+                                        }
+                                    } catch (e) {
+                                        console.warn('JSON解析失败，作为文本处理:', data);
+                                        // 如果不是JSON格式，直接添加文本（本地AI）
+                                        fullResponse += data + ' ';
+                                        responseDiv.textContent = fullResponse;
+                                    }
+                                }
+                            }
+                        }
+                    }
+
+                    // 处理剩余的缓冲区内容
+                    if (buffer.trim()) {
+                        const line = buffer.trim();
+                        if (line.startsWith('data: ')) {
+                            const data = line.slice(6).trim();
+                            if (data && data !== '[DONE]') {
+                                try {
+                                    const jsonData = JSON.parse(data);
+                                    if (jsonData.event === 'message' && jsonData.answer) {
+                                        fullResponse += jsonData.answer;
+                                        responseDiv.textContent = fullResponse;
+                                    }
+                                } catch (e) {
+                                    fullResponse += data + ' ';
+                                    responseDiv.textContent = fullResponse;
+                                }
+                            }
+                        }
+                    }
+
+                } catch (streamError) {
+                    console.error('流处理错误:', streamError);
+                    responseDiv.className = 'response error';
+                    responseDiv.textContent = `流处理错误: ${streamError.message}`;
+                }
+
+                // 确保有响应内容
+                if (!fullResponse.trim()) {
+                    responseDiv.className = 'response error';
+                    responseDiv.textContent = '❌ 未收到AI响应内容';
+                } else {
+                    console.log('✅ 最终完整响应:', fullResponse);
+                    // 确保显示完整内容
+                    responseDiv.textContent = fullResponse;
+                }
+                
+                if (!fullResponse.trim()) {
+                    responseDiv.textContent = '❌ AI没有返回响应';
+                    responseDiv.className = 'response error';
+                }
+                
+            } catch (error) {
+                console.error('发送消息失败:', error);
+                responseDiv.className = 'response error';
+                responseDiv.textContent = `❌ 发送失败: ${error.message}`;
+            }
+        }
+        
+        async function login() {
+            const username = document.getElementById('username').value;
+            const password = document.getElementById('password').value;
+            
+            const responseDiv = document.getElementById('loginResponse');
+            responseDiv.style.display = 'block';
+            responseDiv.className = 'response loading';
+            responseDiv.textContent = '🔐 正在登录...';
+            
+            try {
+                const response = await fetch('http://localhost:8080/h/user/login', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                    },
+                    body: JSON.stringify({
+                        username: username,
+                        password: password
+                    })
+                });
+                
+                const result = await response.json();
+                
+                if (result.code === '200') {
+                    responseDiv.className = 'response';
+                    responseDiv.textContent = `✅ 登录成功!\n用户: ${result.data.username}\nToken: ${result.data.token}`;
+                    
+                    // 保存token到localStorage
+                    localStorage.setItem('token', result.data.token);
+                } else {
+                    responseDiv.className = 'response error';
+                    responseDiv.textContent = `❌ 登录失败: ${result.msg}`;
+                }
+                
+            } catch (error) {
+                console.error('登录失败:', error);
+                responseDiv.className = 'response error';
+                responseDiv.textContent = `❌ 登录失败: ${error.message}`;
+            }
+        }
+        
+        function logout() {
+            localStorage.removeItem('token');
+            const responseDiv = document.getElementById('loginResponse');
+            responseDiv.style.display = 'block';
+            responseDiv.className = 'response';
+            responseDiv.textContent = '✅ 已退出登录';
+        }
+        
+        // 页面加载时检查登录状态
+        window.onload = function() {
+            const token = localStorage.getItem('token');
+            if (token) {
+                const responseDiv = document.getElementById('loginResponse');
+                responseDiv.style.display = 'block';
+                responseDiv.className = 'response';
+                responseDiv.textContent = '✅ 已登录状态';
+            }
+        };
+    </script>
+</body>
+</html>

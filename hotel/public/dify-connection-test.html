@@ -1,0 +1,228 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Dify连接测试</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            max-width: 800px;
+            margin: 0 auto;
+            padding: 20px;
+            background: #f5f5f5;
+        }
+        .test-container {
+            background: white;
+            padding: 20px;
+            border-radius: 10px;
+            box-shadow: 0 2px 10px rgba(0,0,0,0.1);
+            margin-bottom: 20px;
+        }
+        .test-result {
+            padding: 10px;
+            border-radius: 5px;
+            margin: 10px 0;
+        }
+        .success {
+            background: #d4edda;
+            color: #155724;
+            border: 1px solid #c3e6cb;
+        }
+        .error {
+            background: #f8d7da;
+            color: #721c24;
+            border: 1px solid #f5c6cb;
+        }
+        .info {
+            background: #d1ecf1;
+            color: #0c5460;
+            border: 1px solid #bee5eb;
+        }
+        button {
+            background: #007bff;
+            color: white;
+            border: none;
+            padding: 10px 20px;
+            border-radius: 5px;
+            cursor: pointer;
+            margin: 5px;
+        }
+        button:hover {
+            background: #0056b3;
+        }
+        .loading {
+            display: inline-block;
+            width: 20px;
+            height: 20px;
+            border: 3px solid #f3f3f3;
+            border-top: 3px solid #3498db;
+            border-radius: 50%;
+            animation: spin 1s linear infinite;
+        }
+        @keyframes spin {
+            0% { transform: rotate(0deg); }
+            100% { transform: rotate(360deg); }
+        }
+    </style>
+</head>
+<body>
+    <h1>🔧 Dify AI助手连接测试</h1>
+    
+    <div class="test-container">
+        <h2>📋 测试项目</h2>
+        <button onclick="testDifyService()">测试Dify服务连接</button>
+        <button onclick="testDifyEmbed()">测试Dify嵌入脚本</button>
+        <button onclick="testProxyServer()">测试代理服务器</button>
+        <button onclick="testChatAPI()">测试聊天API</button>
+        <button onclick="runAllTests()">运行所有测试</button>
+    </div>
+
+    <div class="test-container">
+        <h2>📊 测试结果</h2>
+        <div id="test-results"></div>
+    </div>
+
+    <div class="test-container">
+        <h2>🔧 Dify配置信息</h2>
+        <div id="config-info"></div>
+    </div>
+
+    <script>
+        // Dify配置
+        const DIFY_CONFIG = {
+            token: 'fggmGdSFt6MSQFJa',
+            baseUrl: 'http://4295a4ce.r28.cpolar.top',
+            apiKey: 'app-oaUwvb7k2zbC8Bi03EO977nN'
+        };
+
+        // 显示配置信息
+        function showConfig() {
+            const configDiv = document.getElementById('config-info');
+            configDiv.innerHTML = `
+                <div class="info">
+                    <strong>Token:</strong> ${DIFY_CONFIG.token}<br>
+                    <strong>Base URL:</strong> ${DIFY_CONFIG.baseUrl}<br>
+                    <strong>API Key:</strong> ${DIFY_CONFIG.apiKey}<br>
+                    <strong>嵌入脚本:</strong> ${DIFY_CONFIG.baseUrl}/embed.min.js<br>
+                    <strong>聊天链接:</strong> ${DIFY_CONFIG.baseUrl}/chat/${DIFY_CONFIG.token}
+                </div>
+            `;
+        }
+
+        // 添加测试结果
+        function addResult(title, success, message, details = '') {
+            const resultsDiv = document.getElementById('test-results');
+            const resultClass = success ? 'success' : 'error';
+            const icon = success ? '✅' : '❌';
+            
+            resultsDiv.innerHTML += `
+                <div class="test-result ${resultClass}">
+                    <strong>${icon} ${title}</strong><br>
+                    ${message}
+                    ${details ? `<br><small>${details}</small>` : ''}
+                </div>
+            `;
+        }
+
+        // 测试Dify服务连接
+        async function testDifyService() {
+            try {
+                addResult('Dify服务连接', false, '正在测试...', '<span class="loading"></span>');
+                
+                const response = await fetch(DIFY_CONFIG.baseUrl, {
+                    method: 'HEAD',
+                    mode: 'no-cors'
+                });
+                
+                addResult('Dify服务连接', true, '服务连接正常', `URL: ${DIFY_CONFIG.baseUrl}`);
+            } catch (error) {
+                addResult('Dify服务连接', false, '服务连接失败', `错误: ${error.message}`);
+            }
+        }
+
+        // 测试Dify嵌入脚本
+        async function testDifyEmbed() {
+            try {
+                addResult('Dify嵌入脚本', false, '正在测试...', '<span class="loading"></span>');
+                
+                const scriptUrl = `${DIFY_CONFIG.baseUrl}/embed.min.js`;
+                const response = await fetch(scriptUrl, {
+                    method: 'HEAD',
+                    mode: 'no-cors'
+                });
+                
+                addResult('Dify嵌入脚本', true, '脚本可访问', `URL: ${scriptUrl}`);
+            } catch (error) {
+                addResult('Dify嵌入脚本', false, '脚本访问失败', `错误: ${error.message}`);
+            }
+        }
+
+        // 测试代理服务器
+        async function testProxyServer() {
+            try {
+                addResult('代理服务器', false, '正在测试...', '<span class="loading"></span>');
+                
+                const response = await fetch('http://localhost:3001/health');
+                
+                if (response.ok) {
+                    addResult('代理服务器', true, '代理服务器运行正常', 'URL: http://localhost:3001');
+                } else {
+                    addResult('代理服务器', false, '代理服务器响应异常', `状态码: ${response.status}`);
+                }
+            } catch (error) {
+                addResult('代理服务器', false, '代理服务器连接失败', `错误: ${error.message}`);
+            }
+        }
+
+        // 测试聊天API
+        async function testChatAPI() {
+            try {
+                addResult('聊天API', false, '正在测试...', '<span class="loading"></span>');
+                
+                const response = await fetch('/api/dify/v1/chat-messages', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                        'Authorization': `Bearer ${DIFY_CONFIG.apiKey}`
+                    },
+                    body: JSON.stringify({
+                        inputs: {},
+                        query: '你好',
+                        response_mode: 'blocking',
+                        user: 'test-user'
+                    })
+                });
+
+                if (response.ok) {
+                    const data = await response.json();
+                    addResult('聊天API', true, 'API调用成功', `响应: ${data.answer || '收到响应'}`);
+                } else {
+                    addResult('聊天API', false, 'API调用失败', `状态码: ${response.status}`);
+                }
+            } catch (error) {
+                addResult('聊天API', false, 'API调用异常', `错误: ${error.message}`);
+            }
+        }
+
+        // 运行所有测试
+        async function runAllTests() {
+            document.getElementById('test-results').innerHTML = '';
+            
+            await testDifyService();
+            await new Promise(resolve => setTimeout(resolve, 1000));
+            
+            await testDifyEmbed();
+            await new Promise(resolve => setTimeout(resolve, 1000));
+            
+            await testProxyServer();
+            await new Promise(resolve => setTimeout(resolve, 1000));
+            
+            await testChatAPI();
+        }
+
+        // 页面加载时显示配置
+        window.addEventListener('load', showConfig);
+    </script>
+</body>
+</html>

@@ -1,0 +1,405 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Dify CORS测试工具 - 普洱蘑菇庄园民宿</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Arial', sans-serif;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            min-height: 100vh;
+            padding: 20px;
+        }
+
+        .container {
+            max-width: 1200px;
+            margin: 0 auto;
+            background: white;
+            border-radius: 20px;
+            padding: 40px;
+            box-shadow: 0 20px 40px rgba(0,0,0,0.1);
+        }
+
+        .header {
+            text-align: center;
+            margin-bottom: 30px;
+            padding-bottom: 20px;
+            border-bottom: 2px solid #e9ecef;
+        }
+
+        .header h1 {
+            color: #2c3e50;
+            margin-bottom: 10px;
+            font-size: 2rem;
+        }
+
+        .alert {
+            padding: 15px;
+            border-radius: 10px;
+            margin-bottom: 20px;
+            border-left: 4px solid;
+        }
+
+        .alert.error {
+            background: #f8d7da;
+            border-color: #dc3545;
+            color: #721c24;
+        }
+
+        .alert.warning {
+            background: #fff3cd;
+            border-color: #ffc107;
+            color: #856404;
+        }
+
+        .alert.info {
+            background: #d1ecf1;
+            border-color: #17a2b8;
+            color: #0c5460;
+        }
+
+        .test-section {
+            margin-bottom: 30px;
+            padding: 20px;
+            background: #f8f9fa;
+            border-radius: 10px;
+        }
+
+        .test-section h3 {
+            color: #495057;
+            margin-bottom: 15px;
+        }
+
+        .input-group {
+            display: flex;
+            gap: 10px;
+            margin-bottom: 20px;
+        }
+
+        .input-group input {
+            flex: 1;
+            padding: 12px;
+            border: 1px solid #ddd;
+            border-radius: 6px;
+            font-size: 14px;
+        }
+
+        .btn {
+            padding: 12px 24px;
+            border: none;
+            border-radius: 6px;
+            cursor: pointer;
+            font-weight: 500;
+            transition: all 0.3s ease;
+        }
+
+        .btn-primary {
+            background: #007bff;
+            color: white;
+        }
+
+        .btn-success {
+            background: #28a745;
+            color: white;
+        }
+
+        .btn-warning {
+            background: #ffc107;
+            color: #212529;
+        }
+
+        .btn:hover {
+            transform: translateY(-1px);
+        }
+
+        .btn:disabled {
+            background: #6c757d;
+            cursor: not-allowed;
+            transform: none;
+        }
+
+        .response-area {
+            background: white;
+            border: 1px solid #ddd;
+            border-radius: 6px;
+            padding: 15px;
+            min-height: 200px;
+            white-space: pre-wrap;
+            font-family: monospace;
+            font-size: 12px;
+            overflow-y: auto;
+            max-height: 400px;
+        }
+
+        .status {
+            padding: 10px;
+            border-radius: 6px;
+            margin-bottom: 15px;
+            font-weight: 500;
+        }
+
+        .status.success {
+            background: #d4edda;
+            color: #155724;
+            border: 1px solid #c3e6cb;
+        }
+
+        .status.error {
+            background: #f8d7da;
+            color: #721c24;
+            border: 1px solid #f5c6cb;
+        }
+
+        .status.info {
+            background: #d1ecf1;
+            color: #0c5460;
+            border: 1px solid #bee5eb;
+        }
+
+        .grid {
+            display: grid;
+            grid-template-columns: 1fr;
+            gap: 20px;
+        }
+
+        .solution-box {
+            background: #e3f2fd;
+            border: 1px solid #90caf9;
+            border-radius: 10px;
+            padding: 20px;
+            margin-bottom: 20px;
+        }
+
+        .solution-box h4 {
+            color: #1565c0;
+            margin-bottom: 10px;
+        }
+
+        .code-block {
+            background: #f8f9fa;
+            border: 1px solid #e9ecef;
+            border-radius: 6px;
+            padding: 15px;
+            font-family: monospace;
+            font-size: 14px;
+            margin: 10px 0;
+            overflow-x: auto;
+        }
+
+        @media (max-width: 768px) {
+            .container {
+                padding: 20px;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div class="header">
+            <h1>🔧 Dify CORS测试工具</h1>
+            <p>诊断和解决Dify服务的跨域访问问题</p>
+        </div>
+
+        <div class="alert error">
+            <h4>❌ 检测到CORS错误</h4>
+            <p>您的Dify服务返回"Failed to fetch"错误，这通常是跨域资源共享(CORS)问题。</p>
+        </div>
+
+        <div class="solution-box">
+            <h4>🛠️ 解决方案</h4>
+            <p><strong>方案1：配置Dify服务允许跨域</strong></p>
+            <p>在您的Dify服务配置中添加CORS头：</p>
+            <div class="code-block">
+Access-Control-Allow-Origin: http://localhost:5173
+Access-Control-Allow-Methods: POST, GET, OPTIONS
+Access-Control-Allow-Headers: Content-Type, Authorization
+            </div>
+            
+            <p><strong>方案2：使用代理服务器</strong></p>
+            <p>通过后端代理转发请求，避免浏览器CORS限制</p>
+            
+            <p><strong>方案3：使用浏览器扩展</strong></p>
+            <p>安装CORS浏览器扩展临时解决（仅用于测试）</p>
+        </div>
+
+        <div class="test-section">
+            <h3>🌐 基础连接测试</h3>
+            <button class="btn btn-primary" onclick="testBasicConnection()" id="basicBtn">测试基础连接</button>
+            <div id="basicStatus"></div>
+            <div id="basicResponse" class="response-area"></div>
+        </div>
+
+        <div class="test-section">
+            <h3>🔍 CORS预检测试</h3>
+            <button class="btn btn-warning" onclick="testCORSPreflight()" id="corsBtn">测试CORS预检</button>
+            <div id="corsStatus"></div>
+            <div id="corsResponse" class="response-area"></div>
+        </div>
+
+        <div class="test-section">
+            <h3>🚀 代理测试 (推荐)</h3>
+            <div class="input-group">
+                <input type="text" id="proxyMessage" placeholder="输入测试消息" value="推荐一下便宜的房间">
+                <button class="btn btn-success" onclick="testWithProxy()" id="proxyBtn">通过代理测试</button>
+            </div>
+            <div id="proxyStatus"></div>
+            <div id="proxyResponse" class="response-area"></div>
+        </div>
+
+        <div class="alert info">
+            <h4>💡 建议</h4>
+            <p>为了在生产环境中正常使用，建议：</p>
+            <ul style="margin-left: 20px; margin-top: 10px;">
+                <li>配置Dify服务支持CORS</li>
+                <li>或者通过后端API代理转发请求</li>
+                <li>避免在生产环境中使用浏览器扩展解决CORS</li>
+            </ul>
+        </div>
+    </div>
+
+    <script>
+        // 测试基础连接
+        async function testBasicConnection() {
+            const statusDiv = document.getElementById('basicStatus');
+            const responseDiv = document.getElementById('basicResponse');
+            const btn = document.getElementById('basicBtn');
+
+            btn.disabled = true;
+            btn.textContent = '测试中...';
+            statusDiv.innerHTML = '<div class="status info">正在测试基础连接...</div>';
+            responseDiv.textContent = '检查网络连接...';
+
+            try {
+                // 尝试简单的GET请求
+                const response = await fetch('http://4295a4ce.r28.cpolar.top/', {
+                    method: 'GET',
+                    mode: 'no-cors' // 避免CORS错误
+                });
+
+                statusDiv.innerHTML = '<div class="status success">✅ 基础连接成功</div>';
+                responseDiv.textContent = '网络连接正常，服务器可达';
+            } catch (error) {
+                statusDiv.innerHTML = '<div class="status error">❌ 基础连接失败</div>';
+                responseDiv.textContent = `连接错误: ${error.message}`;
+            } finally {
+                btn.disabled = false;
+                btn.textContent = '测试基础连接';
+            }
+        }
+
+        // 测试CORS预检
+        async function testCORSPreflight() {
+            const statusDiv = document.getElementById('corsStatus');
+            const responseDiv = document.getElementById('corsResponse');
+            const btn = document.getElementById('corsBtn');
+
+            btn.disabled = true;
+            btn.textContent = '测试中...';
+            statusDiv.innerHTML = '<div class="status info">正在测试CORS预检...</div>';
+            responseDiv.textContent = '检查CORS配置...';
+
+            try {
+                // 发送OPTIONS请求检查CORS
+                const response = await fetch('http://4295a4ce.r28.cpolar.top/v1/chat-messages', {
+                    method: 'OPTIONS',
+                    headers: {
+                        'Access-Control-Request-Method': 'POST',
+                        'Access-Control-Request-Headers': 'Content-Type, Authorization'
+                    }
+                });
+
+                if (response.ok) {
+                    const corsHeaders = {
+                        'Access-Control-Allow-Origin': response.headers.get('Access-Control-Allow-Origin'),
+                        'Access-Control-Allow-Methods': response.headers.get('Access-Control-Allow-Methods'),
+                        'Access-Control-Allow-Headers': response.headers.get('Access-Control-Allow-Headers')
+                    };
+
+                    statusDiv.innerHTML = '<div class="status success">✅ CORS预检成功</div>';
+                    responseDiv.textContent = `CORS头信息:\n${JSON.stringify(corsHeaders, null, 2)}`;
+                } else {
+                    statusDiv.innerHTML = '<div class="status error">❌ CORS预检失败</div>';
+                    responseDiv.textContent = `状态码: ${response.status}`;
+                }
+            } catch (error) {
+                statusDiv.innerHTML = '<div class="status error">❌ CORS预检失败</div>';
+                responseDiv.textContent = `CORS错误: ${error.message}\n\n这表明服务器没有正确配置CORS头`;
+            } finally {
+                btn.disabled = false;
+                btn.textContent = '测试CORS预检';
+            }
+        }
+
+        // 通过代理测试
+        async function testWithProxy() {
+            const message = document.getElementById('proxyMessage').value;
+            const statusDiv = document.getElementById('proxyStatus');
+            const responseDiv = document.getElementById('proxyResponse');
+            const btn = document.getElementById('proxyBtn');
+
+            if (!message.trim()) {
+                statusDiv.innerHTML = '<div class="status error">请输入测试消息</div>';
+                return;
+            }
+
+            btn.disabled = true;
+            btn.textContent = '测试中...';
+            statusDiv.innerHTML = '<div class="status info">正在通过代理测试...</div>';
+            responseDiv.textContent = '发送请求...';
+
+            try {
+                // 通过本地后端代理发送请求
+                const response = await fetch('/api/dify-proxy', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json'
+                    },
+                    body: JSON.stringify({
+                        url: 'http://4295a4ce.r28.cpolar.top/chat/fggmGdSFt6MSQFJa',
+                        data: {
+                            query: message,
+                            inputs: {
+                                room_info: `普洱蘑菇庄园民宿房间信息：
+- 201号房：大床房，19元/晚，温馨舒适
+- 301号房：家庭房，486元/晚，适合家庭入住  
+- 204号房：单人间带窗，999元/晚，景观优美
+- 105号房：单人间无窗，256元/晚，经济实惠
+- 303号房：双人间，标准配置`
+                            },
+                            response_mode: 'blocking',
+                            user: 'test-user'
+                        }
+                    })
+                });
+
+                if (response.ok) {
+                    const data = await response.json();
+                    statusDiv.innerHTML = '<div class="status success">✅ 代理测试成功</div>';
+                    responseDiv.textContent = JSON.stringify(data, null, 2);
+                } else {
+                    statusDiv.innerHTML = '<div class="status error">❌ 代理测试失败</div>';
+                    responseDiv.textContent = `状态码: ${response.status}`;
+                }
+            } catch (error) {
+                statusDiv.innerHTML = '<div class="status error">❌ 代理不可用</div>';
+                responseDiv.textContent = `代理错误: ${error.message}\n\n需要配置后端代理服务`;
+            } finally {
+                btn.disabled = false;
+                btn.textContent = '通过代理测试';
+            }
+        }
+
+        // 页面加载时自动运行基础测试
+        window.addEventListener('load', () => {
+            setTimeout(testBasicConnection, 1000);
+        });
+    </script>
+</body>
+</html>

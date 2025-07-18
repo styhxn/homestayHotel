@@ -1,0 +1,613 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>AI选房推荐功能测试</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            min-height: 100vh;
+            padding: 20px;
+        }
+
+        .container {
+            max-width: 1200px;
+            margin: 0 auto;
+        }
+
+        .header {
+            text-align: center;
+            margin-bottom: 40px;
+            color: white;
+        }
+
+        .header h1 {
+            font-size: 2.5rem;
+            font-weight: 700;
+            margin-bottom: 15px;
+            text-shadow: 0 4px 15px rgba(0, 0, 0, 0.3);
+        }
+
+        .header p {
+            font-size: 1.2rem;
+            opacity: 0.9;
+        }
+
+        .demo-grid {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 30px;
+            margin-bottom: 40px;
+        }
+
+        .demo-panel {
+            background: rgba(255, 255, 255, 0.95);
+            border-radius: 20px;
+            padding: 30px;
+            box-shadow: 0 20px 60px rgba(0, 0, 0, 0.15);
+            backdrop-filter: blur(10px);
+        }
+
+        .demo-panel h3 {
+            color: #2d3748;
+            margin-bottom: 20px;
+            font-size: 1.5rem;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+
+        .chat-simulation {
+            background: #f8f9fa;
+            border-radius: 15px;
+            padding: 20px;
+            margin-bottom: 20px;
+            max-height: 400px;
+            overflow-y: auto;
+        }
+
+        .message {
+            margin-bottom: 15px;
+            padding: 12px 16px;
+            border-radius: 15px;
+            max-width: 80%;
+        }
+
+        .message.ai {
+            background: linear-gradient(135deg, rgba(139, 69, 19, 0.1), rgba(205, 133, 63, 0.1));
+            border: 1px solid rgba(139, 69, 19, 0.2);
+            margin-right: auto;
+        }
+
+        .message.user {
+            background: linear-gradient(135deg, #667eea, #764ba2);
+            color: white;
+            margin-left: auto;
+        }
+
+        .message-header {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            margin-bottom: 8px;
+            font-size: 0.9rem;
+            font-weight: 600;
+        }
+
+        .avatar {
+            width: 24px;
+            height: 24px;
+            border-radius: 50%;
+            background: linear-gradient(135deg, #FFD700, #4CAF50);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 12px;
+        }
+
+        .room-card {
+            background: white;
+            border-radius: 10px;
+            padding: 15px;
+            margin: 10px 0;
+            border: 2px solid #e2e8f0;
+            transition: all 0.3s ease;
+        }
+
+        .room-card:hover {
+            border-color: #8B4513;
+            transform: translateY(-2px);
+            box-shadow: 0 8px 25px rgba(139, 69, 19, 0.15);
+        }
+
+        .room-card h4 {
+            color: #2d3748;
+            margin-bottom: 8px;
+        }
+
+        .room-meta {
+            display: flex;
+            gap: 15px;
+            font-size: 0.9rem;
+            color: #4a5568;
+        }
+
+        .price {
+            color: #8B4513;
+            font-weight: 600;
+        }
+
+        .order-card {
+            background: #e6fffa;
+            border: 2px solid #81e6d9;
+            border-radius: 10px;
+            padding: 20px;
+            margin: 15px 0;
+        }
+
+        .order-item {
+            display: flex;
+            justify-content: space-between;
+            margin-bottom: 10px;
+        }
+
+        .order-item.total {
+            font-weight: 600;
+            font-size: 1.1rem;
+            color: #8B4513;
+            border-top: 1px solid #81e6d9;
+            padding-top: 10px;
+            margin-top: 15px;
+        }
+
+        .test-controls {
+            display: flex;
+            gap: 10px;
+            margin-bottom: 20px;
+        }
+
+        .test-btn {
+            background: linear-gradient(135deg, #8B4513, #CD853F);
+            color: white;
+            border: none;
+            padding: 10px 20px;
+            border-radius: 8px;
+            cursor: pointer;
+            font-weight: 600;
+            transition: transform 0.3s ease;
+        }
+
+        .test-btn:hover {
+            transform: translateY(-2px);
+        }
+
+        .test-btn.secondary {
+            background: linear-gradient(135deg, #667eea, #764ba2);
+        }
+
+        .status-indicator {
+            display: inline-flex;
+            align-items: center;
+            gap: 5px;
+            padding: 4px 12px;
+            border-radius: 15px;
+            font-size: 0.8rem;
+            font-weight: 600;
+        }
+
+        .status-success {
+            background: #d4edda;
+            color: #155724;
+        }
+
+        .status-info {
+            background: #d1ecf1;
+            color: #0c5460;
+        }
+
+        /* 响应式设计 */
+        @media (max-width: 768px) {
+            .demo-grid {
+                grid-template-columns: 1fr;
+                gap: 20px;
+            }
+            
+            .header h1 {
+                font-size: 2rem;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div class="header">
+            <h1>🤖 AI选房推荐功能测试</h1>
+            <p>测试AI聊天内容解析、房间推荐显示和订单创建功能</p>
+        </div>
+
+        <div class="demo-grid">
+            <!-- 左侧：聊天模拟 -->
+            <div class="demo-panel">
+                <h3>
+                    <span>💬</span>
+                    聊天内容模拟
+                </h3>
+                
+                <div class="test-controls">
+                    <button class="test-btn" onclick="simulateRecommendation()">模拟房间推荐</button>
+                    <button class="test-btn secondary" onclick="simulateBooking()">模拟预订确认</button>
+                    <button class="test-btn" onclick="clearChat()">清空聊天</button>
+                </div>
+
+                <div id="chat-simulation" class="chat-simulation">
+                    <div class="message ai">
+                        <div class="message-header">
+                            <div class="avatar">🤖</div>
+                            <span>普普AI助手</span>
+                        </div>
+                        <div>您好！我是普普，您的专属选房顾问。请告诉我您的需求，我会为您推荐最适合的房间。</div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- 右侧：推荐结果 -->
+            <div class="demo-panel">
+                <h3>
+                    <span>⭐</span>
+                    AI推荐房间
+                    <span id="room-count" class="status-indicator status-info">(0)</span>
+                </h3>
+                
+                <div id="recommended-rooms">
+                    <div style="text-align: center; color: #666; padding: 40px 20px;">
+                        <i style="font-size: 3rem; margin-bottom: 15px; display: block;">🏠</i>
+                        <p>请点击"模拟房间推荐"查看AI推荐结果</p>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- 订单详情 -->
+        <div class="demo-panel">
+            <h3>
+                <span>📋</span>
+                订单详情
+                <span id="order-status" class="status-indicator status-info">等待中</span>
+            </h3>
+            
+            <div id="order-details">
+                <div style="text-align: center; color: #666; padding: 40px 20px;">
+                    <i style="font-size: 3rem; margin-bottom: 15px; display: block;">📝</i>
+                    <p>完成房间选择后，订单详情将显示在这里</p>
+                </div>
+            </div>
+        </div>
+
+        <!-- 功能说明 -->
+        <div class="demo-panel">
+            <h3>
+                <span>💡</span>
+                功能说明
+            </h3>
+            
+            <div style="line-height: 1.8; color: #4a5568;">
+                <h4 style="color: #2d3748; margin-bottom: 15px;">实现的功能：</h4>
+                <ul style="padding-left: 20px;">
+                    <li><strong>聊天内容解析：</strong>监听Dify AI聊天消息，自动解析房间推荐信息</li>
+                    <li><strong>房间推荐显示：</strong>实时更新左侧推荐房间列表，显示房间详情</li>
+                    <li><strong>订单自动创建：</strong>检测预订确认消息，自动生成订单详情</li>
+                    <li><strong>IP形象头像：</strong>Dify聊天框顶部显示普普IP形象覆盖层</li>
+                </ul>
+                
+                <h4 style="color: #2d3748; margin: 20px 0 15px 0;">解析规则：</h4>
+                <ul style="padding-left: 20px;">
+                    <li>房间号码：识别"101号房"、"202房"等格式</li>
+                    <li>入住日期：识别"2025年7月16日"等日期格式</li>
+                    <li>手机号码：识别11位手机号码</li>
+                    <li>价格信息：识别"48元"等价格信息</li>
+                </ul>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        // 房间数据库
+        const roomDatabase = [
+            {
+                id: '101',
+                code: '101',
+                name: '雨林景观豪华蘑菇屋',
+                price: 18,
+                rating: 4.8,
+                status: 'available',
+                floor: '1楼',
+                direction: '东向带窗',
+                type: '单人间'
+            },
+            {
+                id: '202',
+                code: '202',
+                name: '雨林景观豪华蘑菇屋',
+                price: 48,
+                rating: 4.9,
+                status: 'available',
+                floor: '2楼',
+                direction: '南向带窗',
+                type: '单人间'
+            },
+            {
+                id: '212',
+                code: '212',
+                name: '雨林景观豪华蘑菇屋',
+                price: 418,
+                rating: 4.7,
+                status: 'available',
+                floor: '2楼',
+                direction: '西向带窗',
+                type: '亲子房'
+            }
+        ];
+
+        let currentOrder = null;
+
+        // 模拟房间推荐
+        function simulateRecommendation() {
+            const chatDiv = document.getElementById('chat-simulation');
+            
+            // 添加用户消息
+            const userMessage = document.createElement('div');
+            userMessage.className = 'message user';
+            userMessage.innerHTML = `
+                <div class="message-header">
+                    <div class="avatar">👤</div>
+                    <span>用户</span>
+                </div>
+                <div>推荐一下房间</div>
+            `;
+            chatDiv.appendChild(userMessage);
+
+            // 添加AI推荐消息
+            setTimeout(() => {
+                const aiMessage = document.createElement('div');
+                aiMessage.className = 'message ai';
+                aiMessage.innerHTML = `
+                    <div class="message-header">
+                        <div class="avatar">🤖</div>
+                        <span>普普AI助手</span>
+                    </div>
+                    <div>
+                        让我为您推荐几个特色房间吧~ 🌟<br><br>
+                        【亲子房】雨林景观豪华蘑菇屋<br>
+                        房间号：212（2楼西向带窗）<br>
+                        价格：418元/晚<br><br>
+                        【单人间】雨林景观豪华蘑菇屋<br>
+                        房间号：101（1楼东向带窗）<br>
+                        特惠价：18元/晚<br><br>
+                        【单人间】雨林景观豪华蘑菇屋<br>
+                        房间号：202（2楼南向带窗）<br>
+                        价格：48元/晚
+                    </div>
+                `;
+                chatDiv.appendChild(aiMessage);
+                chatDiv.scrollTop = chatDiv.scrollHeight;
+
+                // 解析并显示推荐房间
+                parseAndShowRecommendations(aiMessage.textContent);
+            }, 1000);
+        }
+
+        // 模拟预订确认
+        function simulateBooking() {
+            const chatDiv = document.getElementById('chat-simulation');
+            
+            // 添加用户消息
+            const userMessage = document.createElement('div');
+            userMessage.className = 'message user';
+            userMessage.innerHTML = `
+                <div class="message-header">
+                    <div class="avatar">👤</div>
+                    <span>用户</span>
+                </div>
+                <div>入住日期为2025年7月16日，手机号15262541251</div>
+            `;
+            chatDiv.appendChild(userMessage);
+
+            // 添加AI确认消息
+            setTimeout(() => {
+                const aiMessage = document.createElement('div');
+                aiMessage.className = 'message ai';
+                aiMessage.innerHTML = `
+                    <div class="message-header">
+                        <div class="avatar">🤖</div>
+                        <span>普普AI助手</span>
+                    </div>
+                    <div>
+                        🌿 预订成功！<br><br>
+                        202房订单详情：<br>
+                        入住日期：2025年7月16日（下午2点后）<br>
+                        退房日期：2025年7月17日（中午12点前）<br>
+                        总费用：48元（含税）<br>
+                        联系方式：152****1251（已加密处理）
+                    </div>
+                `;
+                chatDiv.appendChild(aiMessage);
+                chatDiv.scrollTop = chatDiv.scrollHeight;
+
+                // 解析并创建订单
+                parseAndCreateOrder(aiMessage.textContent);
+            }, 1000);
+        }
+
+        // 解析推荐房间
+        function parseAndShowRecommendations(message) {
+            const recommendations = [];
+            const roomMatches = message.match(/(\d{3})号?房|房间号：(\d{3})/g);
+            
+            if (roomMatches) {
+                roomMatches.forEach(match => {
+                    const roomCode = match.match(/\d{3}/)?.[0];
+                    if (roomCode) {
+                        const room = roomDatabase.find(r => r.code === roomCode);
+                        if (room && !recommendations.find(r => r.code === roomCode)) {
+                            recommendations.push(room);
+                        }
+                    }
+                });
+            }
+
+            displayRecommendations(recommendations);
+        }
+
+        // 显示推荐房间
+        function displayRecommendations(rooms) {
+            const container = document.getElementById('recommended-rooms');
+            const countElement = document.getElementById('room-count');
+            
+            countElement.textContent = `(${rooms.length})`;
+            countElement.className = `status-indicator ${rooms.length > 0 ? 'status-success' : 'status-info'}`;
+
+            if (rooms.length === 0) {
+                container.innerHTML = `
+                    <div style="text-align: center; color: #666; padding: 40px 20px;">
+                        <i style="font-size: 3rem; margin-bottom: 15px; display: block;">🏠</i>
+                        <p>暂无推荐房间</p>
+                    </div>
+                `;
+                return;
+            }
+
+            container.innerHTML = rooms.map(room => `
+                <div class="room-card">
+                    <h4>${room.code}号房 - ${room.name}</h4>
+                    <div class="room-meta">
+                        <span class="price">¥${room.price}/晚</span>
+                        <span>⭐${room.rating}</span>
+                        <span>${room.type}</span>
+                        <span>${room.floor}</span>
+                    </div>
+                </div>
+            `).join('');
+        }
+
+        // 解析并创建订单
+        function parseAndCreateOrder(message) {
+            const orderInfo = {};
+            
+            // 解析房间号
+            const roomMatch = message.match(/(\d{3})房/);
+            if (roomMatch) {
+                orderInfo.roomCode = roomMatch[1];
+                const room = roomDatabase.find(r => r.code === roomMatch[1]);
+                if (room) {
+                    orderInfo.roomName = room.name;
+                    orderInfo.price = room.price;
+                }
+            }
+            
+            // 解析日期
+            const dateMatch = message.match(/(\d{4})年(\d{1,2})月(\d{1,2})日/);
+            if (dateMatch) {
+                orderInfo.checkInDate = `${dateMatch[1]}-${dateMatch[2].padStart(2, '0')}-${dateMatch[3].padStart(2, '0')}`;
+            }
+            
+            // 解析价格
+            const priceMatch = message.match(/(\d+)元/);
+            if (priceMatch) {
+                orderInfo.totalAmount = parseInt(priceMatch[1]);
+            }
+
+            if (orderInfo.roomCode) {
+                currentOrder = {
+                    orderNumber: 'ORD' + Date.now(),
+                    roomCode: orderInfo.roomCode,
+                    roomName: orderInfo.roomName || '雨林景观豪华蘑菇屋',
+                    checkInDate: orderInfo.checkInDate || '2025-07-16',
+                    checkOutDate: calculateCheckOutDate(orderInfo.checkInDate || '2025-07-16'),
+                    totalAmount: orderInfo.totalAmount || orderInfo.price || 48,
+                    status: 'confirmed',
+                    createdAt: new Date().toLocaleString()
+                };
+
+                displayOrder(currentOrder);
+            }
+        }
+
+        // 计算退房日期
+        function calculateCheckOutDate(checkInDate) {
+            const date = new Date(checkInDate);
+            date.setDate(date.getDate() + 1);
+            return date.toISOString().split('T')[0];
+        }
+
+        // 显示订单
+        function displayOrder(order) {
+            const container = document.getElementById('order-details');
+            const statusElement = document.getElementById('order-status');
+            
+            statusElement.textContent = '已确认';
+            statusElement.className = 'status-indicator status-success';
+
+            container.innerHTML = `
+                <div class="order-card">
+                    <div class="order-item">
+                        <span>订单号：</span>
+                        <span>${order.orderNumber}</span>
+                    </div>
+                    <div class="order-item">
+                        <span>房间：</span>
+                        <span>${order.roomCode}号房</span>
+                    </div>
+                    <div class="order-item">
+                        <span>入住：</span>
+                        <span>${order.checkInDate}</span>
+                    </div>
+                    <div class="order-item">
+                        <span>退房：</span>
+                        <span>${order.checkOutDate}</span>
+                    </div>
+                    <div class="order-item total">
+                        <span>总计：</span>
+                        <span>¥${order.totalAmount}</span>
+                    </div>
+                </div>
+            `;
+        }
+
+        // 清空聊天
+        function clearChat() {
+            const chatDiv = document.getElementById('chat-simulation');
+            chatDiv.innerHTML = `
+                <div class="message ai">
+                    <div class="message-header">
+                        <div class="avatar">🤖</div>
+                        <span>普普AI助手</span>
+                    </div>
+                    <div>您好！我是普普，您的专属选房顾问。请告诉我您的需求，我会为您推荐最适合的房间。</div>
+                </div>
+            `;
+
+            // 清空推荐房间
+            displayRecommendations([]);
+            
+            // 清空订单
+            currentOrder = null;
+            document.getElementById('order-details').innerHTML = `
+                <div style="text-align: center; color: #666; padding: 40px 20px;">
+                    <i style="font-size: 3rem; margin-bottom: 15px; display: block;">📝</i>
+                    <p>完成房间选择后，订单详情将显示在这里</p>
+                </div>
+            `;
+            document.getElementById('order-status').textContent = '等待中';
+            document.getElementById('order-status').className = 'status-indicator status-info';
+        }
+    </script>
+</body>
+</html>

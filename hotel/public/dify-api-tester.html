@@ -1,0 +1,413 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Dify API测试器 - 普洱蘑菇庄园民宿</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Arial', sans-serif;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            min-height: 100vh;
+            padding: 20px;
+        }
+
+        .container {
+            max-width: 1400px;
+            margin: 0 auto;
+            background: white;
+            border-radius: 20px;
+            padding: 40px;
+            box-shadow: 0 20px 40px rgba(0,0,0,0.1);
+        }
+
+        .header {
+            text-align: center;
+            margin-bottom: 30px;
+            padding-bottom: 20px;
+            border-bottom: 2px solid #e9ecef;
+        }
+
+        .header h1 {
+            color: #2c3e50;
+            margin-bottom: 10px;
+            font-size: 2rem;
+        }
+
+        .test-section {
+            margin-bottom: 30px;
+            padding: 20px;
+            background: #f8f9fa;
+            border-radius: 10px;
+        }
+
+        .test-section h3 {
+            color: #495057;
+            margin-bottom: 15px;
+        }
+
+        .btn {
+            padding: 12px 24px;
+            border: none;
+            border-radius: 6px;
+            cursor: pointer;
+            font-weight: 500;
+            transition: all 0.3s ease;
+            margin: 5px;
+        }
+
+        .btn-primary {
+            background: #007bff;
+            color: white;
+        }
+
+        .btn-success {
+            background: #28a745;
+            color: white;
+        }
+
+        .btn-warning {
+            background: #ffc107;
+            color: #212529;
+        }
+
+        .btn-danger {
+            background: #dc3545;
+            color: white;
+        }
+
+        .btn:hover {
+            transform: translateY(-1px);
+        }
+
+        .btn:disabled {
+            background: #6c757d;
+            cursor: not-allowed;
+            transform: none;
+        }
+
+        .response-area {
+            background: white;
+            border: 1px solid #ddd;
+            border-radius: 6px;
+            padding: 15px;
+            min-height: 200px;
+            white-space: pre-wrap;
+            font-family: monospace;
+            font-size: 12px;
+            overflow-y: auto;
+            max-height: 400px;
+        }
+
+        .status {
+            padding: 10px;
+            border-radius: 6px;
+            margin-bottom: 15px;
+            font-weight: 500;
+        }
+
+        .status.success {
+            background: #d4edda;
+            color: #155724;
+            border: 1px solid #c3e6cb;
+        }
+
+        .status.error {
+            background: #f8d7da;
+            color: #721c24;
+            border: 1px solid #f5c6cb;
+        }
+
+        .status.info {
+            background: #d1ecf1;
+            color: #0c5460;
+            border: 1px solid #bee5eb;
+        }
+
+        .grid {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 20px;
+        }
+
+        .format-box {
+            background: #e3f2fd;
+            border: 1px solid #90caf9;
+            border-radius: 6px;
+            padding: 15px;
+            margin: 10px 0;
+        }
+
+        .format-box h4 {
+            color: #1565c0;
+            margin-bottom: 10px;
+        }
+
+        .code-block {
+            background: #f8f9fa;
+            border: 1px solid #e9ecef;
+            border-radius: 4px;
+            padding: 10px;
+            font-family: monospace;
+            font-size: 12px;
+            overflow-x: auto;
+        }
+
+        @media (max-width: 768px) {
+            .container {
+                padding: 20px;
+            }
+            .grid {
+                grid-template-columns: 1fr;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div class="header">
+            <h1>🧪 Dify API测试器</h1>
+            <p>测试不同的API调用格式，找到正确的请求方式</p>
+        </div>
+
+        <div class="test-section">
+            <h3>🎯 快速测试不同格式</h3>
+            <button class="btn btn-primary" onclick="testFormat1()">格式1: 标准Dify API</button>
+            <button class="btn btn-success" onclick="testFormat2()">格式2: 简化请求</button>
+            <button class="btn btn-warning" onclick="testFormat3()">格式3: 完整参数</button>
+            <button class="btn btn-danger" onclick="testFormat4()">格式4: 无inputs</button>
+            <div id="quickStatus"></div>
+            <div id="quickResponse" class="response-area"></div>
+        </div>
+
+        <div class="grid">
+            <div class="test-section">
+                <h3>📋 请求格式说明</h3>
+                
+                <div class="format-box">
+                    <h4>格式1: 标准Dify API</h4>
+                    <div class="code-block">{
+  "inputs": {
+    "room_info": "房间信息..."
+  },
+  "query": "用户消息",
+  "response_mode": "blocking",
+  "conversation_id": "",
+  "user": "用户ID"
+}</div>
+                </div>
+
+                <div class="format-box">
+                    <h4>格式2: 简化请求</h4>
+                    <div class="code-block">{
+  "query": "用户消息",
+  "response_mode": "blocking",
+  "user": "用户ID"
+}</div>
+                </div>
+
+                <div class="format-box">
+                    <h4>格式3: 完整参数</h4>
+                    <div class="code-block">{
+  "inputs": {},
+  "query": "用户消息",
+  "response_mode": "blocking",
+  "conversation_id": "",
+  "user": "用户ID",
+  "auto_generate_name": false
+}</div>
+                </div>
+            </div>
+
+            <div class="test-section">
+                <h3>🔍 详细测试结果</h3>
+                <div id="detailStatus"></div>
+                <div id="detailResponse" class="response-area"></div>
+            </div>
+        </div>
+
+        <div class="test-section">
+            <h3>🛠️ 自定义测试</h3>
+            <textarea id="customJSON" placeholder="输入自定义JSON请求体" style="width: 100%; height: 150px; padding: 10px; font-family: monospace;">{
+  "query": "推荐一下便宜的房间",
+  "inputs": {},
+  "response_mode": "blocking",
+  "user": "test-user"
+}</textarea>
+            <br><br>
+            <button class="btn btn-primary" onclick="testCustomFormat()" id="customBtn">测试自定义格式</button>
+            <div id="customStatus"></div>
+            <div id="customResponse" class="response-area"></div>
+        </div>
+    </div>
+
+    <script>
+        // 通用测试函数
+        async function testDifyAPI(requestBody, formatName) {
+            console.log(`🧪 测试${formatName}:`, requestBody);
+            
+            try {
+                const response = await fetch('/api/dify/chat/fggmGdSFt6MSQFJa', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json'
+                    },
+                    body: JSON.stringify(requestBody)
+                });
+
+                const contentType = response.headers.get('content-type') || '';
+                const responseText = await response.text();
+                
+                const result = {
+                    format: formatName,
+                    status: response.status,
+                    contentType: contentType,
+                    responseText: responseText,
+                    success: response.ok && contentType.includes('json')
+                };
+
+                console.log(`📊 ${formatName}结果:`, result);
+                return result;
+                
+            } catch (error) {
+                console.error(`❌ ${formatName}失败:`, error);
+                return {
+                    format: formatName,
+                    error: error.message,
+                    success: false
+                };
+            }
+        }
+
+        // 格式1: 标准Dify API
+        async function testFormat1() {
+            const requestBody = {
+                inputs: {
+                    room_info: `普洱蘑菇庄园民宿房间信息：
+- 201号房：大床房，19元/晚，温馨舒适
+- 301号房：家庭房，486元/晚，适合家庭入住
+- 204号房：单人间带窗，999元/晚，景观优美
+- 105号房：单人间无窗，256元/晚，经济实惠
+- 303号房：双人间，标准配置`
+                },
+                query: "推荐一下便宜的房间",
+                response_mode: "blocking",
+                conversation_id: "",
+                user: "test-user"
+            };
+
+            const result = await testDifyAPI(requestBody, "格式1");
+            displayResult(result, 'quick');
+        }
+
+        // 格式2: 简化请求
+        async function testFormat2() {
+            const requestBody = {
+                query: "推荐一下便宜的房间",
+                response_mode: "blocking",
+                user: "test-user"
+            };
+
+            const result = await testDifyAPI(requestBody, "格式2");
+            displayResult(result, 'quick');
+        }
+
+        // 格式3: 完整参数
+        async function testFormat3() {
+            const requestBody = {
+                inputs: {},
+                query: "推荐一下便宜的房间",
+                response_mode: "blocking",
+                conversation_id: "",
+                user: "test-user",
+                auto_generate_name: false
+            };
+
+            const result = await testDifyAPI(requestBody, "格式3");
+            displayResult(result, 'quick');
+        }
+
+        // 格式4: 无inputs
+        async function testFormat4() {
+            const requestBody = {
+                query: "推荐一下便宜的房间",
+                response_mode: "blocking",
+                user: "test-user",
+                conversation_id: ""
+            };
+
+            const result = await testDifyAPI(requestBody, "格式4");
+            displayResult(result, 'quick');
+        }
+
+        // 自定义格式测试
+        async function testCustomFormat() {
+            const customJSON = document.getElementById('customJSON').value;
+            const btn = document.getElementById('customBtn');
+            
+            btn.disabled = true;
+            btn.textContent = '测试中...';
+
+            try {
+                const requestBody = JSON.parse(customJSON);
+                const result = await testDifyAPI(requestBody, "自定义格式");
+                displayResult(result, 'custom');
+            } catch (error) {
+                displayResult({
+                    format: "自定义格式",
+                    error: `JSON解析失败: ${error.message}`,
+                    success: false
+                }, 'custom');
+            } finally {
+                btn.disabled = false;
+                btn.textContent = '测试自定义格式';
+            }
+        }
+
+        // 显示结果
+        function displayResult(result, type) {
+            const statusDiv = document.getElementById(`${type}Status`);
+            const responseDiv = document.getElementById(`${type}Response`);
+
+            if (result.success) {
+                statusDiv.innerHTML = `<div class="status success">✅ ${result.format}成功！</div>`;
+                try {
+                    const jsonData = JSON.parse(result.responseText);
+                    responseDiv.textContent = `${result.format}成功响应:
+状态码: ${result.status}
+Content-Type: ${result.contentType}
+
+JSON响应:
+${JSON.stringify(jsonData, null, 2)}`;
+                } catch (e) {
+                    responseDiv.textContent = `${result.format}响应:
+状态码: ${result.status}
+Content-Type: ${result.contentType}
+
+响应内容:
+${result.responseText}`;
+                }
+            } else {
+                statusDiv.innerHTML = `<div class="status error">❌ ${result.format}失败</div>`;
+                responseDiv.textContent = `${result.format}失败详情:
+${result.error ? `错误: ${result.error}` : ''}
+${result.status ? `状态码: ${result.status}` : ''}
+${result.contentType ? `Content-Type: ${result.contentType}` : ''}
+
+${result.responseText ? `响应内容:\n${result.responseText}` : ''}`;
+            }
+        }
+
+        // 页面加载时自动测试格式2（最简单的）
+        window.addEventListener('load', () => {
+            setTimeout(testFormat2, 1000);
+        });
+    </script>
+</body>
+</html>

@@ -1,0 +1,364 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>系统状态调试</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            margin: 0;
+            padding: 20px;
+            background: #f5f5f5;
+        }
+        .container {
+            max-width: 1000px;
+            margin: 0 auto;
+            background: white;
+            border-radius: 10px;
+            padding: 20px;
+            box-shadow: 0 4px 15px rgba(0,0,0,0.1);
+        }
+        .section {
+            margin-bottom: 30px;
+            padding: 20px;
+            border: 1px solid #ddd;
+            border-radius: 8px;
+        }
+        .section h3 {
+            margin-top: 0;
+            color: #333;
+            border-bottom: 2px solid #007bff;
+            padding-bottom: 10px;
+        }
+        .status-item {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 10px 0;
+            border-bottom: 1px solid #eee;
+        }
+        .status-item:last-child {
+            border-bottom: none;
+        }
+        .status-indicator {
+            padding: 4px 12px;
+            border-radius: 20px;
+            font-size: 12px;
+            font-weight: bold;
+        }
+        .status-success {
+            background: #d4edda;
+            color: #155724;
+        }
+        .status-error {
+            background: #f8d7da;
+            color: #721c24;
+        }
+        .status-warning {
+            background: #fff3cd;
+            color: #856404;
+        }
+        .test-buttons {
+            display: flex;
+            gap: 10px;
+            flex-wrap: wrap;
+            margin: 15px 0;
+        }
+        button {
+            background: #007bff;
+            color: white;
+            border: none;
+            padding: 10px 20px;
+            border-radius: 5px;
+            cursor: pointer;
+            transition: background 0.3s;
+        }
+        button:hover {
+            background: #0056b3;
+        }
+        .log-area {
+            background: #f8f9fa;
+            border: 1px solid #dee2e6;
+            border-radius: 5px;
+            padding: 15px;
+            max-height: 300px;
+            overflow-y: auto;
+            font-family: monospace;
+            font-size: 14px;
+        }
+        .log-entry {
+            margin: 2px 0;
+        }
+        .log-success {
+            color: #28a745;
+        }
+        .log-error {
+            color: #dc3545;
+        }
+        .log-info {
+            color: #17a2b8;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1>🔍 系统状态调试面板</h1>
+        
+        <div class="section">
+            <h3>🌐 服务连接状态</h3>
+            <div class="status-item">
+                <span>前端服务 (localhost:5173)</span>
+                <span id="frontend-status" class="status-indicator status-success">运行中</span>
+            </div>
+            <div class="status-item">
+                <span>后端服务 (localhost:8080)</span>
+                <span id="backend-status" class="status-indicator status-warning">检测中...</span>
+            </div>
+            <div class="status-item">
+                <span>代理服务器 (localhost:3001)</span>
+                <span id="proxy-status" class="status-indicator status-warning">检测中...</span>
+            </div>
+            <div class="status-item">
+                <span>Dify服务</span>
+                <span id="dify-status" class="status-indicator status-warning">检测中...</span>
+            </div>
+        </div>
+
+        <div class="section">
+            <h3>🔐 登录功能测试</h3>
+            <div class="test-buttons">
+                <button onclick="testLogin()">测试管理员登录</button>
+                <button onclick="testUserLogin()">测试用户登录</button>
+                <button onclick="checkAuthStatus()">检查认证状态</button>
+            </div>
+            <div id="login-results" class="log-area">
+                <div class="log-info">点击按钮开始测试登录功能...</div>
+            </div>
+        </div>
+
+        <div class="section">
+            <h3>🤖 AI助手状态</h3>
+            <div class="test-buttons">
+                <button onclick="checkAIElements()">检查AI元素</button>
+                <button onclick="testDifyConnection()">测试Dify连接</button>
+                <button onclick="clearAIElements()">清理AI元素</button>
+            </div>
+            <div id="ai-results" class="log-area">
+                <div class="log-info">点击按钮开始检查AI助手状态...</div>
+            </div>
+        </div>
+
+        <div class="section">
+            <h3>📋 快速链接</h3>
+            <div class="test-buttons">
+                <a href="http://localhost:5173/admin/login" target="_blank">
+                    <button>管理员登录</button>
+                </a>
+                <a href="http://localhost:5173/ai-rooms" target="_blank">
+                    <button>AI选房页面</button>
+                </a>
+                <a href="http://localhost:5173/" target="_blank">
+                    <button>首页</button>
+                </a>
+                <a href="http://localhost:8080/sys/user/login" target="_blank">
+                    <button>后端登录API</button>
+                </a>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        function log(area, message, type = 'info') {
+            const logArea = document.getElementById(area);
+            const entry = document.createElement('div');
+            entry.className = `log-entry log-${type}`;
+            entry.textContent = `[${new Date().toLocaleTimeString()}] ${message}`;
+            logArea.appendChild(entry);
+            logArea.scrollTop = logArea.scrollHeight;
+        }
+
+        function updateStatus(elementId, status, text) {
+            const element = document.getElementById(elementId);
+            if (element) {
+                element.className = `status-indicator status-${status}`;
+                element.textContent = text;
+            }
+        }
+
+        async function testBackendConnection() {
+            try {
+                const response = await fetch('http://localhost:8080/sys/user/login', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json'
+                    },
+                    body: JSON.stringify({
+                        username: 'test',
+                        password: 'test'
+                    })
+                });
+                
+                if (response.status === 200 || response.status === 400) {
+                    updateStatus('backend-status', 'success', '运行中');
+                    return true;
+                } else {
+                    updateStatus('backend-status', 'error', '异常');
+                    return false;
+                }
+            } catch (error) {
+                updateStatus('backend-status', 'error', '离线');
+                return false;
+            }
+        }
+
+        async function testProxyConnection() {
+            try {
+                const response = await fetch('/health');
+                if (response.ok) {
+                    updateStatus('proxy-status', 'success', '运行中');
+                    return true;
+                } else {
+                    updateStatus('proxy-status', 'error', '异常');
+                    return false;
+                }
+            } catch (error) {
+                updateStatus('proxy-status', 'error', '离线');
+                return false;
+            }
+        }
+
+        async function testDifyConnection() {
+            log('ai-results', '开始测试Dify连接...', 'info');
+            try {
+                const response = await fetch('http://4295a4ce.r28.cpolar.top', {
+                    method: 'HEAD',
+                    mode: 'no-cors'
+                });
+                updateStatus('dify-status', 'success', '可用');
+                log('ai-results', 'Dify服务连接成功', 'success');
+                return true;
+            } catch (error) {
+                updateStatus('dify-status', 'error', '不可用');
+                log('ai-results', `Dify服务连接失败: ${error.message}`, 'error');
+                return false;
+            }
+        }
+
+        async function testLogin() {
+            log('login-results', '开始测试管理员登录...', 'info');
+            try {
+                const response = await fetch('http://localhost:8080/sys/user/login', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json'
+                    },
+                    body: JSON.stringify({
+                        username: 'root',
+                        password: 'root123'
+                    })
+                });
+
+                const data = await response.json();
+
+                if (response.ok && (data.code === 200 || data.code === "200")) {
+                    log('login-results', '管理员登录成功！', 'success');
+                    log('login-results', `Token: ${data.data.tokenInfo.tokenValue}`, 'info');
+                    localStorage.setItem('adminToken', data.data.tokenInfo.tokenValue);
+                } else {
+                    log('login-results', `管理员登录失败: ${data.msg || '未知错误'}`, 'error');
+                }
+            } catch (error) {
+                log('login-results', `管理员登录请求失败: ${error.message}`, 'error');
+            }
+        }
+
+        async function testUserLogin() {
+            log('login-results', '开始测试用户登录...', 'info');
+            try {
+                const response = await fetch('http://localhost:8080/h/user/login', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json'
+                    },
+                    body: JSON.stringify({
+                        username: 'testuser',
+                        password: '123456'
+                    })
+                });
+
+                const data = await response.json();
+
+                if (response.ok && (data.code === 200 || data.code === "200")) {
+                    log('login-results', '用户登录成功！', 'success');
+                    log('login-results', `Token: ${data.data.tokenInfo.tokenValue}`, 'info');
+                    localStorage.setItem('userToken', data.data.tokenInfo.tokenValue);
+                } else {
+                    log('login-results', `用户登录失败: ${data.msg || '未知错误'}`, 'error');
+                }
+            } catch (error) {
+                log('login-results', `用户登录请求失败: ${error.message}`, 'error');
+            }
+        }
+
+        function checkAuthStatus() {
+            log('login-results', '检查本地认证状态...', 'info');
+            
+            const adminToken = localStorage.getItem('adminToken');
+            const userToken = localStorage.getItem('userToken');
+            
+            if (adminToken) {
+                log('login-results', `管理员Token存在: ${adminToken.substring(0, 20)}...`, 'success');
+            } else {
+                log('login-results', '管理员Token不存在', 'warning');
+            }
+            
+            if (userToken) {
+                log('login-results', `用户Token存在: ${userToken.substring(0, 20)}...`, 'success');
+            } else {
+                log('login-results', '用户Token不存在', 'warning');
+            }
+        }
+
+        function checkAIElements() {
+            log('ai-results', '检查页面AI元素...', 'info');
+            
+            const difyButton = document.getElementById('dify-chatbot-bubble-button');
+            const difyWindow = document.getElementById('dify-chatbot-bubble-window');
+            const customAI = document.querySelector('.ai-assistant');
+            
+            log('ai-results', `Dify按钮: ${difyButton ? '存在' : '不存在'}`, difyButton ? 'success' : 'warning');
+            log('ai-results', `Dify窗口: ${difyWindow ? '存在' : '不存在'}`, difyWindow ? 'success' : 'warning');
+            log('ai-results', `自定义AI: ${customAI ? '存在' : '不存在'}`, customAI ? 'success' : 'warning');
+            
+            // 检查是否有多个AI助手
+            const allAIElements = document.querySelectorAll('[id*="dify"], [class*="ai-"], [class*="chatbot"]');
+            log('ai-results', `总AI元素数量: ${allAIElements.length}`, allAIElements.length > 1 ? 'warning' : 'success');
+        }
+
+        function clearAIElements() {
+            log('ai-results', '清理重复的AI元素...', 'info');
+            
+            const difyButton = document.getElementById('dify-chatbot-bubble-button');
+            const difyWindow = document.getElementById('dify-chatbot-bubble-window');
+            
+            if (difyButton) {
+                difyButton.remove();
+                log('ai-results', 'Dify按钮已移除', 'success');
+            }
+            
+            if (difyWindow) {
+                difyWindow.remove();
+                log('ai-results', 'Dify窗口已移除', 'success');
+            }
+        }
+
+        // 页面加载时自动检查服务状态
+        window.addEventListener('load', async function() {
+            await testBackendConnection();
+            await testProxyConnection();
+            await testDifyConnection();
+        });
+    </script>
+</body>
+</html>

@@ -1,0 +1,434 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>AI决策支持系统演示 - 普洱蘑菇庄园</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Microsoft YaHei', sans-serif;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            min-height: 100vh;
+            padding: 20px;
+        }
+
+        .container {
+            max-width: 1200px;
+            margin: 0 auto;
+            background: white;
+            border-radius: 20px;
+            box-shadow: 0 20px 40px rgba(0,0,0,0.1);
+            overflow: hidden;
+        }
+
+        .header {
+            background: linear-gradient(135deg, #4CAF50 0%, #8BC34A 100%);
+            color: white;
+            padding: 30px;
+            text-align: center;
+        }
+
+        .header h1 {
+            font-size: 2.5em;
+            margin-bottom: 10px;
+            text-shadow: 2px 2px 4px rgba(0,0,0,0.3);
+        }
+
+        .header p {
+            font-size: 1.2em;
+            opacity: 0.9;
+        }
+
+        .demo-section {
+            padding: 40px;
+        }
+
+        .feature-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+            gap: 30px;
+            margin-bottom: 40px;
+        }
+
+        .feature-card {
+            background: #f8f9fa;
+            border-radius: 15px;
+            padding: 25px;
+            border-left: 5px solid #4CAF50;
+            transition: transform 0.3s ease, box-shadow 0.3s ease;
+        }
+
+        .feature-card:hover {
+            transform: translateY(-5px);
+            box-shadow: 0 10px 25px rgba(0,0,0,0.1);
+        }
+
+        .feature-card h3 {
+            color: #2E7D32;
+            margin-bottom: 15px;
+            font-size: 1.3em;
+        }
+
+        .feature-card p {
+            color: #666;
+            line-height: 1.6;
+            margin-bottom: 15px;
+        }
+
+        .demo-button {
+            background: linear-gradient(135deg, #4CAF50 0%, #45a049 100%);
+            color: white;
+            border: none;
+            padding: 12px 25px;
+            border-radius: 25px;
+            cursor: pointer;
+            font-size: 1em;
+            transition: all 0.3s ease;
+        }
+
+        .demo-button:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 5px 15px rgba(76, 175, 80, 0.4);
+        }
+
+        .chat-demo {
+            background: #f0f8f0;
+            border-radius: 15px;
+            padding: 30px;
+            margin: 30px 0;
+        }
+
+        .chat-header {
+            display: flex;
+            align-items: center;
+            margin-bottom: 20px;
+            padding-bottom: 15px;
+            border-bottom: 2px solid #4CAF50;
+        }
+
+        .avatar {
+            width: 50px;
+            height: 50px;
+            border-radius: 50%;
+            background: #4CAF50;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            color: white;
+            font-size: 1.5em;
+            margin-right: 15px;
+        }
+
+        .chat-messages {
+            max-height: 400px;
+            overflow-y: auto;
+            margin-bottom: 20px;
+        }
+
+        .message {
+            margin-bottom: 15px;
+            padding: 12px 18px;
+            border-radius: 18px;
+            max-width: 80%;
+            line-height: 1.5;
+        }
+
+        .user-message {
+            background: #e3f2fd;
+            margin-left: auto;
+            text-align: right;
+        }
+
+        .ai-message {
+            background: #e8f5e8;
+            margin-right: auto;
+        }
+
+        .room-card {
+            background: white;
+            border-radius: 10px;
+            padding: 15px;
+            margin-top: 10px;
+            border: 1px solid #ddd;
+            display: flex;
+            align-items: center;
+        }
+
+        .room-image {
+            width: 80px;
+            height: 60px;
+            background: #4CAF50;
+            border-radius: 8px;
+            margin-right: 15px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            color: white;
+            font-size: 0.9em;
+        }
+
+        .room-info h4 {
+            color: #2E7D32;
+            margin-bottom: 5px;
+        }
+
+        .room-info p {
+            color: #666;
+            font-size: 0.9em;
+        }
+
+        .input-area {
+            display: flex;
+            gap: 10px;
+        }
+
+        .input-area input {
+            flex: 1;
+            padding: 12px 18px;
+            border: 2px solid #ddd;
+            border-radius: 25px;
+            font-size: 1em;
+            outline: none;
+            transition: border-color 0.3s ease;
+        }
+
+        .input-area input:focus {
+            border-color: #4CAF50;
+        }
+
+        .send-button {
+            background: #4CAF50;
+            color: white;
+            border: none;
+            padding: 12px 20px;
+            border-radius: 25px;
+            cursor: pointer;
+            font-size: 1em;
+            transition: background 0.3s ease;
+        }
+
+        .send-button:hover {
+            background: #45a049;
+        }
+
+        .stats-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+            gap: 20px;
+            margin-top: 30px;
+        }
+
+        .stat-card {
+            background: linear-gradient(135deg, #4CAF50 0%, #8BC34A 100%);
+            color: white;
+            padding: 25px;
+            border-radius: 15px;
+            text-align: center;
+        }
+
+        .stat-number {
+            font-size: 2.5em;
+            font-weight: bold;
+            margin-bottom: 10px;
+        }
+
+        .stat-label {
+            font-size: 1.1em;
+            opacity: 0.9;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div class="header">
+            <h1>🤖 AI决策支持系统演示</h1>
+            <p>普洱蘑菇庄园 - 茶茶AI助手智能交互体验</p>
+        </div>
+
+        <div class="demo-section">
+            <h2 style="text-align: center; margin-bottom: 30px; color: #2E7D32;">核心功能展示</h2>
+            
+            <div class="feature-grid">
+                <div class="feature-card">
+                    <h3>🎯 智能交互入口</h3>
+                    <p>数字人IP"茶茶"悬浮在3D场景中，支持语音和文字双模式交互，茶绿+原木配色呼应茶文化主题。</p>
+                    <button class="demo-button" onclick="showInteractionDemo()">体验交互</button>
+                </div>
+
+                <div class="feature-card">
+                    <h3>📊 实时数据匹配</h3>
+                    <p>AI实时调取房态、价格、活动信息，确保用户获取的预订信息与实际情况完全一致。</p>
+                    <button class="demo-button" onclick="showDataDemo()">查看演示</button>
+                </div>
+
+                <div class="feature-card">
+                    <h3>🔄 预订流程闭环</h3>
+                    <p>从咨询到确认的一站式体验，智能提取对话信息，自动填充预订表单，生成优惠码。</p>
+                    <button class="demo-button" onclick="showBookingDemo()">预订演示</button>
+                </div>
+
+                <div class="feature-card">
+                    <h3>🎨 智能推荐算法</h3>
+                    <p>基于用户画像和行为分析，精准推荐个性化套餐，实现"住宿+文旅"深度融合。</p>
+                    <button class="demo-button" onclick="showRecommendationDemo()">推荐演示</button>
+                </div>
+            </div>
+
+            <div class="chat-demo" id="chatDemo">
+                <div class="chat-header">
+                    <div class="avatar">🍵</div>
+                    <div>
+                        <h3>普普AI助手</h3>
+                        <p style="color: #666; margin: 0;">您的专属民宿预订顾问</p>
+                    </div>
+                </div>
+
+                <div class="chat-messages" id="chatMessages">
+                    <div class="message ai-message">
+                        您好！欢迎来到普洱蘑菇庄园🍄！我是普普，您的专属AI小助手。我可以帮您了解庄园信息、预订民宿、推荐茶艺体验等。有什么可以帮助您的吗？
+                    </div>
+                </div>
+
+                <div class="input-area">
+                    <input type="text" id="userInput" placeholder="请输入您的需求，比如：我想预订明天的房间..." />
+                    <button class="send-button" onclick="sendMessage()">发送</button>
+                </div>
+            </div>
+
+            <div class="stats-grid">
+                <div class="stat-card">
+                    <div class="stat-number">95%</div>
+                    <div class="stat-label">用户满意度</div>
+                </div>
+                <div class="stat-card">
+                    <div class="stat-number">3秒</div>
+                    <div class="stat-label">平均响应时间</div>
+                </div>
+                <div class="stat-card">
+                    <div class="stat-number">85%</div>
+                    <div class="stat-label">预订转化率</div>
+                </div>
+                <div class="stat-card">
+                    <div class="stat-number">24/7</div>
+                    <div class="stat-label">在线服务</div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        // 模拟对话数据
+        const demoResponses = {
+            '房间': {
+                text: '我们有6种特色房型可供选择：\n🍄 蘑菇森林小屋(201号) - ¥350/晚，茶园景观，含早餐\n☁️ 云雾山景房(202号) - ¥380/晚，山景阳台，含早餐\n🍵 普洱茶香阁(203号) - ¥280/晚，茶具套装\n🏞️ 湖畔小筑(206号) - ¥428/晚，湖景阳台，垂钓设备',
+                roomCard: {
+                    name: '蘑菇森林小屋',
+                    price: '¥350/晚',
+                    features: '茶园景观 • 含早餐 • WiFi'
+                }
+            },
+            '预订': {
+                text: '好的！我来帮您预订房间。请告诉我：\n📅 入住和退房日期\n👥 入住人数\n🏠 房型偏好\n\n我会为您查找最合适的房间并生成茶艺体验优惠码！',
+                roomCard: null
+            },
+            '活动': {
+                text: '庄园提供丰富的茶文化体验活动：\n🍵 茶艺课程学习 - ¥88/人（住客8折）\n🌱 采茶体验活动 - ¥68/人\n🍄 蘑菇森林探索 - ¥58/人\n🏞️ 湖边垂钓休闲 - 免费\n🌅 茶园日出观赏 - 免费\n\n您对哪个活动感兴趣呢？',
+                roomCard: null
+            }
+        };
+
+        function sendMessage() {
+            const input = document.getElementById('userInput');
+            const message = input.value.trim();
+            
+            if (!message) return;
+
+            // 添加用户消息
+            addMessage(message, 'user');
+            
+            // 清空输入框
+            input.value = '';
+
+            // 模拟AI响应
+            setTimeout(() => {
+                let response = demoResponses['房间']; // 默认响应
+                
+                // 简单的关键词匹配
+                if (message.includes('预订') || message.includes('订房')) {
+                    response = demoResponses['预订'];
+                } else if (message.includes('活动') || message.includes('体验')) {
+                    response = demoResponses['活动'];
+                }
+                
+                addMessage(response.text, 'ai', response.roomCard);
+            }, 1000);
+        }
+
+        function addMessage(text, type, roomCard = null) {
+            const messagesContainer = document.getElementById('chatMessages');
+            const messageDiv = document.createElement('div');
+            messageDiv.className = `message ${type}-message`;
+            messageDiv.innerHTML = text.replace(/\n/g, '<br>');
+            
+            if (roomCard) {
+                const cardDiv = document.createElement('div');
+                cardDiv.className = 'room-card';
+                cardDiv.innerHTML = `
+                    <div class="room-image">🍄</div>
+                    <div class="room-info">
+                        <h4>${roomCard.name}</h4>
+                        <p>${roomCard.price}</p>
+                        <p style="font-size: 0.8em; color: #888;">${roomCard.features}</p>
+                    </div>
+                `;
+                messageDiv.appendChild(cardDiv);
+            }
+            
+            messagesContainer.appendChild(messageDiv);
+            messagesContainer.scrollTop = messagesContainer.scrollHeight;
+        }
+
+        // 功能演示函数
+        function showInteractionDemo() {
+            addMessage('您好！我想了解一下房间情况', 'user');
+            setTimeout(() => {
+                addMessage(demoResponses['房间'].text, 'ai', demoResponses['房间'].roomCard);
+            }, 1000);
+        }
+
+        function showDataDemo() {
+            addMessage('请问明天还有房间吗？', 'user');
+            setTimeout(() => {
+                addMessage('让我为您查询明天的房态信息...\n\n✅ 蘑菇森林小屋(201号) - 可预订\n✅ 云雾山景房(202号) - 可预订\n❌ 普洱茶香阁(203号) - 已满房\n✅ 湖畔小筑(206号) - 可预订\n\n以上信息实时更新，价格已包含最新优惠！', 'ai');
+            }, 1500);
+        }
+
+        function showBookingDemo() {
+            addMessage('我要预订明天的蘑菇森林小屋', 'user');
+            setTimeout(() => {
+                addMessage('好的！已为您预留蘑菇森林小屋201号房，订单号：MG20250116001。\n\n这是为您生成的茶艺体验优惠码→CHA2025，可享受8折优惠！\n\n请在30分钟内完成支付确认。', 'ai');
+            }, 1500);
+        }
+
+        function showRecommendationDemo() {
+            addMessage('我是带孩子的家庭，有什么推荐吗？', 'user');
+            setTimeout(() => {
+                addMessage('为您推荐亲子茶文化体验套餐：\n\n🏠 蘑菇森林小屋住宿 × 2晚\n👶 儿童茶艺启蒙课程\n🍄 蘑菇森林亲子探索\n🎨 手工茶具制作体验\n\n套餐价格：¥980（原价¥1150，优惠15%）\n\n孩子可以在安全的环境中体验茶文化，寓教于乐！', 'ai');
+            }, 1500);
+        }
+
+        // 回车发送消息
+        document.getElementById('userInput').addEventListener('keypress', function(e) {
+            if (e.key === 'Enter') {
+                sendMessage();
+            }
+        });
+    </script>
+</body>
+</html>

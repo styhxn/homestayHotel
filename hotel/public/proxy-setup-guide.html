@@ -1,0 +1,348 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>代理配置指南 - 普洱蘑菇庄园民宿</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Arial', sans-serif;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            min-height: 100vh;
+            padding: 20px;
+        }
+
+        .container {
+            max-width: 1000px;
+            margin: 0 auto;
+            background: white;
+            border-radius: 20px;
+            padding: 40px;
+            box-shadow: 0 20px 40px rgba(0,0,0,0.1);
+        }
+
+        .header {
+            text-align: center;
+            margin-bottom: 40px;
+            padding-bottom: 20px;
+            border-bottom: 2px solid #e9ecef;
+        }
+
+        .header h1 {
+            color: #2c3e50;
+            margin-bottom: 10px;
+            font-size: 2.5rem;
+        }
+
+        .success-section {
+            background: #d4edda;
+            border: 1px solid #c3e6cb;
+            border-radius: 15px;
+            padding: 20px;
+            margin-bottom: 30px;
+        }
+
+        .success-section h3 {
+            color: #155724;
+            margin-bottom: 15px;
+        }
+
+        .quick-links {
+            background: #e3f2fd;
+            border-radius: 15px;
+            padding: 20px;
+            margin-bottom: 30px;
+        }
+
+        .link-buttons {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 15px;
+        }
+
+        .link-btn {
+            padding: 12px 24px;
+            border: none;
+            border-radius: 10px;
+            font-weight: bold;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            text-decoration: none;
+            display: inline-block;
+            color: white;
+        }
+
+        .link-btn.primary {
+            background: #007bff;
+        }
+
+        .link-btn.success {
+            background: #28a745;
+        }
+
+        .link-btn.warning {
+            background: #ffc107;
+            color: #212529;
+        }
+
+        .link-btn.danger {
+            background: #dc3545;
+        }
+
+        .link-btn:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 5px 15px rgba(0,0,0,0.2);
+        }
+
+        .code-block {
+            background: #f8f9fa;
+            border: 1px solid #e9ecef;
+            border-radius: 6px;
+            padding: 15px;
+            font-family: monospace;
+            font-size: 14px;
+            margin: 10px 0;
+            overflow-x: auto;
+        }
+
+        .step-box {
+            background: #fff3cd;
+            border: 1px solid #ffeaa7;
+            border-radius: 10px;
+            padding: 20px;
+            margin-bottom: 20px;
+        }
+
+        .step-box h4 {
+            color: #856404;
+            margin-bottom: 10px;
+        }
+
+        .emoji-large {
+            font-size: 2rem;
+            margin-right: 10px;
+        }
+
+        ul {
+            margin-left: 20px;
+            margin-top: 10px;
+        }
+
+        li {
+            margin-bottom: 8px;
+            line-height: 1.6;
+        }
+
+        .config-table {
+            width: 100%;
+            border-collapse: collapse;
+            margin: 15px 0;
+        }
+
+        .config-table th,
+        .config-table td {
+            border: 1px solid #ddd;
+            padding: 12px;
+            text-align: left;
+        }
+
+        .config-table th {
+            background: #f8f9fa;
+            font-weight: bold;
+        }
+
+        .config-table code {
+            background: #f8f9fa;
+            padding: 2px 6px;
+            border-radius: 3px;
+            font-family: monospace;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div class="header">
+            <h1>🔄 代理配置指南</h1>
+            <p>Vite开发服务器代理配置完成，解决CORS问题</p>
+        </div>
+
+        <div class="success-section">
+            <h3>✅ 代理配置已完成</h3>
+            <div style="line-height: 1.8; color: #155724;">
+                <p>我已经为您配置了Vite开发服务器代理，现在可以通过代理访问Dify服务，完全解决CORS问题。</p>
+                <p><strong>新的服务器地址：</strong> http://localhost:5174 （端口可能会变化）</p>
+            </div>
+        </div>
+
+        <div class="quick-links">
+            <h3>🚀 立即测试代理配置</h3>
+            <div class="link-buttons">
+                <a href="/proxy-test.html" class="link-btn success" target="_blank">
+                    🔧 代理测试工具
+                </a>
+                <a href="/ai-room-selection" class="link-btn primary" target="_blank">
+                    🤖 AI选房页面
+                </a>
+                <a href="/surrounding-products" class="link-btn warning" target="_blank">
+                    🛍️ 周边产品
+                </a>
+                <a href="/orders" class="link-btn danger" target="_blank">
+                    📋 我的订单
+                </a>
+            </div>
+        </div>
+
+        <div class="step-box">
+            <h4>📋 代理配置详情</h4>
+            <table class="config-table">
+                <thead>
+                    <tr>
+                        <th>代理路径</th>
+                        <th>目标地址</th>
+                        <th>用途</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    <tr>
+                        <td><code>/api/dify/chat/*</code></td>
+                        <td><code>http://4295a4ce.r28.cpolar.top/chat/*</code></td>
+                        <td>Dify公网链接代理</td>
+                    </tr>
+                    <tr>
+                        <td><code>/api/dify/v1/*</code></td>
+                        <td><code>http://4295a4ce.r28.cpolar.top/v1/*</code></td>
+                        <td>Dify后端API代理</td>
+                    </tr>
+                </tbody>
+            </table>
+        </div>
+
+        <div class="step-box">
+            <h4>🔧 配置文件修改</h4>
+            <p><strong>文件：</strong><code>hotel/vite.config.ts</code></p>
+            <div class="code-block">
+export default defineConfig({
+  // ... 其他配置
+  server: {
+    proxy: {
+      // 代理Dify公网链接
+      '/api/dify/chat': {
+        target: 'http://4295a4ce.r28.cpolar.top/chat',
+        changeOrigin: true,
+        rewrite: (path) => path.replace(/^\/api\/dify\/chat/, '')
+      },
+      // 代理Dify后端API
+      '/api/dify/v1': {
+        target: 'http://4295a4ce.r28.cpolar.top/v1',
+        changeOrigin: true,
+        rewrite: (path) => path.replace(/^\/api\/dify\/v1/, '')
+      }
+    }
+  }
+})
+            </div>
+        </div>
+
+        <div class="step-box">
+            <h4>🔄 API调用方式更新</h4>
+            <p><strong>文件：</strong><code>hotel/src/api/difyProxy.ts</code></p>
+            <p>API调用现在使用代理路径：</p>
+            <div class="code-block">
+// 原来的直接调用（会有CORS问题）
+// http://4295a4ce.r28.cpolar.top/chat/fggmGdSFt6MSQFJa
+
+// 现在的代理调用（无CORS问题）
+/api/dify/chat/fggmGdSFt6MSQFJa
+
+// 原来的后端API调用（会有CORS问题）
+// http://4295a4ce.r28.cpolar.top/v1/chat-messages
+
+// 现在的代理调用（无CORS问题）
+/api/dify/v1/chat-messages
+            </div>
+        </div>
+
+        <div style="background: #fff3cd; border-radius: 15px; padding: 20px; margin-bottom: 30px; border-left: 5px solid #ffc107;">
+            <h3 style="color: #856404; margin-bottom: 15px;">🧪 测试步骤</h3>
+            <div style="color: #856404; line-height: 1.8;">
+                <p><strong>1. 代理功能测试：</strong></p>
+                <ol style="margin-left: 20px; margin-top: 10px;">
+                    <li>访问代理测试工具页面</li>
+                    <li>点击"测试公网代理"按钮</li>
+                    <li>输入测试消息，查看是否返回正常响应</li>
+                    <li>如果成功，说明代理配置正确</li>
+                </ol>
+                
+                <p style="margin-top: 15px;"><strong>2. AI选房功能测试：</strong></p>
+                <ol style="margin-left: 20px; margin-top: 10px;">
+                    <li>访问AI选房页面</li>
+                    <li>输入"推荐一下便宜的房间"</li>
+                    <li>查看是否返回正常的房间推荐</li>
+                    <li>检查浏览器控制台是否显示"✅ Dify连接成功"</li>
+                </ol>
+                
+                <p style="margin-top: 15px;"><strong>3. 完整流程测试：</strong></p>
+                <ol style="margin-left: 20px; margin-top: 10px;">
+                    <li>测试房间推荐功能</li>
+                    <li>测试预订流程</li>
+                    <li>测试购物车和订单功能</li>
+                    <li>测试退出登录清空对话记录</li>
+                </ol>
+            </div>
+        </div>
+
+        <div style="background: #d1ecf1; border-radius: 15px; padding: 20px; margin-bottom: 30px; border-left: 5px solid #007bff;">
+            <h3 style="color: #0c5460; margin-bottom: 15px;">💡 代理工作原理</h3>
+            <div style="color: #0c5460; line-height: 1.8;">
+                <p><strong>代理如何解决CORS问题：</strong></p>
+                <ul style="margin-left: 20px; margin-top: 10px;">
+                    <li><strong>浏览器视角：</strong>请求发送到同域的开发服务器（localhost:5174）</li>
+                    <li><strong>服务器代理：</strong>开发服务器将请求转发到Dify服务</li>
+                    <li><strong>响应返回：</strong>Dify响应通过代理返回给浏览器</li>
+                    <li><strong>CORS绕过：</strong>浏览器认为这是同域请求，不会阻止</li>
+                </ul>
+                
+                <p style="margin-top: 15px;"><strong>代理配置优势：</strong></p>
+                <ul style="margin-left: 20px; margin-top: 10px;">
+                    <li>✅ 完全解决CORS问题</li>
+                    <li>✅ 无需修改Dify服务配置</li>
+                    <li>✅ 开发环境友好</li>
+                    <li>✅ 支持所有HTTP方法</li>
+                    <li>✅ 保持原有API接口不变</li>
+                </ul>
+            </div>
+        </div>
+
+        <div style="background: #d4edda; border-radius: 15px; padding: 20px; margin-top: 30px; border-left: 5px solid #28a745;">
+            <h3 style="color: #155724; margin-bottom: 15px;">🎯 配置完成总结</h3>
+            <div style="color: #155724; line-height: 1.8;">
+                <p><span class="emoji-large">🔄</span><strong>代理配置：</strong>Vite开发服务器代理已配置完成</p>
+                <p><span class="emoji-large">🌐</span><strong>CORS解决：</strong>通过代理完全解决跨域问题</p>
+                <p><span class="emoji-large">🔧</span><strong>API更新：</strong>API调用路径已更新为代理路径</p>
+                <p><span class="emoji-large">🧪</span><strong>测试工具：</strong>提供专业的代理测试工具</p>
+                <p><span class="emoji-large">📊</span><strong>日志监控：</strong>代理请求和响应都有详细日志</p>
+                <p><span class="emoji-large">🚀</span><strong>即时可用：</strong>重启服务器后立即生效</p>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        // 检测当前端口并更新链接
+        window.addEventListener('load', () => {
+            const currentPort = window.location.port;
+            console.log('🔍 当前端口:', currentPort);
+            
+            // 如果端口不是5174，提示用户
+            if (currentPort !== '5174') {
+                console.log('ℹ️ 注意：当前端口不是5174，可能需要更新链接');
+            }
+        });
+    </script>
+</body>
+</html>

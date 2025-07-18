@@ -1,0 +1,401 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>IP形象Dify集成测试</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            min-height: 100vh;
+            padding: 20px;
+        }
+
+        .container {
+            max-width: 1200px;
+            margin: 0 auto;
+        }
+
+        .header {
+            text-align: center;
+            margin-bottom: 40px;
+            color: white;
+        }
+
+        .header h1 {
+            font-size: 2.5rem;
+            font-weight: 700;
+            margin-bottom: 15px;
+            text-shadow: 0 4px 15px rgba(0, 0, 0, 0.3);
+        }
+
+        .header p {
+            font-size: 1.2rem;
+            opacity: 0.9;
+        }
+
+        .demo-grid {
+            display: grid;
+            grid-template-columns: 1fr 400px;
+            gap: 30px;
+            height: 80vh;
+        }
+
+        .left-panel {
+            background: rgba(255, 255, 255, 0.95);
+            border-radius: 20px;
+            padding: 30px;
+            box-shadow: 0 20px 60px rgba(0, 0, 0, 0.15);
+            backdrop-filter: blur(10px);
+        }
+
+        .right-panel {
+            background: rgba(255, 255, 255, 0.95);
+            border-radius: 20px;
+            padding: 20px;
+            box-shadow: 0 20px 60px rgba(0, 0, 0, 0.15);
+            backdrop-filter: blur(10px);
+            display: flex;
+            flex-direction: column;
+        }
+
+        .chat-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 20px;
+            padding-bottom: 15px;
+            border-bottom: 2px solid #eee;
+        }
+
+        .chat-container {
+            flex: 1;
+            display: flex;
+            flex-direction: column;
+            min-height: 0;
+        }
+
+        .dify-demo-container {
+            flex: 1;
+            border: 2px solid #8B4513;
+            border-radius: 15px;
+            position: relative;
+            overflow: hidden;
+            background: #f8f9fa;
+        }
+
+        /* 模拟IP形象头像覆盖层 */
+        .ip-avatar-overlay {
+            position: absolute;
+            top: 0;
+            left: 0;
+            right: 0;
+            z-index: 20;
+            background: linear-gradient(135deg, rgba(139, 69, 19, 0.95), rgba(205, 133, 63, 0.95));
+            backdrop-filter: blur(10px);
+            border-bottom: 2px solid rgba(255, 215, 0, 0.3);
+        }
+
+        .ip-avatar-header {
+            display: flex;
+            align-items: center;
+            gap: 15px;
+            padding: 15px 20px;
+        }
+
+        .ip-avatar-circle {
+            position: relative;
+            width: 50px;
+            height: 50px;
+            border-radius: 50%;
+            background: linear-gradient(135deg, #FFD700, #4CAF50);
+            padding: 2px;
+            box-shadow: 0 4px 15px rgba(255, 215, 0, 0.3);
+        }
+
+        .ip-avatar-image {
+            width: 100%;
+            height: 100%;
+            border-radius: 50%;
+            object-fit: cover;
+            background: white;
+        }
+
+        .ip-status-ring {
+            position: absolute;
+            top: -3px;
+            left: -3px;
+            right: -3px;
+            bottom: -3px;
+            border: 2px solid rgba(255, 215, 0, 0.5);
+            border-radius: 50%;
+            animation: rotate 8s linear infinite;
+        }
+
+        .ip-pulse-ring {
+            position: absolute;
+            top: -6px;
+            left: -6px;
+            right: -6px;
+            bottom: -6px;
+            border: 1px solid rgba(76, 175, 80, 0.3);
+            border-radius: 50%;
+            animation: pulse-ring 2s ease-out infinite;
+        }
+
+        .ip-info {
+            flex: 1;
+            color: white;
+        }
+
+        .ip-name {
+            font-size: 1.1rem;
+            font-weight: 700;
+            margin: 0 0 2px 0;
+            text-shadow: 0 1px 3px rgba(0, 0, 0, 0.3);
+        }
+
+        .ip-title {
+            font-size: 0.85rem;
+            margin: 0 0 5px 0;
+            opacity: 0.9;
+        }
+
+        .ip-status {
+            display: flex;
+            align-items: center;
+            gap: 6px;
+            font-size: 0.8rem;
+        }
+
+        .status-dot {
+            width: 8px;
+            height: 8px;
+            border-radius: 50%;
+            background: #4CAF50;
+            animation: pulse 2s infinite;
+        }
+
+        .status-text {
+            opacity: 0.9;
+        }
+
+        .dify-content {
+            padding: 20px;
+            height: calc(100% - 80px);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            color: #666;
+            font-size: 1.1rem;
+            text-align: center;
+        }
+
+        .feature-list {
+            list-style: none;
+            padding: 0;
+        }
+
+        .feature-list li {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            margin-bottom: 15px;
+            padding: 15px;
+            background: #f8f9fa;
+            border-radius: 10px;
+            border-left: 4px solid #8B4513;
+        }
+
+        .feature-list li::before {
+            content: "✨";
+            font-size: 1.2rem;
+        }
+
+        .test-buttons {
+            display: flex;
+            gap: 15px;
+            justify-content: center;
+            margin-top: 30px;
+        }
+
+        .test-btn {
+            background: linear-gradient(135deg, #8B4513, #CD853F);
+            color: white;
+            border: none;
+            padding: 12px 25px;
+            border-radius: 10px;
+            font-weight: 600;
+            cursor: pointer;
+            transition: transform 0.3s ease, box-shadow 0.3s ease;
+            text-decoration: none;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+
+        .test-btn:hover {
+            transform: translateY(-3px);
+            box-shadow: 0 10px 30px rgba(139, 69, 19, 0.4);
+        }
+
+        /* 动画效果 */
+        @keyframes rotate {
+            from { transform: rotate(0deg); }
+            to { transform: rotate(360deg); }
+        }
+
+        @keyframes pulse {
+            0%, 100% { opacity: 1; }
+            50% { opacity: 0.7; }
+        }
+
+        @keyframes pulse-ring {
+            0% {
+                transform: scale(1);
+                opacity: 1;
+            }
+            100% {
+                transform: scale(1.3);
+                opacity: 0;
+            }
+        }
+
+        /* 响应式设计 */
+        @media (max-width: 768px) {
+            .demo-grid {
+                grid-template-columns: 1fr;
+                gap: 20px;
+            }
+            
+            .header h1 {
+                font-size: 2rem;
+            }
+            
+            .ip-avatar-header {
+                padding: 12px 15px;
+                gap: 12px;
+            }
+            
+            .ip-avatar-circle {
+                width: 40px;
+                height: 40px;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div class="header">
+            <h1>🎨 IP形象Dify集成测试</h1>
+            <p>AI选房页面右侧Dify聊天框的IP形象头像展示</p>
+        </div>
+
+        <div class="demo-grid">
+            <!-- 左侧：功能说明 -->
+            <div class="left-panel">
+                <h2 style="color: #2d3748; margin-bottom: 25px; font-size: 1.8rem;">
+                    🚀 功能特性
+                </h2>
+                
+                <ul class="feature-list">
+                    <li>
+                        <strong>IP形象头像覆盖层</strong><br>
+                        在Dify聊天界面顶部显示茶茶IP形象头像
+                    </li>
+                    <li>
+                        <strong>美化的头像设计</strong><br>
+                        渐变边框、旋转光环、脉冲动画效果
+                    </li>
+                    <li>
+                        <strong>在线状态指示</strong><br>
+                        实时显示AI助手的在线状态
+                    </li>
+                    <li>
+                        <strong>响应式设计</strong><br>
+                        适配不同屏幕尺寸的设备
+                    </li>
+                    <li>
+                        <strong>无缝集成</strong><br>
+                        与Dify聊天功能完美融合
+                    </li>
+                </ul>
+
+                <div style="background: #e6fffa; border: 1px solid #81e6d9; border-radius: 10px; padding: 20px; margin-top: 30px;">
+                    <h3 style="color: #234e52; margin: 0 0 15px 0;">💡 实现原理</h3>
+                    <p style="color: #285e61; margin: 0; line-height: 1.6;">
+                        通过在Dify iframe容器上方添加绝对定位的覆盖层，显示自定义的IP形象头像。
+                        覆盖层使用渐变背景和毛玻璃效果，与Dify聊天界面形成视觉层次。
+                    </p>
+                </div>
+
+                <div class="test-buttons">
+                    <a href="/ai-rooms" class="test-btn">
+                        <span>🏠</span>
+                        AI选房页面
+                    </a>
+                    <a href="/avatar-showcase.html" class="test-btn">
+                        <span>🎨</span>
+                        头像展示
+                    </a>
+                </div>
+            </div>
+
+            <!-- 右侧：Dify聊天演示 -->
+            <div class="right-panel">
+                <div class="chat-header">
+                    <h3 style="color: #2d3748; margin: 0;">
+                        <i style="color: #8B4513;">💬</i>
+                        AI选房助手
+                    </h3>
+                    <div style="color: #4CAF50; font-size: 0.9rem; font-weight: 600;">
+                        <span class="status-dot" style="margin-right: 5px;"></span>
+                        在线
+                    </div>
+                </div>
+
+                <div class="chat-container">
+                    <div class="dify-demo-container">
+                        <!-- IP形象头像覆盖层 -->
+                        <div class="ip-avatar-overlay">
+                            <div class="ip-avatar-header">
+                                <div class="ip-avatar-circle">
+                                    <img src="/src/assets/images/IP形象/普普正面.png" alt="普普AI助手" class="ip-avatar-image">
+                                    <div class="ip-status-ring"></div>
+                                    <div class="ip-pulse-ring"></div>
+                                </div>
+                                <div class="ip-info">
+                                    <h4 class="ip-name">普普</h4>
+                                    <p class="ip-title">AI选房助手</p>
+                                    <div class="ip-status">
+                                        <span class="status-dot"></span>
+                                        <span class="status-text">在线服务中</span>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- Dify聊天内容区域 -->
+                        <div class="dify-content">
+                            <div>
+                                <p style="margin-bottom: 15px;">🤖 这里是Dify聊天界面</p>
+                                <p style="font-size: 0.9rem; opacity: 0.7;">
+                                    顶部的普普IP形象头像会覆盖在Dify界面上方，<br>
+                                    提供更好的品牌识别和用户体验。
+                                </p>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</body>
+</html>

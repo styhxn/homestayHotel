@@ -1,0 +1,336 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Dify组件测试</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            margin: 0;
+            padding: 20px;
+            background: #f5f5f5;
+        }
+        .container {
+            max-width: 1200px;
+            margin: 0 auto;
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 20px;
+            height: 80vh;
+        }
+        .test-panel {
+            background: white;
+            border-radius: 10px;
+            padding: 20px;
+            box-shadow: 0 4px 15px rgba(0,0,0,0.1);
+        }
+        .chat-container {
+            height: 500px;
+            border: 2px solid #ddd;
+            border-radius: 8px;
+            position: relative;
+            background: #f8f9fa;
+        }
+        .controls {
+            margin-bottom: 20px;
+        }
+        button {
+            background: #007bff;
+            color: white;
+            border: none;
+            padding: 10px 20px;
+            border-radius: 5px;
+            cursor: pointer;
+            margin: 5px;
+            transition: background 0.3s;
+        }
+        button:hover {
+            background: #0056b3;
+        }
+        .log {
+            background: #f8f9fa;
+            border: 1px solid #dee2e6;
+            border-radius: 5px;
+            padding: 15px;
+            height: 200px;
+            overflow-y: auto;
+            font-family: monospace;
+            font-size: 14px;
+        }
+        .log-entry {
+            margin: 2px 0;
+        }
+        .log-success {
+            color: #28a745;
+        }
+        .log-error {
+            color: #dc3545;
+        }
+        .log-info {
+            color: #17a2b8;
+        }
+        .status {
+            padding: 10px;
+            border-radius: 5px;
+            margin: 10px 0;
+            font-weight: bold;
+        }
+        .status-success {
+            background: #d4edda;
+            color: #155724;
+        }
+        .status-error {
+            background: #f8d7da;
+            color: #721c24;
+        }
+        .status-loading {
+            background: #d1ecf1;
+            color: #0c5460;
+        }
+    </style>
+</head>
+<body>
+    <h1>🧪 Dify组件独立测试</h1>
+    
+    <div class="container">
+        <!-- 左侧：直接iframe测试 -->
+        <div class="test-panel">
+            <h3>📱 直接iframe嵌入测试</h3>
+            <div class="controls">
+                <button onclick="loadDirectIframe()">加载iframe</button>
+                <button onclick="clearIframe()">清空</button>
+                <button onclick="checkIframeStatus()">检查状态</button>
+            </div>
+            <div id="iframe-status" class="status status-loading">等待测试...</div>
+            <div class="chat-container" id="iframe-container">
+                <!-- iframe将在这里加载 -->
+            </div>
+        </div>
+
+        <!-- 右侧：官方嵌入脚本测试 -->
+        <div class="test-panel">
+            <h3>🔧 官方嵌入脚本测试</h3>
+            <div class="controls">
+                <button onclick="loadOfficialScript()">加载官方脚本</button>
+                <button onclick="clearScript()">清空脚本</button>
+                <button onclick="checkScriptStatus()">检查状态</button>
+            </div>
+            <div id="script-status" class="status status-loading">等待测试...</div>
+            <div class="chat-container" id="script-container">
+                <!-- 官方脚本将在这里加载 -->
+            </div>
+        </div>
+    </div>
+
+    <div style="margin-top: 20px;">
+        <div class="test-panel">
+            <h3>📋 测试日志</h3>
+            <div class="log" id="test-log">
+                <div class="log-info">测试日志将在这里显示...</div>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        const DIFY_CONFIG = {
+            token: 'fggmGdSFt6MSQFJa',
+            baseUrl: 'http://4295a4ce.r28.cpolar.top'
+        };
+
+        function log(message, type = 'info') {
+            const logDiv = document.getElementById('test-log');
+            const entry = document.createElement('div');
+            entry.className = `log-entry log-${type}`;
+            entry.textContent = `[${new Date().toLocaleTimeString()}] ${message}`;
+            logDiv.appendChild(entry);
+            logDiv.scrollTop = logDiv.scrollHeight;
+        }
+
+        function updateStatus(elementId, status, message) {
+            const element = document.getElementById(elementId);
+            element.className = `status status-${status}`;
+            element.textContent = message;
+        }
+
+        // 直接iframe嵌入测试
+        function loadDirectIframe() {
+            log('开始直接iframe嵌入测试...', 'info');
+            updateStatus('iframe-status', 'loading', '正在加载iframe...');
+            
+            const container = document.getElementById('iframe-container');
+            container.innerHTML = '';
+            
+            const iframe = document.createElement('iframe');
+            iframe.src = `${DIFY_CONFIG.baseUrl}/chat/${DIFY_CONFIG.token}`;
+            iframe.style.width = '100%';
+            iframe.style.height = '100%';
+            iframe.style.border = 'none';
+            iframe.allow = 'fullscreen;microphone';
+            iframe.title = 'Dify AI助手';
+            
+            iframe.onload = () => {
+                log('iframe加载成功！', 'success');
+                updateStatus('iframe-status', 'success', 'iframe加载成功');
+            };
+            
+            iframe.onerror = () => {
+                log('iframe加载失败', 'error');
+                updateStatus('iframe-status', 'error', 'iframe加载失败');
+            };
+            
+            // 设置超时检查
+            setTimeout(() => {
+                if (!iframe.contentDocument && !iframe.contentWindow) {
+                    log('iframe加载超时', 'error');
+                    updateStatus('iframe-status', 'error', 'iframe加载超时');
+                }
+            }, 10000);
+            
+            container.appendChild(iframe);
+        }
+
+        function clearIframe() {
+            document.getElementById('iframe-container').innerHTML = '';
+            updateStatus('iframe-status', 'loading', '已清空');
+            log('iframe容器已清空', 'info');
+        }
+
+        function checkIframeStatus() {
+            const container = document.getElementById('iframe-container');
+            const iframe = container.querySelector('iframe');
+            
+            if (iframe) {
+                log(`iframe状态: 存在, src=${iframe.src}`, 'info');
+                try {
+                    log(`iframe contentWindow: ${iframe.contentWindow ? '可访问' : '不可访问'}`, 'info');
+                } catch (e) {
+                    log(`iframe访问受限: ${e.message}`, 'info');
+                }
+            } else {
+                log('iframe状态: 不存在', 'info');
+            }
+        }
+
+        // 官方嵌入脚本测试
+        function loadOfficialScript() {
+            log('开始官方嵌入脚本测试...', 'info');
+            updateStatus('script-status', 'loading', '正在加载脚本...');
+            
+            // 清理现有脚本
+            const existingScript = document.getElementById('dify-embed-script');
+            if (existingScript) {
+                existingScript.remove();
+            }
+            
+            // 清理现有元素
+            const existingButton = document.getElementById('dify-chatbot-bubble-button');
+            const existingWindow = document.getElementById('dify-chatbot-bubble-window');
+            if (existingButton) existingButton.remove();
+            if (existingWindow) existingWindow.remove();
+            
+            // 设置全局配置
+            window.difyChatbotConfig = {
+                token: DIFY_CONFIG.token,
+                baseUrl: DIFY_CONFIG.baseUrl
+            };
+            
+            log(`设置全局配置: token=${DIFY_CONFIG.token}`, 'info');
+            
+            // 创建脚本
+            const script = document.createElement('script');
+            script.id = 'dify-embed-script';
+            script.src = `${DIFY_CONFIG.baseUrl}/embed.min.js`;
+            script.defer = true;
+            
+            script.onload = () => {
+                log('官方脚本加载成功', 'success');
+                updateStatus('script-status', 'success', '脚本加载成功');
+                
+                // 等待Dify初始化
+                setTimeout(() => {
+                    checkDifyElements();
+                }, 3000);
+            };
+            
+            script.onerror = () => {
+                log('官方脚本加载失败', 'error');
+                updateStatus('script-status', 'error', '脚本加载失败');
+            };
+            
+            document.head.appendChild(script);
+        }
+
+        function clearScript() {
+            const script = document.getElementById('dify-embed-script');
+            const button = document.getElementById('dify-chatbot-bubble-button');
+            const chatWindow = document.getElementById('dify-chatbot-bubble-window');
+            
+            if (script) script.remove();
+            if (button) button.remove();
+            if (chatWindow) chatWindow.remove();
+            
+            document.getElementById('script-container').innerHTML = '';
+            updateStatus('script-status', 'loading', '已清空');
+            log('官方脚本和元素已清空', 'info');
+        }
+
+        function checkScriptStatus() {
+            const script = document.getElementById('dify-embed-script');
+            const button = document.getElementById('dify-chatbot-bubble-button');
+            const chatWindow = document.getElementById('dify-chatbot-bubble-window');
+            
+            log(`脚本状态: ${script ? '已加载' : '未加载'}`, 'info');
+            log(`Dify按钮: ${button ? '存在' : '不存在'}`, 'info');
+            log(`Dify窗口: ${chatWindow ? '存在' : '不存在'}`, 'info');
+            log(`全局配置: ${window.difyChatbotConfig ? '已设置' : '未设置'}`, 'info');
+        }
+
+        function checkDifyElements() {
+            const button = document.getElementById('dify-chatbot-bubble-button');
+            const chatWindow = document.getElementById('dify-chatbot-bubble-window');
+            
+            if (button) {
+                log('找到Dify按钮，尝试移动到容器', 'success');
+                button.style.display = 'none';
+                
+                // 触发聊天窗口
+                button.click();
+                
+                setTimeout(() => {
+                    const window = document.getElementById('dify-chatbot-bubble-window');
+                    if (window) {
+                        log('找到Dify窗口，移动到测试容器', 'success');
+                        const container = document.getElementById('script-container');
+                        
+                        // 重置样式
+                        window.style.position = 'static';
+                        window.style.width = '100%';
+                        window.style.height = '100%';
+                        window.style.border = 'none';
+                        window.style.borderRadius = '0';
+                        window.style.boxShadow = 'none';
+                        window.style.bottom = 'unset';
+                        window.style.right = 'unset';
+                        
+                        container.appendChild(window);
+                        updateStatus('script-status', 'success', 'Dify窗口已嵌入');
+                    } else {
+                        log('未找到Dify窗口', 'error');
+                        updateStatus('script-status', 'error', '未找到Dify窗口');
+                    }
+                }, 1000);
+            } else {
+                log('未找到Dify按钮', 'error');
+                updateStatus('script-status', 'error', '未找到Dify按钮');
+            }
+        }
+
+        // 页面加载时的初始化
+        window.addEventListener('load', () => {
+            log('页面加载完成，准备测试Dify组件', 'info');
+            log(`Dify配置: ${DIFY_CONFIG.baseUrl}/chat/${DIFY_CONFIG.token}`, 'info');
+        });
+    </script>
+</body>
+</html>
