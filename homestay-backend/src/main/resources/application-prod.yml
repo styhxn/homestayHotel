@@ -3,10 +3,11 @@ server:
 
 spring:
   datasource:
-    url: ${SPRING_DATASOURCE_URL:jdbc:mysql://localhost:3306/homestay?useUnicode=true&characterEncoding=UTF-8&serverTimezone=Asia/Shanghai}
+    # Railway PostgreSQL支持
+    url: ${DATABASE_URL:${SPRING_DATASOURCE_URL:jdbc:mysql://localhost:3306/homestay?useUnicode=true&characterEncoding=UTF-8&serverTimezone=Asia/Shanghai}}
     username: ${SPRING_DATASOURCE_USERNAME:homestay}
     password: ${SPRING_DATASOURCE_PASSWORD:homestay123}
-    driver-class-name: com.mysql.cj.jdbc.Driver
+    driver-class-name: ${DATABASE_DRIVER:org.postgresql.Driver}
     hikari:
       maximum-pool-size: 20
       minimum-idle: 5
