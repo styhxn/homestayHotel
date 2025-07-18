@@ -361,32 +361,68 @@ public class ChatAssistServiceImpl implements ChatAssistService {
      */
     private String recommendRooms(String query) {
         try {
+            // 检查是否指定了楼层
+            String targetFloor = null;
+            if (query.contains("3楼") || query.contains("三楼")) {
+                targetFloor = "3楼";
+            } else if (query.contains("2楼") || query.contains("二楼")) {
+                targetFloor = "2楼";
+            } else if (query.contains("1楼") || query.contains("一楼")) {
+                targetFloor = "1楼";
+            }
+
             // 获取可用房间
             LambdaQueryWrapper<HRoom> wrapper = Wrappers.<HRoom>lambdaQuery();
             wrapper.eq(HRoom::getStatus, 0); // 上架状态
             wrapper.eq(HRoom::getState, "空闲"); // 空闲状态
-            wrapper.orderByAsc(HRoom::getPrice); // 按价格排序
-            wrapper.last("LIMIT 3"); // 限制3个
+
+            // 如果指定了楼层，按楼层筛选
+            if (targetFloor != null) {
+                wrapper.like(HRoom::getAddress, targetFloor);
+                wrapper.orderByAsc(HRoom::getPrice); // 按价格排序
+            } else {
+                wrapper.orderByAsc(HRoom::getPrice); // 按价格排序
+                wrapper.last("LIMIT 3"); // 限制3个
+            }
 
             List<HRoom> availableRooms = hRoomService.list(wrapper);
 
             if (availableRooms.isEmpty()) {
+                if (targetFloor != null) {
+                    return "🍄 抱歉，" + targetFloor + "目前没有可用房间。让我为您推荐其他楼层的优质房间！";
+                }
                 return "🍄 抱歉，目前没有可用房间。请稍后再试或联系客服。";
             }
 
-            StringBuilder response = new StringBuilder("🍄 为您推荐以下可预订房间：\n\n");
+            StringBuilder response = new StringBuilder();
+            if (targetFloor != null) {
+                response.append("🍄 为您推荐").append(targetFloor).append("的可预订房间：\n\n");
+
+                // 添加楼层特色描述
+                if ("3楼".equals(targetFloor)) {
+                    response.append("🏢 3楼特色：最佳视野，山景尽收眼底，私密性最好，空气清新\n\n");
+                } else if ("2楼".equals(targetFloor)) {
+                    response.append("🏢 2楼特色：视野开阔，采光极佳，可俯瞰茶园美景\n\n");
+                } else if ("1楼".equals(targetFloor)) {
+                    response.append("🏢 1楼特色：出入方便，靠近大堂和餐厅，部分房间有独立花园\n\n");
+                }
+            } else {
+                response.append("🍄 为您推荐以下可预订房间：\n\n");
+            }
+
             for (int i = 0; i < availableRooms.size(); i++) {
                 HRoom room = availableRooms.get(i);
                 response.append(String.format("%d. %s (%s)\n", i + 1, room.getName(), room.getCode()));
                 response.append(String.format("   💰 价格：¥%s/晚\n", room.getPrice()));
                 response.append(String.format("   🏷️ 类型：%s\n", room.getCategory()));
+                response.append(String.format("   📍 位置：%s\n", room.getAddress()));
                 response.append(String.format("   ⭐ 评分：4.%d\n", (int)(Math.random() * 3) + 5));
                 if (i < availableRooms.size() - 1) {
                     response.append("\n");
                 }
             }
 
-            response.append("\n\n💡 您可以说'我要预订201'来预订指定房间。");
+            response.append("\n\n💡 您可以说'我要预订301'来预订指定房间。");
             return response.toString();
 
         } catch (Exception e) {
