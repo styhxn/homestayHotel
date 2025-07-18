@@ -1,0 +1,252 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>日期解析测试</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            max-width: 800px;
+            margin: 0 auto;
+            padding: 20px;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+        }
+        .container {
+            background: rgba(255, 255, 255, 0.1);
+            padding: 20px;
+            border-radius: 10px;
+            backdrop-filter: blur(10px);
+        }
+        .test-case {
+            background: rgba(255, 255, 255, 0.1);
+            margin: 10px 0;
+            padding: 15px;
+            border-radius: 8px;
+            border-left: 4px solid #4CAF50;
+        }
+        .test-input {
+            font-weight: bold;
+            color: #FFD700;
+        }
+        .test-result {
+            margin-top: 10px;
+            font-family: monospace;
+        }
+        .success {
+            color: #4CAF50;
+        }
+        .error {
+            color: #f44336;
+        }
+        button {
+            background: #4CAF50;
+            color: white;
+            border: none;
+            padding: 10px 20px;
+            border-radius: 5px;
+            cursor: pointer;
+            margin: 10px 5px;
+        }
+        button:hover {
+            background: #45a049;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1>🗓️ 日期解析测试工具</h1>
+        <p>测试AI聊天中的日期解析功能是否正确</p>
+        
+        <button onclick="runAllTests()">运行所有测试</button>
+        <button onclick="testRegexPatterns()">测试正则表达式</button>
+        <button onclick="clearResults()">清除结果</button>
+        
+        <div id="test-results"></div>
+    </div>
+
+    <script>
+        // 模拟日期解析函数（基于修复后的逻辑）
+        function parseDates(dateText) {
+            const today = new Date()
+            const currentYear = today.getFullYear()
+
+            console.log('🗓️ 解析日期文本:', dateText)
+
+            // 更精确的日期解析模式
+            const patterns = [
+                // 入住时间7月20日，离开时间7月25日
+                /入住时间.*?(\d{1,2})月(\d{1,2})日.*?离开时间.*?(\d{1,2})月(\d{1,2})日/,
+                // 7月20日入住，7月25日离开
+                /(\d{1,2})月(\d{1,2})日.*?入住.*?(\d{1,2})月(\d{1,2})日.*?离开/,
+                // 7月20日到7月25日
+                /(\d{1,2})月(\d{1,2})日.*?到.*?(\d{1,2})月(\d{1,2})日/,
+                // 20号到25号
+                /(\d{1,2})号.*?到.*?(\d{1,2})号/,
+                // 2025-07-20到2025-07-25
+                /(\d{4})-(\d{1,2})-(\d{1,2}).*?到.*?(\d{4})-(\d{1,2})-(\d{1,2})/
+            ]
+
+            for (let i = 0; i < patterns.length; i++) {
+                const pattern = patterns[i]
+                const match = dateText.match(pattern)
+                if (match) {
+                    console.log('🎯 匹配到模式 ' + i + ':', pattern.source, '结果:', match)
+
+                    if (i === 0) {
+                        // 入住时间7月20日，离开时间7月25日
+                        const checkInMonth = match[1].padStart(2, '0')
+                        const checkInDay = match[2].padStart(2, '0')
+                        const checkOutMonth = match[3].padStart(2, '0')
+                        const checkOutDay = match[4].padStart(2, '0')
+                        return {
+                            checkIn: `${currentYear}-${checkInMonth}-${checkInDay}`,
+                            checkOut: `${currentYear}-${checkOutMonth}-${checkOutDay}`
+                        }
+                    } else if (i === 1) {
+                        // 7月20日入住，7月25日离开
+                        const checkInMonth = match[1].padStart(2, '0')
+                        const checkInDay = match[2].padStart(2, '0')
+                        const checkOutMonth = match[3].padStart(2, '0')
+                        const checkOutDay = match[4].padStart(2, '0')
+                        return {
+                            checkIn: `${currentYear}-${checkInMonth}-${checkInDay}`,
+                            checkOut: `${currentYear}-${checkOutMonth}-${checkOutDay}`
+                        }
+                    } else if (i === 2) {
+                        // 7月20日到7月25日
+                        const checkInMonth = match[1].padStart(2, '0')
+                        const checkInDay = match[2].padStart(2, '0')
+                        const checkOutMonth = match[3].padStart(2, '0')
+                        const checkOutDay = match[4].padStart(2, '0')
+                        return {
+                            checkIn: `${currentYear}-${checkInMonth}-${checkInDay}`,
+                            checkOut: `${currentYear}-${checkOutMonth}-${checkOutDay}`
+                        }
+                    } else if (i === 3) {
+                        // 20号到25号 - 假设是当前月
+                        const currentMonth = (today.getMonth() + 1).toString().padStart(2, '0')
+                        const day1 = match[1].padStart(2, '0')
+                        const day2 = match[2].padStart(2, '0')
+                        return {
+                            checkIn: `${currentYear}-${currentMonth}-${day1}`,
+                            checkOut: `${currentYear}-${currentMonth}-${day2}`
+                        }
+                    } else if (i === 4) {
+                        // 完整日期格式 2025-07-20到2025-07-25
+                        return {
+                            checkIn: `${match[1]}-${match[2].padStart(2, '0')}-${match[3].padStart(2, '0')}`,
+                            checkOut: `${match[4]}-${match[5].padStart(2, '0')}-${match[6].padStart(2, '0')}`
+                        }
+                    }
+                }
+            }
+
+            console.log('❌ 未能解析日期')
+            return { checkIn: '', checkOut: '' }
+        }
+
+        // 测试用例
+        const testCases = [
+            {
+                input: "7月20日入住，7月25日离开",
+                expected: { checkIn: "2025-07-20", checkOut: "2025-07-25" }
+            },
+            {
+                input: "入住时间7月20日，离开时间7月25日",
+                expected: { checkIn: "2025-07-20", checkOut: "2025-07-25" }
+            },
+            {
+                input: "7月20日到7月25日",
+                expected: { checkIn: "2025-07-20", checkOut: "2025-07-25" }
+            },
+            {
+                input: "20号到25号",
+                expected: { checkIn: "2025-07-20", checkOut: "2025-07-25" }
+            },
+            {
+                input: "2025-07-20到2025-07-25",
+                expected: { checkIn: "2025-07-20", checkOut: "2025-07-25" }
+            }
+        ]
+
+        function runTest(testCase, index) {
+            console.log(`\n=== 测试 ${index + 1}: "${testCase.input}" ===`)
+            const result = parseDates(testCase.input)
+            const isSuccess = result.checkIn === testCase.expected.checkIn &&
+                            result.checkOut === testCase.expected.checkOut
+
+            console.log('期望:', testCase.expected)
+            console.log('实际:', result)
+            console.log('结果:', isSuccess ? '✅ 通过' : '❌ 失败')
+
+            return {
+                index: index + 1,
+                input: testCase.input,
+                expected: testCase.expected,
+                actual: result,
+                success: isSuccess
+            }
+        }
+
+        function runAllTests() {
+            const resultsDiv = document.getElementById('test-results')
+            resultsDiv.innerHTML = '<h2>测试结果</h2>'
+            
+            testCases.forEach((testCase, index) => {
+                const testResult = runTest(testCase, index)
+                const testDiv = document.createElement('div')
+                testDiv.className = 'test-case'
+                
+                testDiv.innerHTML = `
+                    <div class="test-input">测试 ${testResult.index}: "${testResult.input}"</div>
+                    <div class="test-result">
+                        <div>期望结果: 入住 ${testResult.expected.checkIn}, 离开 ${testResult.expected.checkOut}</div>
+                        <div>实际结果: 入住 ${testResult.actual.checkIn}, 离开 ${testResult.actual.checkOut}</div>
+                        <div class="${testResult.success ? 'success' : 'error'}">
+                            ${testResult.success ? '✅ 通过' : '❌ 失败'}
+                        </div>
+                    </div>
+                `
+                
+                resultsDiv.appendChild(testDiv)
+            })
+        }
+
+        function clearResults() {
+            document.getElementById('test-results').innerHTML = ''
+        }
+
+        function testRegexPatterns() {
+            const resultsDiv = document.getElementById('test-results')
+            resultsDiv.innerHTML = '<h2>正则表达式测试</h2>'
+
+            const testText = "7月20日入住，7月25日离开"
+            const patterns = [
+                /入住时间.*?(\d{1,2})月(\d{1,2})日.*?离开时间.*?(\d{1,2})月(\d{1,2})日/,
+                /(\d{1,2})月(\d{1,2})日.*?入住.*?(\d{1,2})月(\d{1,2})日.*?离开/,
+                /(\d{1,2})月(\d{1,2})日.*?到.*?(\d{1,2})月(\d{1,2})日/,
+                /(\d{1,2})号.*?到.*?(\d{1,2})号/,
+                /(\d{4})-(\d{1,2})-(\d{1,2}).*?到.*?(\d{4})-(\d{1,2})-(\d{1,2})/
+            ]
+
+            patterns.forEach((pattern, index) => {
+                const match = testText.match(pattern)
+                const testDiv = document.createElement('div')
+                testDiv.className = 'test-case'
+                testDiv.innerHTML = `
+                    <div class="test-input">模式 ${index}: ${pattern.source}</div>
+                    <div class="test-result">
+                        <div>测试文本: "${testText}"</div>
+                        <div class="${match ? 'success' : 'error'}">
+                            ${match ? '✅ 匹配成功: ' + JSON.stringify(match) : '❌ 不匹配'}
+                        </div>
+                    </div>
+                `
+                resultsDiv.appendChild(testDiv)
+            })
+        }
+    </script>
+</body>
+</html>
